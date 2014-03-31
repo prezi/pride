@@ -2,7 +2,8 @@ package com.prezi.gradle.pride.cli
 
 import io.airlift.command.Cli
 import io.airlift.command.Command
-import io.airlift.command.Help;
+import io.airlift.command.Help
+import io.airlift.command.Option
 
 /**
  * Created by lptr on 31/03/14.
@@ -18,11 +19,20 @@ public class PrideCli {
 	}
 }
 
+abstract class SessionCommand implements Runnable {
+	@Option(name = "-s", description = "session directory")
+	private File explicitSessionDirectory
+
+	protected File getSessionDirectory() {
+		explicitSessionDirectory ?: new File(System.getProperty("user.dir"))
+	}
+}
+
 @Command(name = "init", description = "Initialize session")
-class Init implements Runnable {
+class Init extends SessionCommand {
 
 	@Override
-	void run() {
-		System.out.println("Initializing")
+	public void run() {
+		System.out.println("Initializing ${sessionDirectory}")
 	}
 }
