@@ -55,6 +55,12 @@ To add modules by cloning them from GitHub use:
 
 Where `<repo-name>` is the name of the Git repository under `https://github.com/prezi/`.
 
+## Limitations
+
+* Module dependencies can only be resolved properly to local projects available in the session if they are specified via the `moduleDependencies { ... }` block instead of `dependencies { ... }`. If you put them in `dependencies { ... }`, they will always come from Artifactory.
+* Multi-project Gradle builds cannot use `project(":some-other-subproject")` to refer to other subprojects in the project. You should not this either, and it is a code-smell to use this feature. Publish anything you might need in other subprojects to a configuration, and depend on that instead.
+* Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the session, or the newest version from Artifactory.
+
 ## Software used
 
 * Gradle (http://gradle.org) to build stuff
