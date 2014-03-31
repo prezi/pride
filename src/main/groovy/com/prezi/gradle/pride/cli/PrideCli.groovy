@@ -78,6 +78,8 @@ class Init extends SessionCommand {
 				}
 			}
 		}
+
+		buildFile << getClass().getResourceAsStream("/build.gradle")
 	}
 
 	private static boolean isValidProject(File dir) {

@@ -1,0 +1,17 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		maven {
+			credentials {
+				username nexusUser
+				password nexusPassword
+			}
+			url "https://artifactory.prezi.com/plugins-snapshot"
+		}
+	}
+}
+
+allprojects {
+	// HACK This is so that local projects will always override external projects
+	version = String.valueOf(Short.MAX_VALUE)
+}
