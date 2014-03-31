@@ -16,6 +16,10 @@ class AddToSession extends SessionCommand {
 			description = "Overwrite existing modules in the session")
 	private boolean overwrite
 
+	@Option(name = ["-h", "--use-https"],
+			description = "Use HTTPS GitHub URL instead of SSH when cloning")
+	private boolean useHttps
+
 	@Arguments(required = true, description = "Modules to add to the session")
 	private List<String> modules
 
@@ -31,7 +35,7 @@ class AddToSession extends SessionCommand {
 
 		// Clone repositories
 		modules.each { moduleName ->
-			def repository = "git@github.com:prezi/${moduleName}.git"
+			def repository = getRepositoryUrl(moduleName, useHttps)
 			def targetDirectory = new File(sessionDirectory, moduleName)
 			targetDirectory.deleteDir()
 
@@ -45,5 +49,13 @@ class AddToSession extends SessionCommand {
 
 		// Re-initialize session
 		SessionInitializer.initializeSession(sessionDirectory, true)
+	}
+
+	protected static String getRepositoryUrl(moduleName, boolean useHttps) {
+		if (useHttps) {
+			return "https://github.com/prezi/${moduleName}"
+		} else {
+			return "git@github.com:prezi/${moduleName}.git"
+		}
 	}
 }
