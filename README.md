@@ -70,6 +70,12 @@ Where `<repo-name>` is the name of the Git repository under `https://github.com/
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Pride merges `gradle.properties` from modules into a `gradle.properties` in the root of the session. If multiple modules define the same property, the results might be confusing.
 
+## Why the name?
+
+Working with a large modular application is like herding cats. Big cats. Like a pride of lions:
+
+![](http://i62.tinypic.com/2hs3g4o.jpg)
+
 ## Software used
 
 * Gradle (http://gradle.org) to build stuff
