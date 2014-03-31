@@ -22,8 +22,8 @@ apply plugin: "prezi"
 apply plugin: "application"
 mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
 
-sourceCompatibility=1.6
-targetCompatibility=1.6
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 
 repositories {
 	maven preziDownloadRepo("external-libs")
