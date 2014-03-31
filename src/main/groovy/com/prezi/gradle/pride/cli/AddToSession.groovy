@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli
 
+import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.SessionInitializer
 import io.airlift.command.Arguments
 import io.airlift.command.Command
@@ -24,7 +25,7 @@ class AddToSession extends SessionCommand {
 		if (!overwrite) {
 			def existingRepos = modules.findAll { new File(sessionDirectory, it).exists() }
 			if (existingRepos) {
-				throw new IllegalArgumentException("These modules already exist in session: ${existingRepos.join(", ")}")
+				throw new PrideException("These modules already exist in session: ${existingRepos.join(", ")}")
 			}
 		}
 
@@ -38,7 +39,7 @@ class AddToSession extends SessionCommand {
 			def process = ["git", "clone", repository, targetDirectory].execute()
 			process.waitForProcessOutput((OutputStream) System.out, System.err)
 			if (process.exitValue()) {
-				throw new IllegalStateException("Could not clone ${targetDirectory}")
+				throw new PrideException("Could not clone ${targetDirectory}")
 			}
 		}
 

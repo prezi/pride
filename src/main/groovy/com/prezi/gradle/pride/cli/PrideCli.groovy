@@ -1,8 +1,10 @@
 package com.prezi.gradle.pride.cli
 
+import com.prezi.gradle.pride.PrideException
 import io.airlift.command.Cli
 import io.airlift.command.Command
 import io.airlift.command.Help
+import io.airlift.command.ParseException
 
 /**
  * Created by lptr on 31/03/14.
@@ -20,7 +22,22 @@ public class PrideCli {
 				.withCommands(AddToSession, InitSession, ListSession, Help)
 
 		Cli<Runnable> parser = builder.build();
-		parser.parse(args).run();
+		try {
+			def command = parser.parse(args)
+			command.run();
+		} catch (ParseException e) {
+			showError(e)
+		} catch (PrideException e) {
+			showError(e)
+		} catch (Exception e) {
+			e.printStackTrace()
+			System.exit(-1)
+		}
+	}
+
+	private static void showError(Exception e) {
+		System.err.println("ERROR: ${e.message}")
+		System.exit(-1)
 	}
 }
 

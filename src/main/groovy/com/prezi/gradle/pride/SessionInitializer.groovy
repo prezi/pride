@@ -19,7 +19,7 @@ class SessionInitializer {
 
 		def sessionExists = settingsFile.exists() || buildFile.exists()
 		if (!overwrite && sessionExists) {
-			throw new IllegalStateException("A session already exists in ${sessionDirectory}")
+			throw new PrideException("A session already exists in ${sessionDirectory}")
 		}
 
 		System.out.println((sessionExists ? "Reinitializing" : "Initializing") + " ${sessionDirectory}")
