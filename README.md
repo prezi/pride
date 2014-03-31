@@ -11,7 +11,17 @@ A session is a directory containing clones of modules. Each module is expected t
 
 ## Get Pride
 
-For now the only option is to build Pride from source:
+### Installing and updating Pride
+
+Execute this to install the newest version of Pride:
+
+    $ curl -sSL https://gist.github.com/lptr/e9c448b9de6bd41720bd/download | gradle
+
+Currently this is also the way to upgrade it. An automatic upgrade facility is coming soon.
+
+### Building from source
+
+If you want to experiment with Pride:
 
 ```shell
 git clone git@github.com:prezi/pride.git
