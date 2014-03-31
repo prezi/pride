@@ -19,7 +19,7 @@ public class PrideCli {
 		builder.withGroup("session")
 				.withDescription("Manage sessions")
 				.withDefaultCommand(ListSession)
-				.withCommands(AddToSession, InitSession, ListSession, Help)
+				.withCommands(AddToSession, InitSession, ListSession, RemoveFromSession, Help)
 
 		Cli<Runnable> parser = builder.build();
 		try {
