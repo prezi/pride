@@ -16,10 +16,12 @@ buildscript {
 }
 
 group = "com.prezi.gradle.pride"
+
 apply plugin: "groovy"
 apply plugin: "idea"
 apply plugin: "prezi"
 apply plugin: "application"
+
 mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
 
 sourceCompatibility = 1.6
