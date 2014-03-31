@@ -15,7 +15,7 @@ A session is a directory containing clones of modules. Each module is expected t
 
 Execute this to install the newest version of Pride:
 
-    $ curl -sSL https://gist.github.com/lptr/e9c448b9de6bd41720bd/download | gradle
+    $ curl -sSL http://href.prezi.com/install-pride | gradle
 
 Currently this is also the way to upgrade it. An automatic upgrade facility is coming soon.
 
