@@ -17,7 +17,7 @@ public class PrideCli {
 		builder.withGroup("session")
 				.withDescription("Manage sessions")
 				.withDefaultCommand(ListSession)
-				.withCommands(InitSession, ListSession, Help)
+				.withCommands(AddToSession, InitSession, ListSession, Help)
 
 		Cli<Runnable> parser = builder.build();
 		parser.parse(args).run();
