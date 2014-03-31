@@ -1,0 +1,35 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		maven {
+			credentials {
+				username nexusUser
+				password nexusPassword
+			}
+			url "https://artifactory.prezi.com/plugins-snapshot"
+		}
+	}
+
+	dependencies {
+		classpath "com.prezi.boxfish:gradle-boxfish-plugin:1.0-SNAPSHOT"
+	}
+}
+
+group = "com.prezi.gradle.pride"
+apply plugin: "groovy"
+apply plugin: "idea"
+apply plugin: "prezi"
+apply plugin: "application"
+mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
+
+sourceCompatibility=1.6
+targetCompatibility=1.6
+
+repositories {
+	maven preziDownloadRepo("external-libs")
+}
+
+dependencies {
+	compile "org.codehaus.groovy:groovy:1.8.6"
+	compile "io.airlift:airline:0.6"
+}
