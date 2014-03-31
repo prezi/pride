@@ -4,6 +4,8 @@ import io.airlift.command.Cli
 import io.airlift.command.Command
 import io.airlift.command.Help
 import io.airlift.command.Option
+import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.model.gradle.GradleBuild
 
 /**
  * Created by lptr on 31/03/14.
@@ -31,8 +33,45 @@ abstract class SessionCommand implements Runnable {
 @Command(name = "init", description = "Initialize session")
 class Init extends SessionCommand {
 
+	public static final String SETTINGS_GRADLE = "settings.gradle"
+	public static final String BUILD_GRADLE = "build.gradle"
+
 	@Override
 	public void run() {
+		System.out.println("Starting Gradle connector")
+		def connector = GradleConnector.newConnector()
 		System.out.println("Initializing ${sessionDirectory}")
+
+		sessionDirectory.mkdirs()
+		def settingsFile = new File(sessionDirectory, SETTINGS_GRADLE)
+		settingsFile.delete()
+
+		sessionDirectory.eachDir { dir ->
+			if (isValidProject(dir)) {
+				def connection = connector.forProjectDirectory(dir).connect()
+				try {
+					// Load the model for the build
+					GradleBuild build = connection.getModel(GradleBuild)
+					build.projects.each { prj ->
+						if (prj == build.rootProject) {
+							settingsFile << "include '$build.rootProject.name'\n"
+							settingsFile << "project(':$build.rootProject.name').projectDir = file('$dir.name')\n"
+						} else {
+							settingsFile << "include '$build.rootProject.name$prj.path'\n"
+						}
+					}
+				} finally {
+					// Clean up
+					connection.close()
+				}
+			}
+		}
+	}
+
+	private static boolean isValidProject(File dir) {
+		System.out.println("Scanning ${dir}")
+		return !dir.name.startsWith(".") &&
+				dir.list().contains(BUILD_GRADLE) ||
+				dir.list().contains(SETTINGS_GRADLE)
 	}
 }
