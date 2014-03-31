@@ -22,7 +22,7 @@ public class PrideCli {
 }
 
 abstract class SessionCommand implements Runnable {
-	@Option(name = [ "-s", "--session-directory" ], title = "directory",
+	@Option(name = ["-s", "--session-directory"], title = "directory",
 			description = "Initializes the session in the given directory instead of the current directory")
 	private File explicitSessionDirectory
 
@@ -34,7 +34,7 @@ abstract class SessionCommand implements Runnable {
 @Command(name = "init", description = "Initialize session")
 class Init extends SessionCommand {
 
-	@Option(name = [ "-o", "--overwrite" ],
+	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite any existing sessions in the directory")
 	private boolean overwrite
 
