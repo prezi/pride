@@ -72,7 +72,7 @@ Where `<repo-name>` is the name of the Git repository under `https://github.com/
 
 ## Why the name?
 
-Working with a large modular application is like herding cats. Big cats. Like a pride of lions:
+Working with a large modular application is like herding cats. Dangerous cats. Like a pride of lions.
 
 ![](http://i62.tinypic.com/2hs3g4o.jpg)
 
