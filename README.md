@@ -37,11 +37,11 @@ Pride has an extensive help system (much similar to Git), so it's easy to start 
 
 To create an empty session, simply create an empty directory, and say:
 
-    $ pride session init
+    $ pride init
 
 To add modules by cloning them from GitHub you can use:
 
-    $ pride session add <repo-name>
+    $ pride add <repo-name>
 
 Where `<repo-name>` is the name of the Git repository under `https://github.com/prezi/`.
 
