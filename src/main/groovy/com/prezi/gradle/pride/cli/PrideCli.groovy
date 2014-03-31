@@ -14,10 +14,10 @@ public class PrideCli {
 	public static void main(String... args) {
 		Cli.CliBuilder<Runnable> builder = Cli.<Runnable> builder("pride")
 				.withDescription("manages a pride of modules")
-				.withDefaultCommand(Help.class)
-				.withCommands(Help.class, Init.class, Version.class);
-		Cli<Runnable> parser = builder.build();
-		parser.parse(args).run();
+				.withDefaultCommand(Help)
+				.withCommands(Help, Init, Version)
+		Cli<Runnable> parser = builder.build()
+		parser.parse(args).run()
 	}
 }
 
