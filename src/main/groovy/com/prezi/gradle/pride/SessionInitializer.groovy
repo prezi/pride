@@ -10,10 +10,15 @@ class SessionInitializer {
 	public static final String SETTINGS_GRADLE = "settings.gradle"
 	public static final String BUILD_GRADLE = "build.gradle"
 
-	public static void initializeSession(File sessionDirectory, boolean overwrite) {
-		System.out.println("Starting Gradle connector")
-		def connector = GradleConnector.newConnector()
+	private static ThreadLocal<GradleConnector> gradleConnector = new ThreadLocal<>() {
+		@Override
+		protected Object initialValue() {
+			System.out.println("Starting Gradle connector")
+			GradleConnector.newConnector()
+		}
+	}
 
+	public static void initializeSession(File sessionDirectory, boolean overwrite) {
 		def settingsFile = new File(sessionDirectory, SETTINGS_GRADLE)
 		def buildFile = new File(sessionDirectory, BUILD_GRADLE)
 
@@ -29,7 +34,7 @@ class SessionInitializer {
 
 		sessionDirectory.eachDir { dir ->
 			if (isValidProject(dir)) {
-				def connection = connector.forProjectDirectory(dir).connect()
+				def connection = gradleConnector.get().forProjectDirectory(dir).connect()
 				try {
 					def relativePath = sessionDirectory.toURI().relativize(dir.toURI()).toString()
 					settingsFile << "\n// Project from directory /${relativePath}\n"
