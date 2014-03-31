@@ -19,6 +19,7 @@ group = "com.prezi.gradle.pride"
 
 apply plugin: "groovy"
 apply plugin: "idea"
+apply plugin: 'maven'
 apply plugin: "prezi"
 apply plugin: "application"
 
@@ -33,7 +34,12 @@ processResources {
     ]
 }
 
+artifacts {
+	archives(distZip)
+}
+
 repositories {
+	mavenLocal()
 	maven preziDownloadRepo("external-libs")
 }
 
@@ -43,4 +49,19 @@ dependencies {
 	compile "org.gradle:gradle-tooling-api:1.11"
 	testCompile 'junit:junit:4.11'
 	runtime 'org.slf4j:slf4j-simple:1.7.5'
+}
+
+uploadArchives {
+	repositories {
+		repositories {
+			mavenDeployer {
+				repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
+					authentication(userName: nexusUser, password: nexusPassword)
+				}
+				snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
+					authentication(userName: nexusUser, password: nexusPassword)
+				}
+			}
+		}
+	}
 }
