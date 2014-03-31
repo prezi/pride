@@ -16,8 +16,8 @@ public class PrideCli {
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help.class)
 				.withCommands(Help.class, Init.class);
-		Cli<Runnable> gitParser = builder.build();
-		gitParser.parse(args).run();
+		Cli<Runnable> parser = builder.build();
+		parser.parse(args).run();
 	}
 }
 
