@@ -15,9 +15,15 @@ public class PrideCli {
 		Cli.CliBuilder<Runnable> builder = Cli.<Runnable> builder("pride")
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help)
-				.withCommands(Help, Init, Version)
-		Cli<Runnable> parser = builder.build()
-		parser.parse(args).run()
+				.withCommands(Version, Help)
+
+		builder.withGroup("session")
+				.withDescription("Manage sessions")
+				.withDefaultCommand(ListSession)
+				.withCommands(InitSession, ListSession, Help)
+
+		Cli<Runnable> parser = builder.build();
+		parser.parse(args).run();
 	}
 }
 
@@ -42,8 +48,17 @@ abstract class SessionCommand implements Runnable {
 	}
 }
 
+@Command(name = "list", description = "List projects in a session")
+class ListSession extends SessionCommand {
+
+	@Override
+	void run() {
+		System.out.println("This would list the projects loaded in a session")
+	}
+}
+
 @Command(name = "init", description = "Initialize session")
-class Init extends SessionCommand {
+class InitSession extends SessionCommand {
 
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite any existing sessions in the directory")
