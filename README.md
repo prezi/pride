@@ -11,15 +11,20 @@ A session is a directory containing clones of modules. Each module is expected t
 
 ## Get Pride
 
-Note: You will need [Gradle](http://gradle.org/) installed before you can get Pride.
+### Prerequisites
+
+* [Gradle](http://gradle.org/) and [Git](http://git-scm.org/) should be available on the PATH.
+* It is also nice if you have your Prezi GitHub credentials set up before you proceed further.
 
 ### Installing and updating Pride
 
-Execute this to install the newest version of Pride:
+The easiest way is to install Pride is by running:
 
     $ curl -sSL http://href.prezi.com/install-pride | gradle
 
 Currently this is also the way to upgrade it. An automatic upgrade facility is coming soon.
+
+You can also download the Gradle build script from http://href.prezi.com/install-pride, and execute it manually by running `gradle -b install-pride.gradle`.
 
 ### Building from source
 
