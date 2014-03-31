@@ -11,6 +11,8 @@ A session is a directory containing clones of modules. Each module is expected t
 
 ## Get Pride
 
+Note: You will need [Gradle](http://gradle.org/) installed before you can get Pride.
+
 ### Installing and updating Pride
 
 Execute this to install the newest version of Pride:
