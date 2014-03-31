@@ -11,7 +11,20 @@ A session is a directory containing clones of modules. Each module is expected t
 
 ## Get Pride
 
-TBD
+For now the only option is to build Pride from source:
+
+```shell
+git clone git@github.com:prezi/pride.git
+cd pride
+gradle installApp
+export PATH=$PATH:`pwd`/build/install/pride/bin
+```
+
+Check if everything works via:
+
+    $ pride version
+    Pride version 0.1-27-ge342f73
+    $
 
 ## Usage
 
