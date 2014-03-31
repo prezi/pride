@@ -24,7 +24,6 @@ Check if everything works via:
 
     $ pride version
     Pride version 0.1-27-ge342f73
-    $
 
 ## Usage
 
