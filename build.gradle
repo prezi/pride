@@ -34,6 +34,12 @@ processResources {
     ]
 }
 
+configure(applicationDistribution) {
+	from(file("README.md")) {
+		into "/"
+	}
+}
+
 artifacts {
 	archives(distZip) {
 		classifier "dist"
