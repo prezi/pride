@@ -35,7 +35,9 @@ processResources {
 }
 
 artifacts {
-	archives(distZip)
+	archives(distZip) {
+		classifier "dist"
+	}
 }
 
 repositories {
