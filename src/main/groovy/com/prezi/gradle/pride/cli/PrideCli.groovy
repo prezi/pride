@@ -62,6 +62,8 @@ class Init extends SessionCommand {
 			if (isValidProject(dir)) {
 				def connection = connector.forProjectDirectory(dir).connect()
 				try {
+					def relativePath = sessionDirectory.toURI().relativize(dir.toURI()).toString()
+					settingsFile << "\n// Project from directory /${relativePath}\n"
 					// Load the model for the build
 					GradleBuild build = connection.getModel(GradleBuild)
 					build.projects.each { prj ->
