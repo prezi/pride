@@ -33,6 +33,9 @@ abstract class SessionCommand implements Runnable {
 @Command(name = "init", description = "Initialize session")
 class Init extends SessionCommand {
 
+	@Option(name = "-o", description = "overwrite existing session")
+	private boolean overwrite
+
 	public static final String SETTINGS_GRADLE = "settings.gradle"
 	public static final String BUILD_GRADLE = "build.gradle"
 
@@ -42,9 +45,16 @@ class Init extends SessionCommand {
 		def connector = GradleConnector.newConnector()
 		System.out.println("Initializing ${sessionDirectory}")
 
-		sessionDirectory.mkdirs()
 		def settingsFile = new File(sessionDirectory, SETTINGS_GRADLE)
+		def buildFile = new File(sessionDirectory, BUILD_GRADLE)
+
+		if (!overwrite && (settingsFile.exists() || buildFile.exists())) {
+			throw new IllegalStateException("A session already exists in ${sessionDirectory}")
+		}
+
+		sessionDirectory.mkdirs()
 		settingsFile.delete()
+		buildFile.delete()
 
 		sessionDirectory.eachDir { dir ->
 			if (isValidProject(dir)) {
