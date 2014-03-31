@@ -20,6 +20,8 @@ gradle installApp
 export PATH=$PATH:`pwd`/build/install/pride/bin
 ```
 
+Note: On Windows you will need to add `build/install/pride/bin` to the `PATH` manually.
+
 Check if everything works via:
 
     $ pride version
