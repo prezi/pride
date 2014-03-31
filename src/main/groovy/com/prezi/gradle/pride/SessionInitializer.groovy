@@ -13,15 +13,16 @@ class SessionInitializer {
 	public static void initializeSession(File sessionDirectory, boolean overwrite) {
 		System.out.println("Starting Gradle connector")
 		def connector = GradleConnector.newConnector()
-		System.out.println("Initializing ${sessionDirectory}")
 
 		def settingsFile = new File(sessionDirectory, SETTINGS_GRADLE)
 		def buildFile = new File(sessionDirectory, BUILD_GRADLE)
 
-		if (!overwrite && (settingsFile.exists() || buildFile.exists())) {
+		def sessionExists = settingsFile.exists() || buildFile.exists()
+		if (!overwrite && sessionExists) {
 			throw new IllegalStateException("A session already exists in ${sessionDirectory}")
 		}
 
+		System.out.println((sessionExists ? "Reinitializing" : "Initializing") + " ${sessionDirectory}")
 		sessionDirectory.mkdirs()
 		settingsFile.delete()
 		buildFile.delete()
