@@ -13,9 +13,9 @@ class SessionInitializer {
 
 	private static ThreadLocal<GradleConnector> gradleConnector = new ThreadLocal<>() {
 		@Override
-		protected Object initialValue() {
+		protected GradleConnector initialValue() {
 			System.out.println("Starting Gradle connector")
-			GradleConnector.newConnector()
+			return GradleConnector.newConnector()
 		}
 	}
 
