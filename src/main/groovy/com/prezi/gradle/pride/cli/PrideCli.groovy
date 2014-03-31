@@ -48,6 +48,6 @@ class Version implements Runnable {
 	void run() {
 		def props = new Properties()
 		props.load(getClass().getResourceAsStream("/version.properties"))
-		System.out.println("Version ${props["application.version"]}")
+		System.out.println("Pride version ${props["application.version"]}")
 	}
 }
