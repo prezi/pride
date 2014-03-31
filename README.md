@@ -5,7 +5,7 @@ Pride is an internal Prezi tool to manage a pride of Gradle-built modules stored
 
 ### How does it work?
 
-Pride's central concept is a session. It's a (preferably) relatively short-lived entity that lets you work on a few modules of a large system. The idea is that you pick a few modules, start a session, do your work, commit, push, and then remove the session completely.
+Pride's central concept is a session. The idea is that you pick a few modules, start a session, do your work, commit, push, and then remove the session completely. A session should be short-lived, but you can have several concurrent sessions side-by side.
 
 A session is a directory containing clones of modules. Each module is expected to have a Gradle build (i.e. a `build.gradle` file in its root directory). Pride generates Gradle build files in the session directory which allows you to build your modules together, without having to install them to an external repository (such as Ivy local in `~/.ivy2`).
 
