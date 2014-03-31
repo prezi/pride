@@ -27,6 +27,12 @@ mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
+processResources {
+    filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+        version: version
+    ]
+}
+
 repositories {
 	maven preziDownloadRepo("external-libs")
 }

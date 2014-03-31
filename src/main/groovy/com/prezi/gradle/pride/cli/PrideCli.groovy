@@ -15,9 +15,20 @@ public class PrideCli {
 		Cli.CliBuilder<Runnable> builder = Cli.<Runnable> builder("pride")
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help.class)
-				.withCommands(Help.class, Init.class);
+				.withCommands(Help.class, Init.class, Version.class);
 		Cli<Runnable> parser = builder.build();
 		parser.parse(args).run();
+	}
+}
+
+@Command(name = "version", description = "Display program version")
+class Version implements Runnable {
+
+	@Override
+	void run() {
+		def props = new Properties()
+		props.load(getClass().getResourceAsStream("/version.properties"))
+		System.out.println("Version ${props["application.version"]}")
 	}
 }
 
