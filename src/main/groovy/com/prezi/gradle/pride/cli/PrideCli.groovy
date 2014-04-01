@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.cli
 
 import com.prezi.gradle.pride.PrideException
+import com.prezi.gradle.pride.PrideVersion
 import io.airlift.command.Cli
 import io.airlift.command.Command
 import io.airlift.command.Help
@@ -41,8 +42,6 @@ class Version implements Runnable {
 
 	@Override
 	void run() {
-		def props = new Properties()
-		props.load(getClass().getResourceAsStream("/version.properties"))
-		System.out.println("Pride version ${props["application.version"]}")
+		System.out.println("Pride version ${PrideVersion.VERSION}")
 	}
 }
