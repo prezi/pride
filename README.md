@@ -69,6 +69,7 @@ Where `<repo-name>` is the name of the Git repository under `https://github.com/
 * Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the session, or the newest version from Artifactory.
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Pride merges `gradle.properties` from modules into a `gradle.properties` in the root of the session. If multiple modules define the same property, the results might be confusing.
+* Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
 
 ## Why the name?
 
