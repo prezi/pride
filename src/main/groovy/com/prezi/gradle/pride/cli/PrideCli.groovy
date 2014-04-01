@@ -15,7 +15,7 @@ public class PrideCli {
 		Cli.CliBuilder<Runnable> builder = Cli.<Runnable> builder("pride")
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help)
-				.withCommands(AddToSession, InitSession, RemoveFromSession, Version, Help)
+				.withCommands(AddToSessionCommand, InitSessionCommand, RemoveFromSessionCommand, Version, Help)
 
 		Cli<Runnable> parser = builder.build();
 		try {

@@ -10,7 +10,7 @@ import io.airlift.command.Option
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a session")
-class AddToSession extends SessionCommand {
+class AddToSessionCommand extends SessionCommand {
 
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the session")

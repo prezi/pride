@@ -10,7 +10,7 @@ import io.airlift.command.Option
  * Created by lptr on 31/03/14.
  */
 @Command(name = "remove", description = "Remove modules from a session")
-class RemoveFromSession extends SessionCommand {
+class RemoveFromSessionCommand extends SessionCommand {
 
 	@Option(name = ["-f", "--force"],
 			description = "Remove modules even if there are local changes")
