@@ -24,7 +24,7 @@ The easiest way to install Pride is by running:
 
 Currently this is also the way to upgrade it. An automatic upgrade facility is coming soon.
 
-You can also download the Gradle build script from http://href.prezi.com/install-pride, and execute it manually by running `gradle -b install-pride.gradle`.
+You can also download the Gradle build script from http://href.prezi.com/install-pride, and execute it manually by running `gradle -b install-pride`.
 
 ### Building from source
 
