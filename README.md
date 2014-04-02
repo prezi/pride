@@ -9,6 +9,8 @@ Pride's central concept is a session. The idea is that you pick a few modules, s
 
 A session is a directory containing clones of modules. Each module is expected to have a Gradle build (i.e. a `build.gradle` file in its root directory). Pride generates Gradle build files in the session directory which allows you to build your modules together, without having to install them to an external repository (such as Ivy local in `~/.ivy2`).
 
+It is important to craft your modules so that they remain buildable on their own (*stand-alone mode*) as well as a part of a Pride session (*session-mode*). In most cases you don't have to do anything special to make this happen, but there are some [limitations and caveats](#limitations-and-caveats) to watch out for.
+
 ## Get Pride
 
 ### Prerequisites
@@ -65,7 +67,7 @@ Where `<repo-name>` is the name of the Git repository under `https://github.com/
 ## Limitations and caveats
 
 * Module dependencies can only be resolved properly to local projects available in the session if they are specified via the `moduleDependencies { ... }` block instead of `dependencies { ... }`. If you put them in `dependencies { ... }`, they will always come from Artifactory.
-* Multi-project Gradle builds cannot use `project(":some-other-subproject")` and `project(path: "...")` to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: "...")`.
+* Multi-project Gradle builds cannot use `project(":some-other-subproject")` and `project(path: "...")` to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: "...")`. These will be resolved properly both in stand-alone and session-mode.
 * Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the session, or the newest version from Artifactory.
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Pride merges `gradle.properties` from modules into a `gradle.properties` in the root of the session. If multiple modules define the same property, the results might be confusing.
