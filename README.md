@@ -20,7 +20,7 @@ A session is a directory containing clones of modules. Each module is expected t
 
 The easiest way to install Pride is by running:
 
-    $ wget -q http://href.prezi.com/install-pride && gradle -q -b install-pride && rm install-pride > /dev/null
+    $ curl -sSLO Http://href.prezi.com/install-pride && gradle -q -b install-pride && rm install-pride
 
 Currently this is also the way to upgrade it. An automatic upgrade facility is coming soon.
 
