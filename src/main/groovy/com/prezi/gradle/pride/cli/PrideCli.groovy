@@ -16,10 +16,10 @@ public class PrideCli {
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help)
 				.withCommands(
-					AddToSessionCommand,
-					DoInSessionCommand,
-					InitSessionCommand,
-					RemoveFromSessionCommand,
+					AddToPrideCommand,
+					DoInPrideCommand,
+					InitPrideCommand,
+					RemoveFromPrideCommand,
 					VersionCommand,
 					Help)
 

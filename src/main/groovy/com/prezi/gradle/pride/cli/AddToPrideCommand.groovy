@@ -1,7 +1,7 @@
 package com.prezi.gradle.pride.cli
 
 import com.prezi.gradle.pride.PrideException
-import com.prezi.gradle.pride.SessionInitializer
+import com.prezi.gradle.pride.PrideInitializer
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -9,34 +9,34 @@ import io.airlift.command.Option
 /**
  * Created by lptr on 31/03/14.
  */
-@Command(name = "add", description = "Add modules to a session")
-class AddToSessionCommand extends SessionCommand {
+@Command(name = "add", description = "Add modules to a pride")
+class AddToPrideCommand extends PrideCommand {
 
 	@Option(name = ["-o", "--overwrite"],
-			description = "Overwrite existing modules in the session")
+			description = "Overwrite existing modules in the pride")
 	private boolean overwrite
 
 	@Option(name = ["-h", "--use-https"],
 			description = "Use HTTPS GitHub URL instead of SSH when cloning")
 	private boolean useHttps
 
-	@Arguments(required = true, description = "Modules to add to the session")
+	@Arguments(required = true, description = "Modules to add to the pride")
 	private List<String> modules
 
 	@Override
 	void run() {
 		// Check if anything exists already
 		if (!overwrite) {
-			def existingRepos = modules.findAll { new File(sessionDirectory, it).exists() }
+			def existingRepos = modules.findAll { new File(prideDirectory, it).exists() }
 			if (existingRepos) {
-				throw new PrideException("These modules already exist in session: ${existingRepos.join(", ")}")
+				throw new PrideException("These modules already exist in pride: ${existingRepos.join(", ")}")
 			}
 		}
 
 		// Clone repositories
 		modules.each { moduleName ->
 			def repository = getRepositoryUrl(moduleName, useHttps)
-			def targetDirectory = new File(sessionDirectory, moduleName)
+			def targetDirectory = new File(prideDirectory, moduleName)
 			targetDirectory.deleteDir()
 
 			System.out.println("Cloning ${repository}")
@@ -47,8 +47,8 @@ class AddToSessionCommand extends SessionCommand {
 			}
 		}
 
-		// Re-initialize session
-		SessionInitializer.initializeSession(sessionDirectory, true)
+		// Re-initialize pride
+		PrideInitializer.initializePride(prideDirectory, true)
 	}
 
 	protected static String getRepositoryUrl(moduleName, boolean useHttps) {

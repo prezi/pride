@@ -6,7 +6,7 @@ import org.gradle.tooling.model.gradle.GradleBuild
 /**
  * Created by lptr on 31/03/14.
  */
-class SessionInitializer {
+class PrideInitializer {
 	public static final String PRIDE_DIRECTORY = ".pride"
 	public static final String PRIDE_MODULES = "modules"
 
@@ -22,31 +22,31 @@ class SessionInitializer {
 		}
 	}
 
-	public static void initializeSession(File sessionDirectory, boolean overwrite) {
-		def settingsFile = new File(sessionDirectory, SETTINGS_GRADLE)
-		def buildFile = new File(sessionDirectory, BUILD_GRADLE)
-		def gradleProperties = new File(sessionDirectory, GRADLE_PROPERTIES)
-		def prideDirectory = new File(sessionDirectory, PRIDE_DIRECTORY)
-		def prideModulesFile = new File(prideDirectory, PRIDE_MODULES)
+	public static void initializePride(File prideDirectory, boolean overwrite) {
+		def settingsFile = new File(prideDirectory, SETTINGS_GRADLE)
+		def buildFile = new File(prideDirectory, BUILD_GRADLE)
+		def gradleProperties = new File(prideDirectory, GRADLE_PROPERTIES)
+		def configDirectory = new File(prideDirectory, PRIDE_DIRECTORY)
+		def prideModulesFile = new File(configDirectory, PRIDE_MODULES)
 
-		def sessionExists = prideDirectory.exists() || settingsFile.exists() || buildFile.exists() || gradleProperties.exists()
-		if (!overwrite && sessionExists) {
-			throw new PrideException("A session already exists in ${sessionDirectory}")
+		def prideExists = configDirectory.exists() || settingsFile.exists() || buildFile.exists() || gradleProperties.exists()
+		if (!overwrite && prideExists) {
+			throw new PrideException("A pride already exists in ${prideDirectory}")
 		}
 
-		System.out.println((sessionExists ? "Reinitializing" : "Initializing") + " ${sessionDirectory}")
-		sessionDirectory.mkdirs()
-		prideDirectory.deleteDir()
+		System.out.println((prideExists ? "Reinitializing" : "Initializing") + " ${prideDirectory}")
 		prideDirectory.mkdirs()
+		configDirectory.deleteDir()
+		configDirectory.mkdirs()
 		settingsFile.delete()
 		buildFile.delete()
 		gradleProperties.delete()
 
-		sessionDirectory.eachDir { moduleDirectory ->
+		prideDirectory.eachDir { moduleDirectory ->
 			if (isValidProject(moduleDirectory)) {
 				def connection = gradleConnector.get().forProjectDirectory(moduleDirectory).connect()
 				try {
-					def relativePath = sessionDirectory.toURI().relativize(moduleDirectory.toURI()).toString()
+					def relativePath = prideDirectory.toURI().relativize(moduleDirectory.toURI()).toString()
 
 					// Load the model for the build
 					GradleBuild build = connection.getModel(GradleBuild)
