@@ -15,3 +15,18 @@ allprojects {
 	// HACK This is so that local projects will always override external projects
 	version = String.valueOf(Short.MAX_VALUE)
 }
+
+childProjects.each { _, Project child ->
+	def propertiesFile = new File(child.projectDir, GRADLE_PROPERTIES)
+	if (propertiesFile.exists()) {
+		child.logger.info "Setting properties from ${propertiesFile} for project ${child.path}"
+		propertiesFile.withInputStream { stream ->
+			def properties = new Properties()
+			properties.load(stream)
+			properties.each { String key, value ->
+				child.logger.debug "\tsetting ${child.path}/${key} = ${value}"
+				child.setProperty(key, value)
+			}
+		}
+	}
+}

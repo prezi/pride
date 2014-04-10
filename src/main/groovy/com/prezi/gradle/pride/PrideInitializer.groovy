@@ -62,17 +62,6 @@ class PrideInitializer {
 						}
 					}
 
-					// Merge gradle.properties
-					def localGradleProperties = new File(moduleDirectory, GRADLE_PROPERTIES)
-					if (localGradleProperties.exists()) {
-						def localGradlePropertiesText = localGradleProperties.text
-						if (!localGradlePropertiesText.endsWith("\n")) {
-							localGradlePropertiesText += "\n"
-						}
-						gradleProperties << "\n# Properties from project in directory /${relativePath}\n\n"
-						gradleProperties << localGradlePropertiesText
-					}
-
 					// Add module to .pride/modules
 					prideModulesFile << "${moduleDirectory.name}\n"
 				} finally {
