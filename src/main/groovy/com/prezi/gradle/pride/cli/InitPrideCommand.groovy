@@ -10,8 +10,8 @@ import io.airlift.command.Option
 @Command(name = "init", description = "Initialize pride")
 class InitPrideCommand extends PrideCommand {
 
-	@Option(name = ["-o", "--overwrite"],
-			description = "Overwrite any existing pride in the directory")
+	@Option(name = ["-f", "--force"],
+			description = "Force initialization of a pride, even if one already exists")
 	private boolean overwrite
 
 	@Override
