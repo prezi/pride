@@ -16,6 +16,7 @@ allprojects {
 	version = String.valueOf(Short.MAX_VALUE)
 }
 
+// Load gradle.properties for each project
 childProjects.each { _, Project child ->
 	def propertiesFile = new File(child.projectDir, GRADLE_PROPERTIES)
 	if (propertiesFile.exists()) {
