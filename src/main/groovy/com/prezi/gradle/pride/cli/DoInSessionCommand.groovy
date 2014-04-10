@@ -17,7 +17,7 @@ class DoInSessionCommand extends SessionCommand {
 	void run() {
 		Pride pride = new Pride(sessionDirectory)
 		pride.modules.each { moduleDirectory ->
-			System.out.println("Executing in \"${moduleDirectory}\": ${commandLine.join(" ")}")
+			System.out.println("\n${moduleDirectory} \$ ${commandLine.join(" ")}")
 			def process = commandLine.execute((String[]) null, moduleDirectory)
 			process.waitForProcessOutput((OutputStream) System.out, System.err)
 
