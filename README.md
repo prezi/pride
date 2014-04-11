@@ -1,7 +1,7 @@
 Pride
 =====
 
-Pride is an internal Prezi tool to manage a pride of Gradle-built modules stored in different GitHub repositories.
+Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories.
 
 ### How does it work?
 
