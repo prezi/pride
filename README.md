@@ -36,10 +36,10 @@ If you want to experiment with Pride:
 git clone git@github.com:prezi/pride.git
 cd pride
 gradle installApp
-export PATH=$PATH:`pwd`/build/install/pride/bin
+export PATH=$PATH:`pwd`/pride/build/install/pride/bin
 ```
 
-Note: On Windows you will need to add `build/install/pride/bin` to the `PATH` manually.
+Note: On Windows you will need to add `pride/build/install/pride/bin` to the `PATH` manually.
 
 Check if everything works via:
 
