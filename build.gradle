@@ -20,7 +20,7 @@ allprojects {
 	apply plugin: "idea"
 }
 
-subprojects {
+subprojects { subproject ->
 	apply plugin: "maven"
 	apply plugin: "prezi"
 	apply plugin: "groovy"
@@ -44,6 +44,34 @@ subprojects {
 		repositories {
 			repositories {
 				mavenDeployer {
+					pom.project {
+						name subproject.name
+						packaging "jar"
+						description "Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories"
+						url "http://pride.github.com/"
+
+						scm {
+							url "scm:git@github.com:prezi/pride.git"
+							connection "scm:git@github.com:prezi/prezi.git"
+							developerConnection "scm:git@github.com:prezi/pride.git"
+						}
+
+						licenses {
+							license {
+								name "The Apache Software License, Version 2.0"
+								url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+								distribution "repo"
+							}
+						}
+
+						developers {
+							developer {
+								id "lptr"
+								name "Lorant Pinter"
+							}
+						}
+					}
+
 					repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
 						authentication(userName: nexusUser, password: nexusPassword)
 					}
