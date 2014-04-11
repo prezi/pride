@@ -15,61 +15,85 @@ buildscript {
 	}
 }
 
-group = "com.prezi.gradle.pride"
-
-apply plugin: "groovy"
-apply plugin: "idea"
-apply plugin: "maven"
-apply plugin: "prezi"
-apply plugin: "application"
-
-mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
-
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
-
-dependencies {
-	compile "org.codehaus.groovy:groovy:1.8.6"
-	compile "io.airlift:airline:0.6"
-	compile "org.gradle:gradle-tooling-api:1.11"
-	testCompile "junit:junit:4.11"
-	runtime "org.slf4j:slf4j-simple:1.7.5"
+allprojects {
+	group = "com.prezi.gradle.pride"
+	apply plugin: "idea"
 }
 
-processResources {
-    filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-        version: version
-    ]
-}
+subprojects {
+	apply plugin: "maven"
+	apply plugin: "prezi"
+	apply plugin: "groovy"
+	sourceCompatibility = 1.6
+	targetCompatibility = 1.6
 
-configure(applicationDistribution) {
-	from(file("README.md")) {
-		into "/"
+	dependencies {
+		compile "org.codehaus.groovy:groovy:1.8.6"
+		testCompile "junit:junit:4.11"
+		testCompile("org.spockframework:spock-core:0.7-groovy-1.8") {
+			exclude group: "org.codehaus.groovy"
+		}
 	}
-}
 
-artifacts {
-	archives(distZip) {
-		classifier "dist"
-	}
-}
-
-repositories {
-	mavenLocal()
-	maven preziDownloadRepo("external-libs")
-}
-
-uploadArchives {
 	repositories {
+		mavenLocal()
+		maven preziDownloadRepo("external-libs")
+	}
+
+	uploadArchives {
 		repositories {
-			mavenDeployer {
-				repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
-					authentication(userName: nexusUser, password: nexusPassword)
-				}
-				snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
-					authentication(userName: nexusUser, password: nexusPassword)
+			repositories {
+				mavenDeployer {
+					repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
+						authentication(userName: nexusUser, password: nexusPassword)
+					}
+					snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
+						authentication(userName: nexusUser, password: nexusPassword)
+					}
 				}
 			}
 		}
+	}
+}
+
+project("pride-core") {
+	dependencies {
+		compile "org.gradle:gradle-tooling-api:1.11"
+	}
+
+	processResources {
+	    filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+	        version: version
+	    ]
+	}
+}
+
+project("pride") {
+	apply plugin: "application"
+	mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
+
+	dependencies {
+		compile project(path: ":pride-core")
+		compile "io.airlift:airline:0.6"
+		runtime "org.slf4j:slf4j-simple:1.7.5"
+	}
+
+	configure(applicationDistribution) {
+		from(file("README.md")) {
+			into "/"
+		}
+	}
+
+	artifacts {
+		archives(distZip) {
+			classifier "dist"
+		}
+	}
+}
+
+project("gradle-pride-plugin") {
+	dependencies {
+		compile gradleApi()
+		compile(project(":pride-core"))
 	}
 }

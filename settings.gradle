@@ -1,1 +1,4 @@
-rootProject.name = "pride"
+rootProject.name = "pride-parent"
+include "pride-core"
+include "pride"
+include "gradle-pride-plugin"
