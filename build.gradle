@@ -27,6 +27,8 @@ subprojects { subproject ->
 	sourceCompatibility = 1.6
 	targetCompatibility = 1.6
 
+	description = "Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories"
+
 	dependencies {
 		compile "org.codehaus.groovy:groovy:1.8.6"
 		testCompile "junit:junit:4.11"
@@ -42,42 +44,38 @@ subprojects { subproject ->
 
 	uploadArchives {
 		repositories {
-			repositories {
-				mavenDeployer {
-					pom.project {
-						name subproject.name
-						packaging "jar"
-						description "Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories"
-						url "http://pride.github.com/"
+			mavenDeployer {
+				pom.project {
+					url "http://pride.github.com/"
+					name subproject.name
 
-						scm {
-							url "scm:git@github.com:prezi/pride.git"
-							connection "scm:git@github.com:prezi/prezi.git"
-							developerConnection "scm:git@github.com:prezi/pride.git"
-						}
+					scm {
+						url "scm:git@github.com:prezi/pride.git"
+						connection "scm:git@github.com:prezi/prezi.git"
+						developerConnection "scm:git@github.com:prezi/pride.git"
+					}
 
-						licenses {
-							license {
-								name "The Apache Software License, Version 2.0"
-								url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-								distribution "repo"
-							}
-						}
-
-						developers {
-							developer {
-								id "lptr"
-								name "Lorant Pinter"
-							}
+					licenses {
+						license {
+							name "The Apache Software License, Version 2.0"
+							url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+							distribution "repo"
 						}
 					}
 
-					repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
-						authentication(userName: nexusUser, password: nexusPassword)
+					developers {
+						developer {
+							id "lptr"
+							name "Lorant Pinter"
+						}
 					}
-					snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
-						authentication(userName: nexusUser, password: nexusPassword)
-					}
+				}
+
+				repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
+					authentication(userName: nexusUser, password: nexusPassword)
+				}
+				snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
+					authentication(userName: nexusUser, password: nexusPassword)
 				}
 			}
 		}
