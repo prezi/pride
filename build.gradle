@@ -77,9 +77,9 @@ project("pride-core") {
 	}
 
 	processResources {
-	    filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-	        version: version
-	    ]
+		filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+			version: version
+		]
 	}
 }
 
