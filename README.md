@@ -70,7 +70,6 @@ Where `<repo-name>` is the name of the Git repository under `https://github.com/
 * Multi-project Gradle builds cannot use `project(":some-other-subproject")` and `project(path: "...")` to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: "...")`. These will be resolved properly both in stand-alone and pride-mode.
 * Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the pride, or the newest version from Artifactory.
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
-* Pride merges `gradle.properties` from modules into a `gradle.properties` in the root directory of the pride. If multiple modules define the same property, the results might be confusing.
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
 
 ## Why the name?
