@@ -3,12 +3,13 @@
 *.lock
 *.DS_Store
 *.log
-temp
+temp/
 
-.idea
+.idea/
 *.iml
 *.ipr
 *.iws
 
-.gradle
-build
+.gradle/
+build/
+out/
