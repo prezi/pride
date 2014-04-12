@@ -120,7 +120,7 @@ project("pride") {
 	}
 
 	configure(applicationDistribution) {
-		from(file("README.md")) {
+		from(rootProject.file("README.md")) {
 			into "/"
 		}
 	}
