@@ -65,11 +65,15 @@ subprojects { subproject ->
 					}
 				}
 
-				repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
-					authentication(userName: nexusUser, password: nexusPassword)
-				}
-				snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
-					authentication(userName: nexusUser, password: nexusPassword)
+				if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
+					def user = project.getProperty("nexusUser")
+					def password = project.getProperty("nexusPassword")
+					repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
+						authentication(userName: user, password: password)
+					}
+					snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
+						authentication(userName: user, password: password)
+					}
 				}
 			}
 		}
