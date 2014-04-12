@@ -65,12 +65,12 @@ subprojects { subproject ->
 					}
 				}
 
-//				repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
-//					authentication(userName: nexusUser, password: nexusPassword)
-//				}
-//				snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
-//					authentication(userName: nexusUser, password: nexusPassword)
-//				}
+				repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
+					authentication(userName: nexusUser, password: nexusPassword)
+				}
+				snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
+					authentication(userName: nexusUser, password: nexusPassword)
+				}
 			}
 		}
 	}

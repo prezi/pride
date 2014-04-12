@@ -1,5 +1,15 @@
 language: java
 jdk:
-- oraclejdk7
+  - oraclejdk7
+before_install:
+  - mkdir -p ~/.gradle
+  - rm -rf ~/.gradle/gradle.properties
+  - echo nexusUser=$nexusUser >> ~/.gradle/gradle.properties
+  - echo nexusPassword=$nexusPassword >> ~/.gradle/gradle.properties
+after_success:
+  - ./gradlew uploadArchives
 env:
-- TERM=dumb
+  global:
+    - TERM=dumb
+    - secure: MjVM6KfZxekdlTyJ4aavdaOdiamUkkT+HoI6pabwYbxk61n7J9h1DeHIRbOkUh3iOX+kI71ccTAZaWg15KL3jQ4hXkThxLxk8X4tmhnMhxrFAgqs9f/TmPVH8ynEZYSAyO+fkwBE7HAfn35KyRalW87ZYAHV97fxrqtFXawoSZ8=
+    - secure: fVHVZE0410s4Gj9nlvUrkCyyJrqY+v0j2ZmhVeDpLyMAImWrv/hsO4LFce+fK/xr3bnKuXiRSubcY6fht/ZmeLvHTgI0tLkBh/s+ysbHDhuOSN/YvTggmgUJQkyLsUHI2NnjymtMm1fnpCHS47CsGi5sbloxLL4hhihb+9OuBF0=
