@@ -1,28 +1,19 @@
-buildscript {
-	repositories {
-		mavenLocal()
-		maven {
-			credentials {
-				username nexusUser
-				password nexusPassword
-			}
-			url "https://artifactory.prezi.com/plugins-snapshot"
-		}
-	}
+def gitVersion = [ "git", "describe", "--match", "[0-9]*", "--dirty"].execute().text.trim()
 
-	dependencies {
-		classpath "com.prezi.boxfish:gradle-boxfish-plugin:1.0-SNAPSHOT"
+task version {
+	doLast {
+		println "Version: ${gitVersion}"
 	}
 }
 
 allprojects {
 	group = "com.prezi.gradle.pride"
+	version = gitVersion
 	apply plugin: "idea"
 }
 
 subprojects { subproject ->
 	apply plugin: "maven"
-	apply plugin: "prezi"
 	apply plugin: "groovy"
 	sourceCompatibility = 1.6
 	targetCompatibility = 1.6
