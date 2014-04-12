@@ -11,5 +11,5 @@ after_success:
 env:
   global:
     - TERM=dumb
-    - secure: MjVM6KfZxekdlTyJ4aavdaOdiamUkkT+HoI6pabwYbxk61n7J9h1DeHIRbOkUh3iOX+kI71ccTAZaWg15KL3jQ4hXkThxLxk8X4tmhnMhxrFAgqs9f/TmPVH8ynEZYSAyO+fkwBE7HAfn35KyRalW87ZYAHV97fxrqtFXawoSZ8=
     - secure: fVHVZE0410s4Gj9nlvUrkCyyJrqY+v0j2ZmhVeDpLyMAImWrv/hsO4LFce+fK/xr3bnKuXiRSubcY6fht/ZmeLvHTgI0tLkBh/s+ysbHDhuOSN/YvTggmgUJQkyLsUHI2NnjymtMm1fnpCHS47CsGi5sbloxLL4hhihb+9OuBF0=
+    - secure: VbGZVjq3MV25f6/w2jyZqR9yjsw6XpA/ckU+ZM3Jcf9iMxSwE8OJmV7hsbv/B2gETFUgSN9R5i+XA+q+vwviTP1BJLnE/w1HKX0vnYlS1nk8T0cofNfedcHIijb8lbHMqPeEJSQEhKgvpqjwNxEb+QdnA2CrzkqlkR0q+xc0s8Y=
