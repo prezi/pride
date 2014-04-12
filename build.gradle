@@ -29,17 +29,20 @@ subprojects { subproject ->
 
 	description = "Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories"
 
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven {
+			url "http://gradle.artifactoryonline.com/gradle/libs"
+		}
+	}
+
 	dependencies {
 		compile "org.codehaus.groovy:groovy:1.8.6"
 		testCompile "junit:junit:4.11"
 		testCompile("org.spockframework:spock-core:0.7-groovy-1.8") {
 			exclude group: "org.codehaus.groovy"
 		}
-	}
-
-	repositories {
-		mavenLocal()
-		maven preziDownloadRepo("external-libs")
 	}
 
 	uploadArchives {
