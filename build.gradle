@@ -80,6 +80,7 @@ subprojects { subproject ->
 			}
 		}
 	}
+
 	task groovydocJar(type: Jar, dependsOn: groovydoc) {
 		classifier = "javadoc"
 		from "build/docs/groovydoc"
@@ -135,6 +136,6 @@ project("pride") {
 project("gradle-pride-plugin") {
 	dependencies {
 		compile gradleApi()
-		compile(project(":pride-core"))
+		compile project(":pride-core")
 	}
 }
