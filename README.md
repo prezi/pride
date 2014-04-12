@@ -3,6 +3,8 @@ Pride
 
 Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories.
 
+[![Build Status](https://travis-ci.org/prezi/pride.svg?branch=master)](https://travis-ci.org/prezi/pride)
+
 ### How does it work?
 
 Pride's central concept is a working session that encompasses a set of modules. The idea is that you pick a few modules, start a session (a "pride"), do your work, commit, push, and then remove the pride completely. A pride should be short-lived, but you can have several concurrent prides side-by side. You can also have the same module as part of different prides.
