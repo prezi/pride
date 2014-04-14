@@ -6,6 +6,9 @@ task version {
 	}
 }
 
+def sonatype = hasProperty("sonatype")
+def signArtifacts = sonatype || hasProperty("sign")
+
 allprojects {
 	group = "com.prezi.gradle.pride"
 	version = gitVersion
@@ -74,6 +77,22 @@ subprojects { subproject ->
 					snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
 						authentication(userName: user, password: password)
 					}
+				}
+			}
+		}
+	}
+
+	if (signArtifacts) {
+		apply plugin: "signing"
+
+		signing {
+			sign configurations.archives
+		}
+
+		uploadArchives {
+			repositories {
+				mavenDeployer {
+					beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 				}
 			}
 		}
