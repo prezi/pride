@@ -68,7 +68,13 @@ subprojects { subproject ->
 					}
 				}
 
-				if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
+				if (sonatype) {
+					repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+						def user = project.getProperty("sonatypeUsername")
+						def password = project.getProperty("sonatypePassword")
+						authentication(userName: user, password: password)
+					}
+				} else if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
 					def user = project.getProperty("nexusUser")
 					def password = project.getProperty("nexusPassword")
 					repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
