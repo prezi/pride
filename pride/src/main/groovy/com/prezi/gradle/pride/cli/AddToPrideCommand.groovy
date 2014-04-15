@@ -19,7 +19,7 @@ class AddToPrideCommand extends AbstractPrideCommand {
 			description = "Overwrite existing modules in the pride")
 	private boolean overwrite
 
-	@Option(name = ["-b", "--repo-base-url"],
+	@Option(name = ["-B", "--repo-base-url"],
 			title = "url",
 			description = "Base URL for Git repositories")
 	private String explicitRepoBaseUrl
