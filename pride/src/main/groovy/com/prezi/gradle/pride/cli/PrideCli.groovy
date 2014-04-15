@@ -43,11 +43,3 @@ public class PrideCli {
 	}
 }
 
-@Command(name = "version", description = "Display program version")
-class VersionCommand implements Runnable {
-
-	@Override
-	void run() {
-		System.out.println("Pride version ${PrideVersion.VERSION}")
-	}
-}
