@@ -5,12 +5,15 @@ import com.prezi.gradle.pride.PrideInitializer
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 @Command(name = "remove", description = "Remove modules from a pride")
 class RemoveFromPrideCommand extends AbstractPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(RemoveFromPrideCommand)
 
 	@Option(name = ["-f", "--force"],
 			description = "Remove modules even if there are local changes")
@@ -41,7 +44,7 @@ class RemoveFromPrideCommand extends AbstractPrideCommand {
 		// Remove modules
 		modules.each { module ->
 			def moduleDir = new File(prideDirectory, module)
-			System.out.println("Removing ${moduleDir}")
+			log.info "Removing ${moduleDir}"
 			// Make sure we remove symlinks and directories alike
 			moduleDir.delete() || moduleDir.deleteDir()
 		}

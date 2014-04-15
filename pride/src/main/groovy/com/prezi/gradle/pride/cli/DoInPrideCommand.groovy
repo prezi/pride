@@ -4,12 +4,16 @@ import com.prezi.gradle.pride.Pride
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 10/04/14.
  */
 @Command(name = "do", description = "Execute a command in all modules, or a subset of the modules in a pride")
 class DoInPrideCommand extends AbstractPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(DoInPrideCommand)
+
 	@Option(name = ["-I", "--include"],
 			title = "repo",
 			description = "Execute the command on repo (can be specified multiple times)")
@@ -33,7 +37,7 @@ class DoInPrideCommand extends AbstractPrideCommand {
 		}
 
 		modules.each { moduleDirectory ->
-			System.out.println("\n${moduleDirectory} \$ ${commandLine.join(" ")}")
+			log.info "\n${moduleDirectory} \$ ${commandLine.join(" ")}"
 			executeIn(moduleDirectory, commandLine)
 		}
 	}

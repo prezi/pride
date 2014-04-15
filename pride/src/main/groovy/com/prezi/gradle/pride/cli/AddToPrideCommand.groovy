@@ -5,12 +5,15 @@ import com.prezi.gradle.pride.PrideInitializer
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
 class AddToPrideCommand extends AbstractPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(AddToPrideCommand)
 
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the pride")
@@ -56,7 +59,7 @@ class AddToPrideCommand extends AbstractPrideCommand {
 				if (!moduleInCache.exists()) {
 					cloneModuleFromExternal(moduleName, repoCachePath, true)
 				} else {
-					System.out.println "Updating cached module in ${moduleInCache}"
+					log.info "Updating cached module in ${moduleInCache}"
 					executeIn(moduleInCache, ["git", "fetch", "--all"])
 				}
 				def moduleInPride = cloneModuleFromCache(moduleName, prideDirectory)
@@ -90,7 +93,7 @@ class AddToPrideCommand extends AbstractPrideCommand {
 		// Make sure we delete symlinks and directories alike
 		targetDirectory.delete() || targetDirectory.deleteDir()
 
-		System.out.println("Cloning ${repository} into ${moduleName}")
+		log.info "Cloning ${repository} into ${moduleName}"
 		def commandLine = ["git", "clone", repository, targetDirectory]
 		if (mirror) {
 			commandLine.add "--mirror"

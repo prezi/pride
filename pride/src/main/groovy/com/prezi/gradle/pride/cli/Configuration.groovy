@@ -1,11 +1,15 @@
 package com.prezi.gradle.pride.cli
 
 import com.prezi.gradle.pride.PrideException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 15/04/14.
  */
 class Configuration {
+	private static final Logger log = LoggerFactory.getLogger(Configuration)
+
 	private static final REPO_BASE_URL = "repo.base.url"
 	private static final REPO_CACHE_PATH = "repo.cache.path"
 	private static final REPO_CACHE_ALWAYS = "repo.cache.always"
@@ -61,6 +65,7 @@ class Configuration {
 	}
 
 	public void setParameter(String property, String value) {
+		log.debug "Setting \"$property\" to \"$value\""
 		switch (property) {
 			case REPO_BASE_URL:
 				setRepoBaseUrl(value)

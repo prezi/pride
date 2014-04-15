@@ -2,11 +2,15 @@ package com.prezi.gradle.pride
 
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.model.gradle.GradleBuild
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 class PrideInitializer {
+	private static final Logger log = LoggerFactory.getLogger(PrideInitializer)
+
 	public static final String PRIDE_DIRECTORY = ".pride"
 	public static final String PRIDE_MODULES = "modules"
 
@@ -22,7 +26,7 @@ class PrideInitializer {
 	private static ThreadLocal<GradleConnector> gradleConnector = new ThreadLocal<>() {
 		@Override
 		protected GradleConnector initialValue() {
-			System.out.println("Starting Gradle connector")
+			log.info "Starting Gradle connector"
 			return GradleConnector.newConnector()
 		}
 	}
@@ -38,7 +42,7 @@ class PrideInitializer {
 			throw new PrideException("A pride already exists in ${prideDirectory}")
 		}
 
-		System.out.println((prideExists ? "Reinitializing" : "Initializing") + " ${prideDirectory}")
+		log.info (prideExists ? "Reinitializing" : "Initializing") + " ${prideDirectory}"
 		prideDirectory.mkdirs()
 		configDirectory.deleteDir()
 		configDirectory.mkdirs()
@@ -81,7 +85,7 @@ class PrideInitializer {
 	}
 
 	private static boolean isValidProject(File dir) {
-		System.out.println("Scanning ${dir}")
+		log.debug "Scanning ${dir}"
 		return !dir.name.startsWith(".") &&
 				dir.list().contains(BUILD_GRADLE) ||
 				dir.list().contains(SETTINGS_GRADLE)

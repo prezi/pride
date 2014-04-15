@@ -135,7 +135,7 @@ project("pride") {
 	dependencies {
 		compile project(path: ":pride-core")
 		compile "io.airlift:airline:0.6"
-		runtime "org.slf4j:slf4j-simple:1.7.5"
+		compile "ch.qos.logback:logback-classic:1.1.2"
 	}
 
 	configure(applicationDistribution) {
