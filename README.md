@@ -58,6 +58,22 @@ To add modules by cloning them from GitHub use:
 
 Where `<repo-name>` is the name of the Git repository under `https://github.com/prezi/`.
 
+## Repo caching
+
+To quickly create (and discard) prides, there is an option to cache your repositories.
+
+You can enable caching on a per-repo basis by using `pride add -c repo-name`. Or you can enable it by default by adding this line to `~/.prideconfig`:
+
+    repo.cache.always=true
+
+Here's what Pride does when you `add` a module with cache enabled:
+
+* checks in its cache directory if it already has a clone of the module
+    * if it doesn't exist, it creates a mirror clone of it (see `--mirror` in [git-clone](http://git-scm.com/docs/git-clone))
+    * if it exists, it does a `git fetch --all` on it
+* clones the cached repo to your pride
+* sets `origin` to point to the original repo
+
 ## Limitations and caveats
 
 * Module dependencies can only be resolved properly to local projects available in the pride if they are specified via the `moduleDependencies { ... }` block instead of `dependencies { ... }`. If you put them in `dependencies { ... }`, they will always come from Artifactory.
