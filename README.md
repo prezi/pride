@@ -17,18 +17,10 @@ It is important to craft your modules so that they remain buildable on their own
 
 ### Prerequisites
 
-* [Gradle](http://gradle.org/) and [Git](http://git-scm.org/) should be available on the PATH.
-* It is also nice if you have your Prezi GitHub credentials set up before you proceed further.
+Some tools need to be available on the path:
 
-### Installing and updating Pride
-
-The easiest way to install Pride is by running:
-
-    $ curl -sSLO http://href.prezi.com/install-pride && gradle -q -b install-pride && rm install-pride > /dev/null
-
-Currently this is also the way to upgrade it. An automatic upgrade facility is coming soon.
-
-You can also download the Gradle build script from http://href.prezi.com/install-pride, and execute it manually by running `gradle -b install-pride`.
+* [Gradle](http://gradle.org/)
+* [Git](http://git-scm.org/)
 
 ### Building from source
 
