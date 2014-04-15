@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory
 class PrideInitializer {
 	private static final Logger log = LoggerFactory.getLogger(PrideInitializer)
 
-	public static final String PRIDE_DIRECTORY = ".pride"
-	public static final String PRIDE_MODULES = "modules"
-
 	public static final String SETTINGS_GRADLE = "settings.gradle"
 	public static final String BUILD_GRADLE = "build.gradle"
 
@@ -32,15 +29,16 @@ class PrideInitializer {
 	}
 
 	public static void initializePride(File prideDirectory, boolean overwrite) {
-		def settingsFile = new File(prideDirectory, SETTINGS_GRADLE)
-		def buildFile = new File(prideDirectory, BUILD_GRADLE)
-		def configDirectory = new File(prideDirectory, PRIDE_DIRECTORY)
-		def prideModulesFile = new File(configDirectory, PRIDE_MODULES)
-
-		def prideExists = configDirectory.exists() || settingsFile.exists() || buildFile.exists()
+		def prideExists = Pride.containsPride(prideDirectory)
 		if (!overwrite && prideExists) {
 			throw new PrideException("A pride already exists in ${prideDirectory}")
 		}
+
+		def settingsFile = new File(prideDirectory, SETTINGS_GRADLE)
+		def buildFile = new File(prideDirectory, BUILD_GRADLE)
+		def configDirectory = new File(prideDirectory, Pride.PRIDE_DIRECTORY)
+		def prideModulesFile = new File(configDirectory, Pride.PRIDE_MODULES)
+		def prideVersionFile = new File(configDirectory, Pride.PRIDE_VERSION)
 
 		log.info (prideExists ? "Reinitializing" : "Initializing") + " ${prideDirectory}"
 		prideDirectory.mkdirs()
@@ -48,6 +46,8 @@ class PrideInitializer {
 		configDirectory.mkdirs()
 		settingsFile.delete()
 		buildFile.delete()
+
+		prideVersionFile << "0\n"
 
 		settingsFile << DO_NOT_MODIFY_WARNING
 
