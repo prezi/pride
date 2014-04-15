@@ -72,7 +72,7 @@ class AddToPrideCommand extends PrideCommand {
 	}
 
 	protected File cloneRepository(String moduleName, File reposDir) {
-		def repository = reposBaseUrl + moduleName + ".git"
+		def repository = repoBaseUrl + moduleName + ".git"
 		def targetDirectory = new File(reposDir, moduleName)
 		reposDir.mkdirs()
 		// Make sure we delete symlinks and directories alike
@@ -87,16 +87,16 @@ class AddToPrideCommand extends PrideCommand {
 		return targetDirectory
 	}
 
-	private String getReposBaseUrl() {
-		String reposBaseUrl = explicitRepoBaseUrl ?: configuration.repoBaseUrl
-		if (reposBaseUrl == null) {
+	private String getRepoBaseUrl() {
+		String repoBaseUrl = explicitRepoBaseUrl ?: configuration.repoBaseUrl
+		if (repoBaseUrl == null) {
 			throw new PrideException("Base URL for Git repos is not set. Either specify via --base-url, " +
 					"or set it in the global configuration -- see pride help config.")
 		}
-		if (!reposBaseUrl.endsWith("/")) {
-			reposBaseUrl += "/"
+		if (!repoBaseUrl.endsWith("/")) {
+			repoBaseUrl += "/"
 		}
-		return reposBaseUrl
+		return repoBaseUrl
 	}
 
 	private File getRepoCachePath() {
