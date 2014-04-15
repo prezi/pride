@@ -121,6 +121,7 @@ project("pride-core") {
 	}
 
 	processResources {
+		inputs.property "version", version
 		filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
 			version: version
 		]
