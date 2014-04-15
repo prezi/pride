@@ -35,13 +35,7 @@ class DoInPrideCommand extends PrideCommand {
 
 		modules.each { moduleDirectory ->
 			System.out.println("\n${moduleDirectory} \$ ${commandLine.join(" ")}")
-			def process = commandLine.execute((String[]) null, moduleDirectory)
-			process.waitForProcessOutput((OutputStream) System.out, System.err)
-
-			def result = process.exitValue()
-			if (result) {
-				throw new PrideException("Failed to execute \"${commandLine}\" in \"${moduleDirectory}\", exit code: ${result}")
-			}
+			executeIn(moduleDirectory, commandLine)
 		}
 	}
 }

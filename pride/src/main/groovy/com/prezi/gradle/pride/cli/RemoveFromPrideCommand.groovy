@@ -30,12 +30,7 @@ class RemoveFromPrideCommand extends PrideCommand {
 			def changedModules = modules.findAll { module ->
 				def moduleDir = new File(prideDirectory, module)
 
-				def commandLine = ["git", "--git-dir=${moduleDir}/.git", "--work-tree=${moduleDir}", "status", "--porcelain"]
-				def process = commandLine.execute()
-				process.waitFor()
-				if (process.exitValue()) {
-					throw new PrideException("Git status failed: ${commandLine.join(" ")}\n${process.text}")
-				}
+				def process = executeIn(moduleDir, ["git", "status", "--porcelain"], false)
 				return !process.text.trim().empty
 			}
 			if (changedModules) {
