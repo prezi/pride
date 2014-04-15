@@ -55,12 +55,12 @@ class AddToPrideCommand extends PrideCommand {
 				def moduleInCache = new File(repoCachePath, moduleName)
 				if (!moduleInCache.exists()) {
 					moduleInCache = cloneModuleFromExternal(moduleName, repoCachePath, true)
-					executeIn(moduleInCache, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
 				} else {
 					System.out.println "Updating cached module in ${moduleInCache}"
 					executeIn(moduleInCache, ["git", "fetch", "--all"])
 				}
-				cloneModuleFromCache(moduleName, prideDirectory)
+				def moduleInPride = cloneModuleFromCache(moduleName, prideDirectory)
+				executeIn(moduleInPride, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
 			} else {
 				cloneModuleFromExternal(moduleName, prideDirectory, false)
 			}
