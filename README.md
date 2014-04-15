@@ -60,19 +60,17 @@ Where `<repo-name>` is the name of the Git repository under `https://github.com/
 
 ## Repo caching
 
-To quickly create (and discard) prides, there is an option to cache your repositories.
-
-You can enable caching on a per-repo basis by using `pride add -c repo-name`. Or you can enable it by default by adding this line to `~/.prideconfig`:
-
-    repo.cache.always=true
-
-Here's what Pride does when you `add` a module with cache enabled:
+To quickly create (and discard) prides, Git repos of modules are cached locally. Here's what Pride does when you `add` a module with cache enabled:
 
 * checks in its cache directory if it already has a clone of the module
     * if it doesn't exist, it creates a mirror clone of it (see `--mirror` in [git-clone](http://git-scm.com/docs/git-clone))
     * if it exists, it does a `git fetch --all` on it
 * clones the cached repo to your pride
 * sets `origin` to point to the original repo
+
+You can disable caching on a per-repo basis by using `pride add --no-repo-cache repo-name`. Or you can disable it by setting this in `~/.prideconfig`:
+
+    repo.cache.always=false
 
 ## Limitations and caveats
 
