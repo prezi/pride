@@ -1,0 +1,113 @@
+#!/bin/env gradle -b
+defaultTasks "install"
+group = "com.prezi.gradle.pride"
+
+repositories {
+	mavenLocal()
+	maven {
+		credentials {
+			username nexusUser
+			password nexusPassword
+		}
+		url "https://artifactory.prezi.com/plugins"
+	}
+}
+
+configurations.all {
+	resolutionStrategy {
+		// Make sure we always get the newest version
+		cacheDynamicVersionsFor 0, 'seconds'
+	}
+}
+
+configurations {
+	pride
+}
+
+dependencies {
+	pride group: "com.prezi.gradle.pride", name: "pride", version: "0.+", classifier: "dist", ext: "zip"
+}
+
+def userHome = System.properties['user.home']
+def installDir = file("${userHome}/.pride")
+def configFile = file("${userHome}/.prideconfig")
+def getPrideVersion() {
+	return configurations.pride.resolvedConfiguration.firstLevelModuleDependencies.find { it.moduleName == "pride"}.moduleVersion
+}
+
+task copy(type: Copy) {
+	dependsOn configurations.pride
+	from { zipTree(configurations.pride.singleFile) }
+	into installDir
+}
+
+task setup {
+	dependsOn copy
+	def REPO_BASE_URL = "repo.base.url"
+	def REPO_CACHE_ALWAYS = "repo.cache.always"
+
+	outputs.file configFile
+	def config = new Properties()
+	if (configFile.exists()) {
+		configFile.withReader { config.load(it) }
+	}
+	def changed = false
+	def repoBaseUrl = config.getProperty(REPO_BASE_URL)
+	if (repoBaseUrl == null) {
+		config.setProperty(REPO_BASE_URL, "git@github.com:prezi/")
+		changed = true
+	}
+	def repoCacheAlways = config.getProperty(REPO_CACHE_ALWAYS)
+	if (repoCacheAlways == null) {
+		config.setProperty(REPO_CACHE_ALWAYS, "true")
+		changed = true
+	}
+	if (changed) {
+		configFile.withWriter { config.store(it, null) }
+	}
+}
+
+task installUnix {
+	dependsOn copy
+
+	def executableLink = file("/usr/local/bin/pride")
+	outputs.file executableLink
+	doLast {
+		def prideVersion = getPrideVersion()
+		println "Pride version: ${prideVersion}"
+		ant.symlink(resource: "${installDir}/pride-${prideVersion}/bin/pride", link: executableLink, overwrite: true)
+		println "Created ${executableLink}"
+	}
+}
+
+task installOther {
+	dependsOn copy
+	doLast {
+		def prideVersion = getPrideVersion()
+		if (!Os.isFamily(Os.FAMILY_UNIX)) {
+			println "Please add \"${installDir}/pride-${prideVersion}/bin\" to the PATH manually"
+		}
+	}
+}
+
+import org.apache.tools.ant.taskdefs.condition.Os
+
+task install {
+	dependsOn setup
+	if (Os.isFamily(Os.FAMILY_UNIX)) {
+		dependsOn installUnix
+	} else {
+		dependsOn installOther
+	}
+	doLast {
+		def prideVersion = getPrideVersion()
+		println "Successfully installed Pride version ${prideVersion}"
+	}
+}
+
+task update {
+	dependsOn install
+}
+task upgrade {
+	dependsOn install
+}
