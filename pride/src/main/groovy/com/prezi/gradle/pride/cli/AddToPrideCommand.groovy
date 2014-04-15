@@ -53,17 +53,16 @@ class AddToPrideCommand extends PrideCommand {
 		modules.each { moduleName ->
 			if (useRepoCache) {
 				def moduleInCache = new File(repoCachePath, moduleName)
-				def moduleInPride = new File(prideDirectory, moduleName)
 				if (!moduleInCache.exists()) {
-					moduleInCache = cloneRepository(moduleName, repoCachePath)
+					moduleInCache = cloneModuleFromExternal(moduleName, repoCachePath, true)
+					executeIn(moduleInCache, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
+				} else {
+					System.out.println "Updating cached module in ${moduleInCache}"
+					executeIn(moduleInCache, ["git", "fetch", "--all"])
 				}
-				def process = ["ln", "-s", moduleInCache.absolutePath, moduleInPride.absolutePath].execute()
-				process.waitForProcessOutput((OutputStream) System.out, System.err)
-				if (process.exitValue()) {
-					throw new PrideException("Could not link \"${moduleInCache}\" to \"${moduleInPride}")
-				}
+				cloneModuleFromCache(moduleName, prideDirectory)
 			} else {
-				cloneRepository(moduleName, prideDirectory)
+				cloneModuleFromExternal(moduleName, prideDirectory, false)
 			}
 		}
 
@@ -71,19 +70,32 @@ class AddToPrideCommand extends PrideCommand {
 		PrideInitializer.initializePride(prideDirectory, true)
 	}
 
-	protected File cloneRepository(String moduleName, File reposDir) {
-		def repository = repoBaseUrl + moduleName + ".git"
+	private File cloneModuleFromCache(String moduleName, File reposDir) {
+		def repository = new File(repoCachePath, moduleName).absolutePath
+		cloneRepository(repository, moduleName, reposDir, false)
+	}
+
+	private File cloneModuleFromExternal(String moduleName, File reposDir, boolean mirror) {
+		def repository = getModuleRepoUrl(moduleName)
+		cloneRepository(repository, moduleName, reposDir, mirror)
+	}
+
+	private String getModuleRepoUrl(String moduleName) {
+		return repoBaseUrl + moduleName + ".git"
+	}
+
+	private static File cloneRepository(String repository, String moduleName, File reposDir, boolean mirror) {
 		def targetDirectory = new File(reposDir, moduleName)
 		reposDir.mkdirs()
 		// Make sure we delete symlinks and directories alike
 		targetDirectory.delete() || targetDirectory.deleteDir()
 
-		System.out.println("Cloning ${repository}")
-		def process = ["git", "clone", repository, targetDirectory].execute()
-		process.waitForProcessOutput((OutputStream) System.out, System.err)
-		if (process.exitValue()) {
-			throw new PrideException("Could not clone ${targetDirectory}")
+		System.out.println("Cloning ${repository} into ${moduleName}")
+		def commandLine = ["git", "clone", repository, targetDirectory]
+		if (mirror) {
+			commandLine.add "--mirror"
 		}
+		executeIn(null, commandLine)
 		return targetDirectory
 	}
 
