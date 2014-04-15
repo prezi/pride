@@ -22,6 +22,19 @@ Some tools need to be available on the path:
 * [Gradle](http://gradle.org/)
 * [Git](http://git-scm.org/)
 
+### Installing Pride
+
+If you want to install the newest version of Pride, or upgrade your existing installation, run this:
+
+    $ curl -sSLO http://git.io/install-pride && gradle -q -b install-pride && rm install-pride > /dev/null
+    Successfully installed Pride version 0.2
+
+If you are installing for the first time, it's recommended to set the base URL for all your Git repositories, for example:
+
+    $ pride config repo.base.url git@github.com:prezi
+
+So when you execute `pride add some-module`, it will clone `git@github.com/prezi/some-module`.
+
 ### Building from source
 
 If you want to experiment with Pride:
