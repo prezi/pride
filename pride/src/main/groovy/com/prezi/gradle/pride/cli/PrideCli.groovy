@@ -17,6 +17,7 @@ public class PrideCli {
 				.withDefaultCommand(Help)
 				.withCommands(
 					AddToPrideCommand,
+					ConfigCommand,
 					DoInPrideCommand,
 					InitPrideCommand,
 					RemoveFromPrideCommand,
@@ -39,6 +40,9 @@ public class PrideCli {
 
 	private static void showError(Exception e) {
 		System.err.println("ERROR: ${e.message}")
+		if (e.cause) {
+			e.printStackTrace()
+		}
 		System.exit(-1)
 	}
 }

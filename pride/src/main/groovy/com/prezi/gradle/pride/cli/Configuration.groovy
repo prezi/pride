@@ -1,5 +1,7 @@
 package com.prezi.gradle.pride.cli
 
+import com.prezi.gradle.pride.PrideException
+
 /**
  * Created by lptr on 15/04/14.
  */
@@ -43,6 +45,44 @@ class Configuration {
 
 	public void setRepoCacheAlways(boolean repoCacheAlways) {
 		configuration.setProperty(REPO_CACHE_ALWAYS, String.valueOf(repoCacheAlways))
+	}
+
+	public String getParameter(String property) {
+		switch (property) {
+			case REPO_BASE_URL:
+				return repoBaseUrl
+			case REPO_CACHE_PATH:
+				return repoCachePath
+			case REPO_CACHE_ALWAYS:
+				return repoCacheAlways
+			default:
+				throw new PrideException("Unknown configuration parameter ${property}")
+		}
+	}
+
+	public void setParameter(String property, String value) {
+		switch (property) {
+			case REPO_BASE_URL:
+				setRepoBaseUrl(value)
+				break
+			case REPO_CACHE_PATH:
+				setRepoCachePath(new File(value))
+				break
+			case REPO_CACHE_ALWAYS:
+				switch (value) {
+					case "true":
+						setRepoCacheAlways(true)
+						break
+					case "false":
+						setRepoCacheAlways(false)
+						break
+					default:
+						throw new PrideException("Can only set ${property} to \"true\" or \"false\"")
+				}
+				break
+			default:
+				throw new PrideException("Unknown configuration parameter ${property}")
+		}
 	}
 
 	public void load() {

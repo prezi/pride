@@ -1,7 +1,6 @@
 package com.prezi.gradle.pride.cli
 
 import com.prezi.gradle.pride.Pride
-import com.prezi.gradle.pride.PrideException
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -10,7 +9,7 @@ import io.airlift.command.Option
  * Created by lptr on 10/04/14.
  */
 @Command(name = "do", description = "Execute a command in all modules, or a subset of the modules in a pride")
-class DoInPrideCommand extends PrideCommand {
+class DoInPrideCommand extends AbstractPrideCommand {
 	@Option(name = ["-I", "--include"],
 			title = "repo",
 			description = "Execute the command on repo (can be specified multiple times)")

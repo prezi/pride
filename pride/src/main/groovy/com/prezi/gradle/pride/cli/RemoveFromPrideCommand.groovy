@@ -10,7 +10,7 @@ import io.airlift.command.Option
  * Created by lptr on 31/03/14.
  */
 @Command(name = "remove", description = "Remove modules from a pride")
-class RemoveFromPrideCommand extends PrideCommand {
+class RemoveFromPrideCommand extends AbstractPrideCommand {
 
 	@Option(name = ["-f", "--force"],
 			description = "Remove modules even if there are local changes")

@@ -8,7 +8,7 @@ import io.airlift.command.Option
  * Created by lptr on 31/03/14.
  */
 @Command(name = "init", description = "Initialize pride")
-class InitPrideCommand extends PrideCommand {
+class InitPrideCommand extends AbstractPrideCommand {
 
 	@Option(name = ["-f", "--force"],
 			description = "Force initialization of a pride, even if one already exists")

@@ -10,7 +10,7 @@ import io.airlift.command.Option
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
-class AddToPrideCommand extends PrideCommand {
+class AddToPrideCommand extends AbstractPrideCommand {
 
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the pride")
