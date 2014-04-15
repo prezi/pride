@@ -29,10 +29,12 @@ class RemoveFromPrideCommand extends PrideCommand {
 			}
 			def changedModules = modules.findAll { module ->
 				def moduleDir = new File(prideDirectory, module)
-				def process = ["git", "--git-dir=${moduleDir}/.git", "--work-tree=${moduleDir}", "status", "--porcelain"].execute()
+
+				def commandLine = ["git", "--git-dir=${moduleDir}/.git", "--work-tree=${moduleDir}", "status", "--porcelain"]
+				def process = commandLine.execute()
 				process.waitFor()
 				if (process.exitValue()) {
-					throw new PrideException("Git status failed:\n" + process.text)
+					throw new PrideException("Git status failed: ${commandLine.join(" ")}\n${process.text}")
 				}
 				return !process.text.trim().empty
 			}
@@ -45,7 +47,8 @@ class RemoveFromPrideCommand extends PrideCommand {
 		modules.each { module ->
 			def moduleDir = new File(prideDirectory, module)
 			System.out.println("Removing ${moduleDir}")
-			moduleDir.deleteDir()
+			// Make sure we remove symlinks and directories alike
+			moduleDir.delete() || moduleDir.deleteDir()
 		}
 
 		// Re-initialize pride
