@@ -16,9 +16,10 @@ class AddToPrideCommand extends PrideCommand {
 			description = "Overwrite existing modules in the pride")
 	private boolean overwrite
 
-	@Option(name = ["-h", "--use-https"],
-			description = "Use HTTPS GitHub URL instead of SSH when cloning")
-	private boolean useHttps
+	@Option(name = ["-b", "--base-url"],
+			title = "url",
+			description = "Base URL for Git repositories")
+	private String explicitReposBaseUrl
 
 	@Arguments(required = true, description = "Modules to add to the pride")
 	private List<String> modules
@@ -35,7 +36,7 @@ class AddToPrideCommand extends PrideCommand {
 
 		// Clone repositories
 		modules.each { moduleName ->
-			def repository = getRepositoryUrl(moduleName, useHttps)
+			def repository = reposBaseUrl + moduleName + ".git"
 			def targetDirectory = new File(prideDirectory, moduleName)
 			targetDirectory.deleteDir()
 
@@ -51,11 +52,15 @@ class AddToPrideCommand extends PrideCommand {
 		PrideInitializer.initializePride(prideDirectory, true)
 	}
 
-	protected static String getRepositoryUrl(moduleName, boolean useHttps) {
-		if (useHttps) {
-			return "https://github.com/prezi/${moduleName}"
-		} else {
-			return "git@github.com:prezi/${moduleName}.git"
+	private String getReposBaseUrl() {
+		String reposBaseUrl = explicitReposBaseUrl ?: configuration.reposBaseUrl
+		if (reposBaseUrl == null) {
+			throw new PrideException("Base URL for Git repos is not set. Either specify via --base-url, " +
+					"or set it in the global configuration -- see pride help config.")
 		}
+		if (!reposBaseUrl.endsWith("/")) {
+			reposBaseUrl += "/"
+		}
+		return reposBaseUrl
 	}
 }
