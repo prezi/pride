@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli
 
+import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
 import io.airlift.command.Arguments
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
-class AddToPrideCommand extends AbstractPrideCommand {
+class AddToPrideCommand extends AbstractExistingPrideCommand {
 	private static final Logger log = LoggerFactory.getLogger(AddToPrideCommand)
 
 	@Option(name = ["-o", "--overwrite"],
@@ -41,12 +42,12 @@ class AddToPrideCommand extends AbstractPrideCommand {
 	private List<String> modules
 
 	@Override
-	void run() {
+	void runInPride(Pride pride) {
 		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.repoCacheAlways)
 
 		// Check if anything exists already
 		if (!overwrite) {
-			def existingRepos = modules.findAll { new File(prideDirectory, it).exists() }
+			def existingRepos = modules.findAll { new File(pride.rootDirectory, it).exists() }
 			if (existingRepos) {
 				throw new PrideException("These modules already exist in pride: ${existingRepos.join(", ")}")
 			}
@@ -62,15 +63,15 @@ class AddToPrideCommand extends AbstractPrideCommand {
 					log.info "Updating cached module in ${moduleInCache}"
 					executeIn(moduleInCache, ["git", "fetch", "--all"])
 				}
-				def moduleInPride = cloneModuleFromCache(moduleName, prideDirectory)
+				def moduleInPride = cloneModuleFromCache(moduleName, pride.rootDirectory)
 				executeIn(moduleInPride, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
 			} else {
-				cloneModuleFromExternal(moduleName, prideDirectory, false)
+				cloneModuleFromExternal(moduleName, pride.rootDirectory, false)
 			}
 		}
 
 		// Re-initialize pride
-		PrideInitializer.initializePride(prideDirectory, true)
+		PrideInitializer.initializePride(pride.rootDirectory, true)
 	}
 
 	private File cloneModuleFromCache(String moduleName, File reposDir) {

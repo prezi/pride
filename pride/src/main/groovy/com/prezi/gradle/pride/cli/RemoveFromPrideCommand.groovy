@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli
 
+import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
 import io.airlift.command.Arguments
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 31/03/14.
  */
 @Command(name = "remove", description = "Remove modules from a pride")
-class RemoveFromPrideCommand extends AbstractPrideCommand {
+class RemoveFromPrideCommand extends AbstractExistingPrideCommand {
 	private static final Logger log = LoggerFactory.getLogger(RemoveFromPrideCommand)
 
 	@Option(name = ["-f", "--force"],
@@ -23,15 +24,15 @@ class RemoveFromPrideCommand extends AbstractPrideCommand {
 	private List<String> modules
 
 	@Override
-	void run() {
+	void runInPride(Pride pride) {
 		// Check if anything exists already
 		if (!force) {
-			def missingModules = modules.findAll { module -> !new File(prideDirectory, module).exists() }
+			def missingModules = modules.findAll { module -> !new File(pride.rootDirectory, module).exists() }
 			if (missingModules) {
 				throw new PrideException("These modules are missing: ${missingModules}")
 			}
 			def changedModules = modules.findAll { module ->
-				def moduleDir = new File(prideDirectory, module)
+				def moduleDir = new File(pride.rootDirectory, module)
 
 				def process = executeIn(moduleDir, ["git", "status", "--porcelain"], false)
 				return !process.text.trim().empty
@@ -43,13 +44,13 @@ class RemoveFromPrideCommand extends AbstractPrideCommand {
 
 		// Remove modules
 		modules.each { module ->
-			def moduleDir = new File(prideDirectory, module)
+			def moduleDir = new File(pride.rootDirectory, module)
 			log.info "Removing ${moduleDir}"
 			// Make sure we remove symlinks and directories alike
 			moduleDir.delete() || moduleDir.deleteDir()
 		}
 
 		// Re-initialize pride
-		PrideInitializer.initializePride(prideDirectory, true)
+		PrideInitializer.initializePride(pride.rootDirectory, true)
 	}
 }

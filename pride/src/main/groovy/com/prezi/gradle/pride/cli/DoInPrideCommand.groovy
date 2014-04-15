@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 10/04/14.
  */
 @Command(name = "do", description = "Execute a command in all modules, or a subset of the modules in a pride")
-class DoInPrideCommand extends AbstractPrideCommand {
+class DoInPrideCommand extends AbstractExistingPrideCommand {
 	private static final Logger log = LoggerFactory.getLogger(DoInPrideCommand)
 
 	@Option(name = ["-I", "--include"],
@@ -28,8 +28,7 @@ class DoInPrideCommand extends AbstractPrideCommand {
 	private List<String> commandLine
 
 	@Override
-	void run() {
-		Pride pride = new Pride(prideDirectory)
+	void runInPride(Pride pride) {
 		def modules = (inlcudeRepos ? inlcudeRepos : pride.modules).sort { it.name }.findAll { includeRepo ->
 			return null == excludeRepos.find { excludeRepo ->
 				includeRepo.absoluteFile.equals(excludeRepo.absoluteFile)
