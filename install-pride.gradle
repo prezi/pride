@@ -43,19 +43,12 @@ task copy(type: Copy) {
 
 task setup {
 	dependsOn copy
-	def REPO_BASE_URL = "repo.base.url"
 	def REPO_CACHE_ALWAYS = "repo.cache.always"
 
 	outputs.file configFile
 	def config = new Properties()
 	if (configFile.exists()) {
 		configFile.withReader { config.load(it) }
-	}
-	def changed = false
-	def repoBaseUrl = config.getProperty(REPO_BASE_URL)
-	if (repoBaseUrl == null) {
-		config.setProperty(REPO_BASE_URL, "git@github.com:prezi/")
-		changed = true
 	}
 	def repoCacheAlways = config.getProperty(REPO_CACHE_ALWAYS)
 	if (repoCacheAlways == null) {
