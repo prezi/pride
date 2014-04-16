@@ -126,12 +126,47 @@ apply plugin: "pride"
 
 TBD: Where to get the plugin from, and which version to use?
 
+**Note:** craft your modules so that they are buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*). It's not hard at all.
+
+#### Using `moduleDependencies { ... }`
+
+The Pride plugin adds the concept of dynamically resolvable dependencies to Gradle. What it means is that a dependency can be resolved to either a local project if it is present in the pride (`project(path: "...")`), or to an external dependency (`group: "...", name: "...", version: "..."`).
+
+Because Gradle does not have this functionality built-in, you cannot use `dependencies { ... }` to declare inter-module dependencies. Instead you will have to use a similar concept introduced by the Pride plugin: `moduleDependencies { ... }`.
+
+You declare a module dependency like this:
+
+```groovy
+moduleDependencies {
+	module group: "com.example", name: "example", version: "1.+"
+}
+```
+
+If your pride contains the `com.example:example` project, the Pride plugin will convert this dependency into:
+
+```groovy
+dependencies {
+	modules project(path: ":com.example:exampe")
+}
+```
+
+If the `com.example:example` project is not part of the current pride (or if you are building this project outside of a pride), the dependency will be converted like this:
+
+```groovy
+dependencies {
+	modules group: "com.example", name: "example", version: "1.+"
+}
+```
+
+**Note:** You can still declare dependencies via the `dependencies { ... }` block, but they will not be resolved to project dependencies, even if the corresponding project is part of the pride.
+
+#### Relative project references
+
+If you want your project to work in a pride as well as in stand-alone mode, you cannot use `project(":some-other-subproject")` and `project(path: ":some-other-subproject")` in your builds to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: ":some-other-subproject")`. These methods are also provided by the `pride` plugin. These will be resolved properly both in stand-alone and pride-mode.
+
+
 ## Limitations and caveats
 
-* Make sure you craft your modules so that they remain buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*).
-* Module dependencies can only be resolved properly to local projects available in the pride if they are specified via the `moduleDependencies { ... }` block (provided by the `pride` plugin) instead of `dependencies { ... }`. If you put them in `dependencies { ... }`, they will always come from Artifactory.
-* Multi-project Gradle builds cannot use `project(":some-other-subproject")` and `project(path: "...")` to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: "...")`. These methods are also provided by the `pride` plugin. These will be resolved properly both in stand-alone and pride-mode.
-* Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the pride, or the newest version from Artifactory.
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
 
