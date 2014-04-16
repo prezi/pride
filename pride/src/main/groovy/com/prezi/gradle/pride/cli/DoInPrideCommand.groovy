@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 /**
  * Created by lptr on 10/04/14.
  */
-@Command(name = "do", description = "Execute a command in all modules, or a subset of the modules in a pride")
+@Command(name = "do", description = "Execute a command on a set of the modules")
 class DoInPrideCommand extends AbstractExistingPrideCommand {
 	private static final Logger log = LoggerFactory.getLogger(DoInPrideCommand)
 
