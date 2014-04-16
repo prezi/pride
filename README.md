@@ -52,7 +52,7 @@ Note: On Windows you will need to add `pride/build/install/pride/bin` to the `PA
 Check if everything works via:
 
     $ pride version
-    Pride version 0.1-27-ge342f73
+    Pride version 0.2
 
 ## Usage
 
