@@ -90,6 +90,14 @@ apply plugin: "pride"
 
 TBD: Where to get the plugin from, and which version to use?
 
+## Limitations and caveats
+
+* Module dependencies can only be resolved properly to local projects available in the pride if they are specified via the `moduleDependencies { ... }` block (provided by the `pride` plugin) instead of `dependencies { ... }`. If you put them in `dependencies { ... }`, they will always come from Artifactory.
+* Multi-project Gradle builds cannot use `project(":some-other-subproject")` and `project(path: "...")` to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: "...")`. These methods are also provided by the `pride` plugin. These will be resolved properly both in stand-alone and pride-mode.
+* Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the pride, or the newest version from Artifactory.
+* Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
+* Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
+
 ## Repo caching
 
 To quickly create (and discard) prides, Git repos of modules are cached locally. Here's what Pride does when you `add` a module with cache enabled:
@@ -104,19 +112,15 @@ You can disable caching on a per-repo basis by using `pride add --no-repo-cache 
 
     repo.cache.always=false
 
-## Limitations and caveats
-
-* Module dependencies can only be resolved properly to local projects available in the pride if they are specified via the `moduleDependencies { ... }` block (provided by the `pride` plugin) instead of `dependencies { ... }`. If you put them in `dependencies { ... }`, they will always come from Artifactory.
-* Multi-project Gradle builds cannot use `project(":some-other-subproject")` and `project(path: "...")` to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: "...")`. These methods are also provided by the `pride` plugin. These will be resolved properly both in stand-alone and pride-mode.
-* Do not use `gradle.properties` to store version numbers. It should not be needed, as in `moduleDependencies { ... }` you can specify the major version to depend on, and Gradle will always get you either a local project from the pride, or the newest version from Artifactory.
-* Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
-* Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
-
 ## Why the name?
 
 Working with a large modular application is like herding cats. Dangerous cats. Like a pride of lions.
 
 ![](http://i62.tinypic.com/2hs3g4o.jpg)
+
+## License
+
+Pride is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
 ## Software used
 
