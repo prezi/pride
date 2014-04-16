@@ -72,7 +72,7 @@ To add modules by cloning them from GitHub use:
 
     $ pride add <repo-name>
 
-Where `<repo-name>` is the name of the Git repository under `https://github.com/prezi/`.
+Where `<repo-name>` is the name of the Git repository under the base repo URL, such as `git@github.com:prezi`.
 
 ### The `pride` plugin
 
