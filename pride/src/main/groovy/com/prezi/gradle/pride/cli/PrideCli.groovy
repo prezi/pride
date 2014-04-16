@@ -24,6 +24,7 @@ public class PrideCli {
 					DoInPrideCommand,
 					InitPrideCommand,
 					RemoveFromPrideCommand,
+					RmCommandAlias,
 					VersionCommand,
 					Help)
 

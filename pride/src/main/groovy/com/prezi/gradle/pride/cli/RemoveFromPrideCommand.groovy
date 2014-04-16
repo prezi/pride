@@ -54,3 +54,12 @@ class RemoveFromPrideCommand extends AbstractExistingPrideCommand {
 		PrideInitializer.initializePride(pride.rootDirectory, true)
 	}
 }
+
+/**
+ * Created by lptr on 16/04/14.
+ */
+@Command(name = "rm",
+		hidden = true,
+		description = "Remove modules from a pride")
+class RmCommandAlias extends RemoveFromPrideCommand {
+}
