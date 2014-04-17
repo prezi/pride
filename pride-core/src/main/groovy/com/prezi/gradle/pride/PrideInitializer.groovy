@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride
 
+import com.prezi.gradle.pride.internal.LoggerOutputStream
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.model.gradle.GradleBuild
 import org.slf4j.Logger
@@ -58,7 +59,12 @@ class PrideInitializer {
 					def relativePath = prideDirectory.toURI().relativize(moduleDirectory.toURI()).toString()
 
 					// Load the model for the build
-					GradleBuild build = connection.getModel(GradleBuild)
+					def builder = connection.model(GradleBuild)
+					// Redirect output to loggers
+					// Won't work until http://issues.gradle.org/browse/GRADLE-2687
+					builder.standardError = new LoggerOutputStream({ log.error("{}", it) })
+					builder.standardOutput = new LoggerOutputStream({ log.info("{}", it) })
+					GradleBuild build = builder.get()
 
 					// Merge settings
 					settingsFile << "\n// Settings from project in directory /${relativePath}\n\n"
