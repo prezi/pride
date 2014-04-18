@@ -24,7 +24,7 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 
 	@Option(name = ["-B", "--repo-base-url"],
 			title = "url",
-			description = "Base URL for Git repositories")
+			description = "Base URL for module repositories")
 	private String explicitRepoBaseUrl
 
 	@Option(name = ["-c", "--use-repo-cache"],
@@ -40,7 +40,7 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 			description = "Local repo cache location")
 	private File explicitRepoCachePath
 
-	@Arguments(required = true, description = "Modules to add to the pride")
+	@Arguments(required = true, description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
 	private List<String> modules
 
 	@Override
@@ -85,8 +85,8 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 	private String getRepoBaseUrl() {
 		String repoBaseUrl = explicitRepoBaseUrl ?: configuration.repoBaseUrl
 		if (repoBaseUrl == null) {
-			throw new PrideException("Base URL for Git repos is not set. Either specify via --base-url, " +
-					"or set it in the global configuration -- see pride help config.")
+			throw new PrideException("You have specified a module name, but base URL for Git repos is not set. " +
+					"Either use a full repository URL, specify the base URL via --base-url, or set it in the global configuration -- see pride help config.")
 		}
 		if (!repoBaseUrl.endsWith("/")) {
 			repoBaseUrl += "/"
