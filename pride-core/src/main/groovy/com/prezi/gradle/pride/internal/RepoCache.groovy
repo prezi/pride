@@ -23,11 +23,13 @@ class RepoCache {
 	}
 
 	public void cloneRepository(String repositoryUrl, File targetDirectory) {
-		def moduleInCacheName = cacheMapping.getProperty(repositoryUrl)
+		def normalizedUrl = normalize(repositoryUrl)
+
+		def moduleInCacheName = cacheMapping.getProperty(normalizedUrl)
 		def newName = moduleInCacheName == null
 
 		if (newName) {
-			moduleInCacheName = sanitize(repositoryUrl)
+			moduleInCacheName = sanitize(normalizedUrl)
 		}
 
 		def moduleInCache = new File(cacheDirectory, moduleInCacheName)
@@ -43,9 +45,13 @@ class RepoCache {
 		GitUtils.setOrigin(repositoryUrl, targetDirectory)
 
 		if (newName) {
-			cacheMapping.put(repositoryUrl, moduleInCacheName)
+			cacheMapping.put(normalizedUrl, moduleInCacheName)
 			saveCacheMapping()
 		}
+	}
+
+	private static String normalize(String repositoryUrl) {
+		return repositoryUrl.replaceAll(/(\.git)|\/$/, "")
 	}
 
 	private static String sanitize(String repositoryUrl) {
@@ -53,7 +59,8 @@ class RepoCache {
 		new Random().nextBytes(randomBytes)
 		byte[] bytes = [repositoryUrl.bytes, randomBytes].flatten()
 		def hash = MessageDigest.getInstance("SHA1").digest(bytes).encodeHex().toString().substring(0, 7)
-		return repositoryUrl.replaceAll(/[^a-zA-Z0-9]+/, "-") + "-" + hash
+		return repositoryUrl
+				.replaceAll(/[^a-zA-Z0-9]+/, "-") + "-" + hash
 	}
 
 	private static Properties loadCacheMapping(File mappingFile) {

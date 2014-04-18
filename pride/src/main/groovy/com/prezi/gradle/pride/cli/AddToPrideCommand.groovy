@@ -8,12 +8,16 @@ import com.prezi.gradle.pride.internal.RepoCache
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
 class AddToPrideCommand extends AbstractExistingPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(AddToPrideCommand)
+
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the pride")
 	private boolean overwrite
@@ -52,8 +56,10 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 		}
 
 		// Clone repositories
-		modules.each { moduleName ->
-			def repoUrl = repoBaseUrl + moduleName
+		modules.each { module ->
+			def (moduleName, repoUrl) = resolve(module)
+			log.info "Adding ${moduleName} from ${repoUrl}"
+
 			def moduleInPride = new File(prideDirectory, moduleName)
 			if (useRepoCache) {
 				def cache = new RepoCache(repoCachePath)
@@ -65,6 +71,15 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 
 		// Re-initialize pride
 		PrideInitializer.initializePride(pride.rootDirectory, true)
+	}
+
+	private String[] resolve(String module) {
+		def m = module =~ /^(?:git@|(?:https?):\\/+).*[:\\/]([-\._\w]+?)(?:\.git)?\\/?$/
+		if (m) {
+			return [m[0][1], module]
+		} else {
+			return [module, repoBaseUrl + module]
+		}
 	}
 
 	private String getRepoBaseUrl() {
