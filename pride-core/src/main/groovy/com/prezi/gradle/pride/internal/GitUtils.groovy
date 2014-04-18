@@ -9,17 +9,20 @@ import org.slf4j.LoggerFactory
 class GitUtils {
 	private static final Logger log = LoggerFactory.getLogger(GitUtils)
 
-	public static File cloneRepository(String repository, File targetDirectory, boolean mirror) {
+	public static void cloneRepository(String repositoryUrl, File targetDirectory, boolean mirror = false) {
 		targetDirectory.parentFile.mkdirs()
 		// Make sure we delete symlinks and directories alike
 		targetDirectory.delete() || targetDirectory.deleteDir()
 
-		log.info "Cloning ${repository} into ${targetDirectory}"
-		def commandLine = ["git", "clone", repository, targetDirectory]
+		log.debug "Cloning ${repositoryUrl} into ${targetDirectory}"
+		def commandLine = ["git", "clone", repositoryUrl, targetDirectory]
 		if (mirror) {
 			commandLine.add "--mirror"
 		}
 		ProcessUtils.executeIn(null, commandLine)
-		return targetDirectory
+	}
+
+	public static void setOrigin(String repositoryUrl, File targetDirectory) {
+		ProcessUtils.executeIn(targetDirectory, ["git", "remote", "set-url", "origin", repositoryUrl])
 	}
 }

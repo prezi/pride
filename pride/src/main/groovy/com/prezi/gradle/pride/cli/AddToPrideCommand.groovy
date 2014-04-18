@@ -4,20 +4,16 @@ import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
 import com.prezi.gradle.pride.internal.GitUtils
-import com.prezi.gradle.pride.internal.ProcessUtils
+import com.prezi.gradle.pride.internal.RepoCache
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
 class AddToPrideCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(AddToPrideCommand)
-
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the pride")
 	private boolean overwrite
@@ -57,37 +53,18 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 
 		// Clone repositories
 		modules.each { moduleName ->
+			def repoUrl = repoBaseUrl + moduleName
+			def moduleInPride = new File(prideDirectory, moduleName)
 			if (useRepoCache) {
-				def moduleInCache = new File(repoCachePath, moduleName)
-				if (!moduleInCache.exists()) {
-					cloneModuleFromExternal(moduleName, repoCachePath, true)
-				} else {
-					log.info "Updating cached module in ${moduleInCache}"
-					ProcessUtils.executeIn(moduleInCache, ["git", "fetch", "--all"])
-				}
-				def moduleInPride = cloneModuleFromCache(moduleName, pride.rootDirectory)
-				ProcessUtils.executeIn(moduleInPride, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
+				def cache = new RepoCache(repoCachePath)
+				cache.cloneRepository(repoUrl, moduleInPride)
 			} else {
-				cloneModuleFromExternal(moduleName, pride.rootDirectory, false)
+				GitUtils.cloneRepository(repoUrl, moduleInPride)
 			}
 		}
 
 		// Re-initialize pride
 		PrideInitializer.initializePride(pride.rootDirectory, true)
-	}
-
-	private File cloneModuleFromCache(String moduleName, File reposDir) {
-		def repository = new File(repoCachePath, moduleName).absolutePath
-		GitUtils.cloneRepository(repository, new File(reposDir, moduleName), false)
-	}
-
-	private File cloneModuleFromExternal(String moduleName, File reposDir, boolean mirror) {
-		def repository = getModuleRepoUrl(moduleName)
-		GitUtils.cloneRepository(repository, new File(reposDir, moduleName), mirror)
-	}
-
-	private String getModuleRepoUrl(String moduleName) {
-		return repoBaseUrl + moduleName + ".git"
 	}
 
 	private String getRepoBaseUrl() {
