@@ -86,7 +86,7 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 		String repoBaseUrl = explicitRepoBaseUrl ?: configuration.repoBaseUrl
 		if (repoBaseUrl == null) {
 			throw new PrideException("You have specified a module name, but base URL for Git repos is not set. " +
-					"Either use a full repository URL, specify the base URL via --base-url, or set it in the global configuration -- see pride help config.")
+					"Either use a full repository URL, specify the base URL via --repo-base-url, or set it in the global configuration -- see pride help config.")
 		}
 		if (!repoBaseUrl.endsWith("/")) {
 			repoBaseUrl += "/"
