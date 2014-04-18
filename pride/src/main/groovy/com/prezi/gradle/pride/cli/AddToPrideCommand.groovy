@@ -3,6 +3,8 @@ package com.prezi.gradle.pride.cli
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
+import com.prezi.gradle.pride.internal.GitUtils
+import com.prezi.gradle.pride.internal.ProcessUtils
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -61,10 +63,10 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 					cloneModuleFromExternal(moduleName, repoCachePath, true)
 				} else {
 					log.info "Updating cached module in ${moduleInCache}"
-					executeIn(moduleInCache, ["git", "fetch", "--all"])
+					ProcessUtils.executeIn(moduleInCache, ["git", "fetch", "--all"])
 				}
 				def moduleInPride = cloneModuleFromCache(moduleName, pride.rootDirectory)
-				executeIn(moduleInPride, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
+				ProcessUtils.executeIn(moduleInPride, ["git", "remote", "set-url", "origin", getModuleRepoUrl(moduleName)])
 			} else {
 				cloneModuleFromExternal(moduleName, pride.rootDirectory, false)
 			}
@@ -76,31 +78,16 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 
 	private File cloneModuleFromCache(String moduleName, File reposDir) {
 		def repository = new File(repoCachePath, moduleName).absolutePath
-		cloneRepository(repository, moduleName, reposDir, false)
+		GitUtils.cloneRepository(repository, new File(reposDir, moduleName), false)
 	}
 
 	private File cloneModuleFromExternal(String moduleName, File reposDir, boolean mirror) {
 		def repository = getModuleRepoUrl(moduleName)
-		cloneRepository(repository, moduleName, reposDir, mirror)
+		GitUtils.cloneRepository(repository, new File(reposDir, moduleName), mirror)
 	}
 
 	private String getModuleRepoUrl(String moduleName) {
 		return repoBaseUrl + moduleName + ".git"
-	}
-
-	private static File cloneRepository(String repository, String moduleName, File reposDir, boolean mirror) {
-		def targetDirectory = new File(reposDir, moduleName)
-		reposDir.mkdirs()
-		// Make sure we delete symlinks and directories alike
-		targetDirectory.delete() || targetDirectory.deleteDir()
-
-		log.info "Cloning ${repository} into ${moduleName}"
-		def commandLine = ["git", "clone", repository, targetDirectory]
-		if (mirror) {
-			commandLine.add "--mirror"
-		}
-		executeIn(null, commandLine)
-		return targetDirectory
 	}
 
 	private String getRepoBaseUrl() {

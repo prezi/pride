@@ -3,6 +3,7 @@ package com.prezi.gradle.pride.cli
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
+import com.prezi.gradle.pride.internal.ProcessUtils
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -34,7 +35,7 @@ class RemoveFromPrideCommand extends AbstractExistingPrideCommand {
 			def changedModules = modules.findAll { module ->
 				def moduleDir = new File(pride.rootDirectory, module)
 
-				def process = executeIn(moduleDir, ["git", "status", "--porcelain"], false)
+				def process = ProcessUtils.executeIn(moduleDir, ["git", "status", "--porcelain"], false)
 				return !process.text.trim().empty
 			}
 			if (changedModules) {
