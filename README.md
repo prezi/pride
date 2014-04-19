@@ -169,7 +169,7 @@ Craft your modules so that they are buildable on their own (*stand-alone mode*) 
 
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
-* Do not rely on `project.rootDir` or `rootProject` either. These properties change depending on whether your project is part of a pride or not.
+* Do not rely on `project.rootDir` or `rootProject` either. These properties change depending on whether your project is part of a pride or not. Instead always refer to the parent project with `relativeProject(":")` and take the `projectDir` from that.
 
 ## Repo caching
 
