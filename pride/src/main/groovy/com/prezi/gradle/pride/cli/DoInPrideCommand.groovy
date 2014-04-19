@@ -25,6 +25,10 @@ class DoInPrideCommand extends AbstractExistingPrideCommand {
 			description = "Do not execute command on repo (can be specified multiple times)")
 	private List<File> excludeRepos
 
+	@Option(name = ["-b", "--bare"],
+			description = "Only print the result of the executed commands")
+	private boolean explicitBare
+
 	@Arguments(required = true, description = "The command to execute")
 	private List<String> commandLine
 
@@ -37,7 +41,9 @@ class DoInPrideCommand extends AbstractExistingPrideCommand {
 		}
 
 		modules.each { moduleDirectory ->
-			log.info "\n${moduleDirectory} \$ ${commandLine.join(" ")}"
+			if (!explicitBare) {
+				log.info "\n${moduleDirectory} \$ ${commandLine.join(" ")}"
+			}
 			ProcessUtils.executeIn(moduleDirectory, commandLine)
 		}
 	}
