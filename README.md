@@ -126,8 +126,6 @@ apply plugin: "pride"
 
 TBD: Where to get the plugin from, and which version to use?
 
-**Note:** craft your modules so that they are buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*). It's not hard at all.
-
 #### Using `moduleDependencies { ... }`
 
 The Pride plugin adds the concept of dynamically resolvable dependencies to Gradle. What it means is that a dependency can be resolved to either a local project if it is present in the pride (`project(path: "...")`), or to an external dependency (`group: "...", name: "...", version: "..."`).
@@ -167,8 +165,11 @@ If you want your project to work in a pride as well as in stand-alone mode, you 
 
 ## Limitations and caveats
 
+Craft your modules so that they are buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*). It's not hard at all.
+
 * Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
+* Do not rely on `project.rootDir` or `rootProject` either. These properties change depending on whether your project is part of a pride or not.
 
 ## Repo caching
 
