@@ -1,7 +1,7 @@
 package com.prezi.gradle.pride.cli
 
 import com.prezi.gradle.pride.Pride
-import com.prezi.gradle.pride.internal.ProcessUtils
+import com.prezi.gradle.pride.ProcessUtils
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option

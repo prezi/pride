@@ -1,6 +1,5 @@
-package com.prezi.gradle.pride.internal
+package com.prezi.gradle.pride
 
-import com.prezi.gradle.pride.PrideException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
