@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory
 class Configuration {
 	private static final Logger log = LoggerFactory.getLogger(Configuration)
 
-	private static final REPO_BASE_URL = "repo.base.url"
-	private static final REPO_CACHE_PATH = "repo.cache.path"
-	private static final REPO_CACHE_ALWAYS = "repo.cache.always"
+	public static final REPO_BASE_URL = "repo.base.url"
+	public static final REPO_CACHE_PATH = "repo.cache.path"
+	public static final REPO_CACHE_ALWAYS = "repo.cache.always"
 
 	private final Properties configuration
 	private final File configFile
