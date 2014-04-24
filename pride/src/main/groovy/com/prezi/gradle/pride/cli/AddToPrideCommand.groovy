@@ -3,8 +3,8 @@ package com.prezi.gradle.pride.cli
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
-import com.prezi.gradle.pride.internal.GitUtils
-import com.prezi.gradle.pride.internal.RepoCache
+import com.prezi.gradle.pride.vcs.GitVcsSupport
+import com.prezi.gradle.pride.vcs.RepoCache
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -45,14 +45,21 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 
 	@Override
 	void runInPride(Pride pride) {
-		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.repoCacheAlways)
-
 		// Check if anything exists already
 		if (!overwrite) {
 			def existingRepos = modules.findAll { new File(pride.rootDirectory, it).exists() }
 			if (existingRepos) {
 				throw new PrideException("These modules already exist in pride: ${existingRepos.join(", ")}")
 			}
+		}
+
+		// Hard code Git for now
+		def vcsSupport = new GitVcsSupport()
+
+		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.repoCacheAlways)
+		if (useRepoCache && !vcsSupport.mirroringSupported) {
+			log.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.")
+			useRepoCache = false
 		}
 
 		// Clone repositories
@@ -63,9 +70,9 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 			def moduleInPride = new File(prideDirectory, moduleName)
 			if (useRepoCache) {
 				def cache = new RepoCache(repoCachePath)
-				cache.cloneRepository(repoUrl, moduleInPride)
+				cache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride)
 			} else {
-				GitUtils.cloneRepository(repoUrl, moduleInPride)
+				vcsSupport.checkout(repoUrl, moduleInPride, false)
 			}
 		}
 

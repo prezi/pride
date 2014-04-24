@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.internal
+package com.prezi.gradle.pride.vcs
 
 import com.prezi.gradle.pride.ProcessUtils
 import org.slf4j.Logger
@@ -23,8 +23,8 @@ class RepoCache {
 		this.cacheMapping = loadCacheMapping(mappingFile)
 	}
 
-	public void cloneRepository(String repositoryUrl, File targetDirectory) {
-		def normalizedUrl = normalize(repositoryUrl)
+	public void checkoutThroughCache(VcsSupport vcsSupport, String repositoryUrl, File targetDirectory) {
+		def normalizedUrl = vcsSupport.normalizeRepositoryUrl(repositoryUrl)
 
 		def moduleInCacheName = cacheMapping.getProperty(normalizedUrl)
 		def newName = moduleInCacheName == null
@@ -36,23 +36,19 @@ class RepoCache {
 		def moduleInCache = new File(cacheDirectory, moduleInCacheName)
 		if (!moduleInCache.exists()) {
 			log.info "Caching repository ${repositoryUrl} as ${moduleInCacheName}"
-			GitUtils.cloneRepository(repositoryUrl, moduleInCache, true)
+			vcsSupport.checkout(repositoryUrl, moduleInCache, true)
 		} else {
 			log.info "Updating cached repository in ${moduleInCacheName}"
-			ProcessUtils.executeIn(moduleInCache, ["git", "fetch", "--all"])
+			vcsSupport.update(repositoryUrl, moduleInCache, true)
 		}
 
-		GitUtils.cloneRepository(moduleInCache.absolutePath, targetDirectory, false)
-		GitUtils.setOrigin(repositoryUrl, targetDirectory)
+		vcsSupport.checkout(moduleInCache.absolutePath, targetDirectory, false)
+		vcsSupport.activate(repositoryUrl, targetDirectory)
 
 		if (newName) {
 			cacheMapping.put(normalizedUrl, moduleInCacheName)
 			saveCacheMapping()
 		}
-	}
-
-	private static String normalize(String repositoryUrl) {
-		return repositoryUrl.replaceAll(/(\.git)|\/$/, "")
 	}
 
 	private static String sanitize(String repositoryUrl) {
