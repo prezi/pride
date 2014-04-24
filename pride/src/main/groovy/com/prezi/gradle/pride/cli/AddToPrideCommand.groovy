@@ -3,9 +3,9 @@ package com.prezi.gradle.pride.cli
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
-import com.prezi.gradle.pride.vcs.GitVcsSupport
 import com.prezi.gradle.pride.vcs.RepoCache
 import com.prezi.gradle.pride.vcs.VcsManager
+import com.prezi.gradle.pride.vcs.VcsSupport
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -41,6 +41,11 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 			description = "Local repo cache location")
 	private File explicitRepoCachePath
 
+	@Option(name = ["-T", "--repo-type"],
+			title = "type",
+			description = "Repository type")
+	private String explicitRepoType
+
 	@Arguments(required = true,
 			description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
 	private List<String> modules
@@ -55,9 +60,10 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 			}
 		}
 
-		// Hard code Git for now
-		def vcsSupport = new VcsManager().getVcsSupport("git")
+		// Get some support for our VCS
+		def vcsSupport = getVcsSupport()
 
+		// Determine if we can use a repo cache
 		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.repoCacheAlways)
 		if (useRepoCache && !vcsSupport.mirroringSupported) {
 			log.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.")
@@ -109,5 +115,21 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 			throw invalidOptionException("Repository cache path is not set", "--repo-cache-path", Configuration.REPO_CACHE_PATH)
 		}
 		return path
+	}
+
+	private VcsSupport getVcsSupport() {
+		def repoType = explicitRepoType ?: configuration.repoTypeDefault
+		if (!repoType) {
+			throw invalidOptionException("Repository type is not set", "--repo-type", Configuration.REPO_TYPE_DEFAULT)
+		}
+		return getVcsManager().getVcsSupport(repoType)
+	}
+
+	private VcsManager vcsManager
+	private VcsManager getVcsManager() {
+		if (vcsManager == null) {
+			vcsManager = new VcsManager()
+		}
+		return vcsManager
 	}
 }
