@@ -5,6 +5,7 @@ import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
 import com.prezi.gradle.pride.vcs.GitVcsSupport
 import com.prezi.gradle.pride.vcs.RepoCache
+import com.prezi.gradle.pride.vcs.VcsManager
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -54,7 +55,7 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 		}
 
 		// Hard code Git for now
-		def vcsSupport = new GitVcsSupport()
+		def vcsSupport = new VcsManager().getVcsSupport("git")
 
 		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.repoCacheAlways)
 		if (useRepoCache && !vcsSupport.mirroringSupported) {
