@@ -41,7 +41,8 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 			description = "Local repo cache location")
 	private File explicitRepoCachePath
 
-	@Arguments(required = true, description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
+	@Arguments(required = true,
+			description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
 	private List<String> modules
 
 	@Override
@@ -93,8 +94,8 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 	private String getRepoBaseUrl() {
 		String repoBaseUrl = explicitRepoBaseUrl ?: configuration.repoBaseUrl
 		if (repoBaseUrl == null) {
-			throw new PrideException("You have specified a module name, but base URL for Git repos is not set. " +
-					"Either use a full repository URL, specify the base URL via --repo-base-url, or set it in the global configuration -- see pride help config.")
+			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set",
+					"a full repository URL, specify the base URL via --repo-base-url", Configuration.REPO_BASE_URL)
 		}
 		if (!repoBaseUrl.endsWith("/")) {
 			repoBaseUrl += "/"
@@ -105,7 +106,7 @@ class AddToPrideCommand extends AbstractExistingPrideCommand {
 	private File getRepoCachePath() {
 		def path = explicitRepoCachePath ?: configuration.repoCachePath
 		if (!path) {
-			throw new PrideException("Repo cache path is not set. Either use --repo-cache-path, or set it in ~/.prideconfig.")
+			throw invalidOptionException("Repository cache path is not set", "--repo-cache-path", Configuration.REPO_CACHE_PATH)
 		}
 		return path
 	}
