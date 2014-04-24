@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli
 
+import com.prezi.gradle.pride.PrideException
 import io.airlift.command.Option
 
 /**
@@ -12,5 +13,9 @@ abstract class AbstractPrideCommand extends AbstractCommand {
 
 	protected File getPrideDirectory() {
 		explicitPrideDirectory ?: new File(System.getProperty("user.dir"))
+	}
+
+	protected static PrideException invalidOptionException(String message, String option, String configuration) {
+		return new PrideException("${message}. Either use ${option}, or set it in the global configuration (~/.prideconfig) as \"${configuration}\". See 'pride help config' for more information.")
 	}
 }
