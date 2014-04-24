@@ -17,12 +17,12 @@ final class VcsManager {
 	public VcsSupport getVcsSupport(String type) {
 		def vcsSupport = vcss.get(type)
 		if (vcsSupport == null) {
-			throw new PrideException("No support for VCS type ${type}")
+			throw new PrideException("No support for VCS type \"${type}\"")
 		}
 		return vcsSupport
 	}
 
-	public Set<String> getSupportedType() {
+	public Set<String> getSupportedTypes() {
 		return vcss.keySet().asImmutable()
 	}
 }
