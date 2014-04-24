@@ -1,6 +1,7 @@
-package com.prezi.gradle.pride.vcs
+package com.prezi.gradle.pride.vcs.git
 
 import com.prezi.gradle.pride.ProcessUtils
+import com.prezi.gradle.pride.vcs.VcsSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

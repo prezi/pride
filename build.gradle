@@ -128,12 +128,19 @@ project("pride-core") {
 	}
 }
 
+project("pride-git-support") {
+	dependencies {
+		compile project(path: ":pride-core")
+	}
+}
+
 project("pride") {
 	apply plugin: "application"
 	mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
 
 	dependencies {
 		compile project(path: ":pride-core")
+		compile project(path: ":pride-git-support")
 		compile "io.airlift:airline:0.6"
 		compile "ch.qos.logback:logback-classic:1.1.2"
 	}
