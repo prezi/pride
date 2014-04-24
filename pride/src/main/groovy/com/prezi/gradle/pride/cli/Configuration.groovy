@@ -25,7 +25,7 @@ class Configuration {
 	}
 
 	public String getRepoTypeDefault() {
-		return configuration.getProperty(REPO_TYPE_DEFAULT)
+		return configuration.getProperty(REPO_TYPE_DEFAULT) ?: "git"
 	}
 
 	public void setRepoTypeDefault(String repoTypeDefault) {
