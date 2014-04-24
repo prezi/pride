@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 class Configuration {
 	private static final Logger log = LoggerFactory.getLogger(Configuration)
 
+	public static final REPO_TYPE_DEFAULT = "repo.type.default"
 	public static final REPO_BASE_URL = "repo.base.url"
 	public static final REPO_CACHE_PATH = "repo.cache.path"
 	public static final REPO_CACHE_ALWAYS = "repo.cache.always"
@@ -21,6 +22,15 @@ class Configuration {
 		this.configuration = new Properties()
 		this.configFile = new File("${System.getProperty("user.home")}/.prideconfig")
 		load()
+	}
+
+	public String getRepoTypeDefault() {
+		return configuration.getProperty(REPO_TYPE_DEFAULT)
+	}
+
+	public void setRepoTypeDefault(String repoTypeDefault) {
+		// TODO Check if it's a supported repo type
+		configuration.setProperty(REPO_TYPE_DEFAULT, repoTypeDefault)
 	}
 
 	public String getRepoBaseUrl() {
@@ -53,6 +63,8 @@ class Configuration {
 
 	public String getParameter(String property) {
 		switch (property) {
+			case REPO_TYPE_DEFAULT:
+				return repoTypeDefault
 			case REPO_BASE_URL:
 				return repoBaseUrl
 			case REPO_CACHE_PATH:
@@ -67,6 +79,9 @@ class Configuration {
 	public void setParameter(String property, String value) {
 		log.debug "Setting \"$property\" to \"$value\""
 		switch (property) {
+			case REPO_TYPE_DEFAULT:
+				setRepoTypeDefault(value)
+				break
 			case REPO_BASE_URL:
 				setRepoBaseUrl(value)
 				break
