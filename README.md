@@ -104,11 +104,11 @@ To create a new pride do this in an empty directory:
 
     $ pride init
 
-To add modules by cloning them from GitHub use:
+To add modules by cloning them:
 
-    $ pride add <repo-name>
+    $ pride add <repo>
 
-Where `<repo-name>` is the name of the Git repository under `https://github.com/prezi/`.
+Where `<repo>` is either a full repository URL (like `git@github.com:prezi/pride.git`), or the name of the repository under the `repo.base.url` configuration setting.
 
 ### The `pride` plugin
 
