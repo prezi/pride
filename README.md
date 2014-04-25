@@ -128,8 +128,6 @@ buildscript {
 apply plugin: "pride"
 ```
 
-TBD: Where to get the plugin from, and which version to use?
-
 #### Using `dynamicDependencies { ... }`
 
 The Pride plugin adds the concept of dynamically resolvable dependencies to Gradle. What it means is that a dependency can be resolved to either a local project if it is present in the pride (`project(path: "...")`), or to an external dependency (`group: "...", name: "...", version: "..."`).
