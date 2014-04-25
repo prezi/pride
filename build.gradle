@@ -45,6 +45,7 @@ subprojects { subproject ->
 				pom.project {
 					url "http://prezi.github.io/pride/"
 					name subproject.name
+					description subproject.description
 
 					scm {
 						url "scm:git@github.com:prezi/pride.git"
