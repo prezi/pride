@@ -39,10 +39,10 @@ mkdir quick-fix-for-securty-bug
 cd quick-fix-for-security-bug
 pride init
 
-# Add modules that need fixing (these are resolved from repo.base.url)
+# Add modules that need fixing (these are resolved from repo.base.url, see below)
 pride add network-component backend-api
 
-# Now you do some work and realize you also need another module
+# Now you do some work and realize you also need another module (with an absolute URL)
 pride add https://github.com/myself/myproject
 
 # Once you changed stuff, you probably want to run "check" on all your projects:
@@ -72,7 +72,7 @@ If you are installing Pride for the first time, it's recommended to set the base
 
     $ pride config repo.base.url git@github.com:prezi
 
-So when you execute `pride add some-module`, it will clone `git@github.com/prezi/some-module`.
+So when you execute `pride add some-module`, it will clone `git@github.com:prezi/some-module`.
 
 ### Building from source
 
@@ -90,7 +90,7 @@ Note: On Windows you will need to add `pride/build/install/pride/bin` to the `PA
 Check if everything works via:
 
     $ pride version
-    Pride version 0.2
+    Pride version 0.3
 
 ## Usage
 
