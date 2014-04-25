@@ -1,7 +1,7 @@
 Pride
 =====
 
-Pride is a tool to help you manage local development of large, modular applications built with Gradle. It consists of a command-line tool to manage your prides of modules, and a Gradle plugin to add some extra functionality to the Gradle projects.
+Pride is a tool to help you manage the local development of large, modular applications built with Gradle. It consists of a command-line tool to manage your prides of modules, and a Gradle plugin to add some extra functionality to the Gradle projects.
 
 [![Build Status](https://travis-ci.org/prezi/pride.svg?branch=master)](https://travis-ci.org/prezi/pride)
 
