@@ -126,17 +126,17 @@ apply plugin: "pride"
 
 TBD: Where to get the plugin from, and which version to use?
 
-#### Using `moduleDependencies { ... }`
+#### Using `dynamicDependencies { ... }`
 
 The Pride plugin adds the concept of dynamically resolvable dependencies to Gradle. What it means is that a dependency can be resolved to either a local project if it is present in the pride (`project(path: "...")`), or to an external dependency (`group: "...", name: "...", version: "..."`).
 
-Because Gradle does not have this functionality built-in, you cannot use `dependencies { ... }` to declare inter-module dependencies. Instead you will have to use a similar concept introduced by the Pride plugin: `moduleDependencies { ... }`.
+Because Gradle does not have this functionality built-in, you cannot use `dependencies { ... }` to declare inter-module dependencies. Instead you will have to use a similar concept introduced by the Pride plugin: `dynamicDependencies { ... }`.
 
-You declare a module dependency like this:
+You declare a dependency like this:
 
 ```groovy
-moduleDependencies {
-	module group: "com.example", name: "example", version: "1.+"
+dynamicDependencies {
+	compile group: "com.example", name: "example", version: "1.+"
 }
 ```
 
@@ -144,7 +144,7 @@ If your pride contains the `com.example:example` project, the Pride plugin will 
 
 ```groovy
 dependencies {
-	modules project(path: ":com.example:exampe")
+	compile project(path: ":com.example:exampe")
 }
 ```
 
@@ -152,7 +152,7 @@ If the `com.example:example` project is not part of the current pride (or if you
 
 ```groovy
 dependencies {
-	modules group: "com.example", name: "example", version: "1.+"
+	compile group: "com.example", name: "example", version: "1.+"
 }
 ```
 
