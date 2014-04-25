@@ -39,11 +39,11 @@ mkdir quick-fix-for-securty-bug
 cd quick-fix-for-security-bug
 pride init
 
-# Add modules that need fixing
+# Add modules that need fixing (these are resolved from repo.base.url)
 pride add network-component backend-api
 
 # Now you do some work and realize you also need another module
-pride add backend-impl
+pride add https://github.com/myself/myproject
 
 # Once you changed stuff, you probably want to run "check" on all your projects:
 gradle check
