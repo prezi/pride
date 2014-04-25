@@ -116,8 +116,12 @@ Pride has some additional functionalities to dependency resolution, so you need 
 
 ```groovy
 buildscript {
+    repositories {
+        mavenCentral()
+    }
+
     dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.2"
+        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.4"
     }
 }
 
