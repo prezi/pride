@@ -3,14 +3,7 @@ defaultTasks "install"
 group = "com.prezi.gradle.pride"
 
 repositories {
-	mavenLocal()
-	maven {
-		credentials {
-			username nexusUser
-			password nexusPassword
-		}
-		url "https://artifactory.prezi.com/plugins"
-	}
+	mavenCentral()
 }
 
 configurations.all {
