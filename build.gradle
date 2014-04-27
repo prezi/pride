@@ -43,7 +43,7 @@ subprojects { subproject ->
 		repositories {
 			mavenDeployer {
 				pom.project {
-					url "http://prezi.github.io/pride/"
+					url "http://github.com/prezi/pride"
 					name subproject.name
 					description subproject.description
 
