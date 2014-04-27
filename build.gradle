@@ -49,7 +49,7 @@ subprojects { subproject ->
 
 					scm {
 						url "scm:git@github.com:prezi/pride.git"
-						connection "scm:git@github.com:prezi/prezi.git"
+						connection "scm:git@github.com:prezi/pride.git"
 						developerConnection "scm:git@github.com:prezi/pride.git"
 					}
 
