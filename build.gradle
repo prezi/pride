@@ -115,6 +115,10 @@ subprojects { subproject ->
 		classifier = "sources"
 	}
 
+	jar {
+		from rootProject.file("LICENSE.txt")
+	}
+
 	artifacts {
 		archives jar
 		archives groovydocJar
@@ -154,6 +158,9 @@ project("pride") {
 
 	configure(applicationDistribution) {
 		from(rootProject.file("README.md")) {
+			into "/"
+		}
+		from(rootProject.file("LICENSE.txt")) {
 			into "/"
 		}
 	}
