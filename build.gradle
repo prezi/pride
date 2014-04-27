@@ -1,4 +1,9 @@
-def gitVersion = [ "git", "describe", "--match", "[0-9]*", "--dirty"].execute().text.trim()
+String gitVersion
+if (hasProperty("release")) {
+	gitVersion = [ "git", "describe", "--match", "[0-9]*", "--dirty"].execute().text.trim()
+} else {
+	gitVersion = [ "git", "describe", "--match", "[0-9]*", "--abbrev=0"].execute().text.trim() + "-SNAPSHOT"
+}
 
 task version {
 	doLast {
@@ -71,6 +76,11 @@ subprojects { subproject ->
 
 				if (sonatype) {
 					repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+						def user = project.getProperty("sonatypeUsername")
+						def password = project.getProperty("sonatypePassword")
+						authentication(userName: user, password: password)
+					}
+					snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
 						def user = project.getProperty("sonatypeUsername")
 						def password = project.getProperty("sonatypePassword")
 						authentication(userName: user, password: password)
