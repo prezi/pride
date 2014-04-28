@@ -11,6 +11,7 @@ import org.gradle.api.artifacts.ModuleDependency
  */
 class DynamicDependenciesExtension {
 	private final Project project
+	final LinkedHashMap<Configuration, List<Dependency>> dependencies = [:]
 
 	public DynamicDependenciesExtension(Project project) {
 		this.project = project
@@ -37,10 +38,6 @@ class DynamicDependenciesExtension {
 		}
 	}
 
-	def relativeProject(Map<String, ?> notation) {
-		return project.dependencies.project(PrideConvention.resolveProjectPath(project, notation))
-	}
-
 	private Dependency doAdd(Configuration configuration, Object dependencyNotation, Closure closure) {
 		// When not set, group and version should come from the current project
 		if (dependencyNotation instanceof Map) {
@@ -55,19 +52,12 @@ class DynamicDependenciesExtension {
 
 		// Let the DependencyHandler parse our dependency definition
 		def dependency = project.dependencies.create(dependencyNotation, closure)
-
-		Dependency resolvedDependency = dependency
-		if (dependency instanceof ExternalDependency) {
-			// See if we can resolve this external dependency to a project dependency
-			def project = project.rootProject.allprojects.find { it.group == dependency.group && it.name == dependency.name }
-			if (project) {
-				String targetConfiguration = dependency instanceof ModuleDependency ? dependency.configuration : null
-				resolvedDependency = project.dependencies.project(path: project.path, configuration: targetConfiguration)
-			}
+		def dependenciesForConfig = dependencies.get(configuration)
+		if (dependenciesForConfig == null) {
+			dependenciesForConfig = []
+			dependencies.put(configuration, dependenciesForConfig)
 		}
-
-		// Add the resolved dependency
-		configuration.dependencies.add(resolvedDependency)
-		return resolvedDependency
+		dependenciesForConfig.add(dependency)
+		return dependency
 	}
 }
