@@ -37,7 +37,6 @@ subprojects { subproject ->
 	}
 
 	dependencies {
-		compile "org.codehaus.groovy:groovy:1.8.6"
 		testCompile "junit:junit:4.11"
 		testCompile("org.spockframework:spock-core:0.7-groovy-1.8") {
 			exclude group: "org.codehaus.groovy"
@@ -138,6 +137,7 @@ subprojects { subproject ->
 
 project("pride-core") {
 	dependencies {
+		compile "org.codehaus.groovy:groovy:1.8.6"
 		compile "org.gradle:gradle-tooling-api:1.11"
 	}
 
@@ -184,7 +184,10 @@ project("pride") {
 
 project("gradle-pride-plugin") {
 	dependencies {
+		compile localGroovy()
 		compile gradleApi()
-		compile project(":pride-core")
+		compile project(":pride-core"), {
+			exclude group: "org.codehaus.groovy"
+		}
 	}
 }
