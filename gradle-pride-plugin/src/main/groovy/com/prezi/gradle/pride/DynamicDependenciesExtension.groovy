@@ -37,6 +37,10 @@ class DynamicDependenciesExtension {
 		}
 	}
 
+	def relativeProject(Map<String, ?> notation) {
+		return project.dependencies.project(PrideConvention.resolveProjectPath(project, notation))
+	}
+
 	private Dependency doAdd(Configuration configuration, Object dependencyNotation, Closure closure) {
 		// When not set, group and version should come from the current project
 		if (dependencyNotation instanceof Map) {

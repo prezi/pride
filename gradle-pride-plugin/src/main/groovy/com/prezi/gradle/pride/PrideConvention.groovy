@@ -19,21 +19,25 @@ class PrideConvention {
 
 		// Add relativeProject() method to dependencies { ... } block
 		project.dependencies.metaClass.relativeProject = { Map<String, ?> notation ->
-			Map<String, ?> absoluteNotation = notation
-			if (notation.containsKey("path")) {
-				String path = notation.get("path")
-				absoluteNotation = (Map<String, ?>) notation.clone()
-				Project resolvedProject = findRelativeProjectInternal(project, path)
-				if (!resolvedProject) {
-					throw new UnknownProjectException("Could not find relative project at path \"${path}\"")
-				}
-				absoluteNotation.put("path", resolvedProject.path)
-			}
-			return project.dependencies.project(absoluteNotation)
+			return project.dependencies.project(resolveProjectPath(project, notation))
 		}
 	}
 
-	private Project findRelativeProjectInternal(Project parent, String path) {
+	public static Map<String, ?> resolveProjectPath(Project project, Map<String, ?> notation) {
+		Map<String, ?> absoluteNotation = notation
+		if (notation.containsKey("path")) {
+			String path = notation.get("path")
+			absoluteNotation = new LinkedHashMap<>(notation)
+			Project resolvedProject = findRelativeProjectInternal(project, path)
+			if (!resolvedProject) {
+				throw new UnknownProjectException("Could not find relative project at path \"${path}\"")
+			}
+			absoluteNotation.put("path", resolvedProject.path)
+		}
+		return absoluteNotation
+	}
+
+	private static Project findRelativeProjectInternal(Project parent, String path) {
 		if (path.empty) {
 			return parent
 		}
