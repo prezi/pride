@@ -25,7 +25,7 @@ class PridePlugin implements Plugin<Project> {
 			Map<String, Project> projectsByGroupAndName = project.rootProject.allprojects.collectEntries() { Project p ->
 				[p.group + ":" + p.name, p]
 			}
-			project.logger.debug("Found projects: ${projectsByGroupAndName.keySet()}")
+			project.logger.debug("Resolving dynamic dependencies among projects: ${projectsByGroupAndName.keySet()}")
 
 			// Resolve dependencies to projects when possible
 			extension.dependencies.each { Configuration configuration, Collection<Dependency> dependencies ->
