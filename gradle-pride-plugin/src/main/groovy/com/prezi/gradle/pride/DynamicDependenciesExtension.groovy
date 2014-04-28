@@ -58,6 +58,7 @@ class DynamicDependenciesExtension {
 			dependencies.put(configuration, dependenciesForConfig)
 		}
 		dependenciesForConfig.add(dependency)
+		project.logger.debug("Added dynamic dependency ${dependency.group}:${dependency.name}:${dependency.version} (${dependency.getClass().name})")
 		return dependency
 	}
 }
