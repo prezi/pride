@@ -16,10 +16,10 @@ class ConfigCommand extends AbstractCommand {
 	void run() {
 		switch (args.size()) {
 			case 1:
-				log.info configuration.getParameter(args[0])
+				log.info configuration.getString(args[0], null)
 				break
 			case 2:
-				configuration.setParameter(args[0], args[1])
+				configuration.setProperty(args[0], args[1])
 				configuration.save()
 				break
 			default:

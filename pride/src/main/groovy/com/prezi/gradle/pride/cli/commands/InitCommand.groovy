@@ -2,6 +2,7 @@ package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
+import com.prezi.gradle.pride.cli.PrideConfiguration
 import io.airlift.command.Command
 import io.airlift.command.Option
 
@@ -30,7 +31,7 @@ class InitCommand extends AbstractPrideCommand {
 			throw new PrideException("A pride already exists in ${prideDirectory}")
 		}
 		def pride = Pride.create(prideDirectory, vcsManager)
-		def vcs = vcsManager.getVcs(explicitRepoType ?: configuration.repoTypeDefault)
+		def vcs = vcsManager.getVcs(explicitRepoType ?: configuration.getString(PrideConfiguration.REPO_TYPE_DEFAULT))
 
 		if (!explicitNoAddExisting) {
 			log.debug "Adding existing modules"

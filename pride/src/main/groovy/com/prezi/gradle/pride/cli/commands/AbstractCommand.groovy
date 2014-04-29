@@ -1,8 +1,9 @@
 package com.prezi.gradle.pride.cli.commands
 
-import com.prezi.gradle.pride.cli.Configuration
 import io.airlift.command.Option
 import io.airlift.command.OptionType
+import org.apache.commons.configuration.FileConfiguration
+import org.apache.commons.configuration.PropertiesConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -22,5 +23,5 @@ abstract class AbstractCommand implements Runnable {
 			description = "Quite mode")
 	public boolean quiet
 
-	protected final Configuration configuration = new Configuration()
+	protected final FileConfiguration configuration = new PropertiesConfiguration("${System.getProperty("user.home")}/.prideconfig")
 }

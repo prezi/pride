@@ -139,6 +139,10 @@ project("pride-core") {
 	dependencies {
 		compile "org.codehaus.groovy:groovy:1.8.6"
 		compile "org.gradle:gradle-tooling-api:1.11"
+		compile "commons-configuration:commons-configuration:1.10", {
+			exclude group: "commons-logging"
+		}
+		compile "org.slf4j:jcl-over-slf4j:1.7.7"
 	}
 
 	processResources {
