@@ -10,6 +10,7 @@ import com.prezi.gradle.pride.cli.commands.DoCommand
 import com.prezi.gradle.pride.cli.commands.InitCommand
 import com.prezi.gradle.pride.cli.commands.RemoveCommand
 import com.prezi.gradle.pride.cli.commands.RmCommandAlias
+import com.prezi.gradle.pride.cli.commands.UpdateCommand
 import com.prezi.gradle.pride.cli.commands.VersionCommand
 import io.airlift.command.Cli
 import io.airlift.command.Help
@@ -33,6 +34,7 @@ public class PrideCli {
 					InitCommand,
 					RemoveCommand,
 					RmCommandAlias,
+					UpdateCommand,
 					VersionCommand,
 					Help)
 
