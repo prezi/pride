@@ -217,7 +217,7 @@ class Pride {
 		return modulesMap
 	}
 
-	private static boolean isValidModuleDirectory(File dir) {
+	public static boolean isValidModuleDirectory(File dir) {
 		return !dir.name.startsWith(".") &&
 				dir.list().contains(GRADLE_BUILD_FILE)
 	}

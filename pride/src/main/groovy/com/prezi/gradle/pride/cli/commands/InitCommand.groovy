@@ -15,11 +15,37 @@ class InitCommand extends AbstractPrideCommand {
 			description = "Force initialization of a pride, even if one already exists")
 	private boolean overwrite
 
+	@Option(name = ["-T", "--repo-type"],
+			title = "type",
+			description = "Repository type (used to identify the type of any existing repos)")
+	private String explicitRepoType
+
+	@Option(name = "--no-add-existing",
+			description = "Do not automatically add")
+	boolean explicitNoAddExisting
+
 	@Override
 	public void run() {
 		if (!overwrite && Pride.containsPride(prideDirectory)) {
 			throw new PrideException("A pride already exists in ${prideDirectory}")
 		}
-		Pride.create(prideDirectory, vcsManager)
+		def pride = Pride.create(prideDirectory, vcsManager)
+		def vcs = vcsManager.getVcs(explicitRepoType ?: configuration.repoTypeDefault)
+
+		if (!explicitNoAddExisting) {
+			log.debug "Adding existing modules"
+			def addedAny = false
+			prideDirectory.eachDir { File dir ->
+				if (Pride.isValidModuleDirectory(dir)) {
+					log.info "Addign existing ${vcs.type} module in ${dir}"
+					pride.addModule(dir.name, vcs)
+					addedAny = true
+				}
+			}
+			if (addedAny) {
+				pride.save()
+				pride.reinitialize()
+			}
+		}
 	}
 }
