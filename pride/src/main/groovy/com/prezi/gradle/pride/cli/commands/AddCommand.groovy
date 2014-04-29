@@ -5,7 +5,6 @@ import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
 import com.prezi.gradle.pride.cli.Configuration
 import com.prezi.gradle.pride.vcs.RepoCache
-import com.prezi.gradle.pride.vcs.VcsManager
 import com.prezi.gradle.pride.vcs.VcsSupport
 import io.airlift.command.Arguments
 import io.airlift.command.Command
@@ -122,13 +121,5 @@ class AddCommand extends AbstractExistingPrideCommand {
 			throw invalidOptionException("Repository type is not set", "--repo-type", Configuration.REPO_TYPE_DEFAULT)
 		}
 		return getVcsManager().getVcsSupport(repoType)
-	}
-
-	private VcsManager vcsManager
-	private VcsManager getVcsManager() {
-		if (vcsManager == null) {
-			vcsManager = new VcsManager()
-		}
-		return vcsManager
 	}
 }
