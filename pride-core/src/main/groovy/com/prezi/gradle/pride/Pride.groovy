@@ -5,6 +5,7 @@ import com.prezi.gradle.pride.vcs.Vcs
 import com.prezi.gradle.pride.vcs.VcsManager
 import org.apache.commons.configuration.Configuration
 import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProjectConnection
 import org.gradle.tooling.model.gradle.GradleBuild
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -106,33 +107,39 @@ class Pride {
 		modules.values().each { Module module ->
 			def moduleDirectory = new File(rootDirectory, module.name)
 			if (isValidModuleDirectory(moduleDirectory)) {
-				def connection = gradleConnector.get().forProjectDirectory(moduleDirectory).connect()
-				try {
-					def relativePath = rootDirectory.toURI().relativize(moduleDirectory.toURI()).toString()
+				initializeModule(moduleDirectory, settingsFile)
+			}
+		}
+	}
 
-					// Load the model for the build
-					def builder = connection.model(GradleBuild)
-					// Redirect output to loggers
-					// Won't work until http://issues.gradle.org/browse/GRADLE-2687
-					builder.standardError = new LoggerOutputStream({ log.error("{}", it) })
-					builder.standardOutput = new LoggerOutputStream({ log.info("{}", it) })
-					GradleBuild build = builder.get()
+	private void initializeModule(File moduleDirectory, File settingsFile) {
+		def connection = gradleConnector.get().forProjectDirectory(moduleDirectory).connect()
+		try {
+			def relativePath = rootDirectory.toURI().relativize(moduleDirectory.toURI()).toString()
 
-					// Merge settings
-					settingsFile << "\n// Settings from project in directory /${relativePath}\n\n"
-					build.projects.each { project ->
-						if (project == build.rootProject) {
-							settingsFile << "include '${build.rootProject.name}'\n"
-							settingsFile << "project(':${build.rootProject.name}').projectDir = file('${moduleDirectory.name}')\n"
-						} else {
-							settingsFile << "include '${build.rootProject.name}${project.path}'\n"
-						}
-					}
-				} finally {
-					// Clean up
-					connection.close()
+			// Load the model for the build
+			def builder = connection.model(GradleBuild)
+			// Redirect output to loggers
+			// Won't work until http://issues.gradle.org/browse/GRADLE-2687
+			builder.standardError = new LoggerOutputStream({ log.error("{}", it) })
+			builder.standardOutput = new LoggerOutputStream({ log.info("{}", it) })
+			GradleBuild build = builder.get()
+
+			// Merge settings
+			settingsFile << "\n// Settings from project in directory /${relativePath}\n\n"
+			build.projects.each { project ->
+				if (project == build.rootProject) {
+					settingsFile << "include '${build.rootProject.name}'\n"
+					settingsFile << "project(':${build.rootProject.name}').projectDir = file('${moduleDirectory.name}')\n"
+				} else {
+					settingsFile << "include '${build.rootProject.name}${project.path}'\n"
 				}
 			}
+		} catch (Exception ex) {
+			throw new PrideException("Could not parse module in ${moduleDirectory}: ${ex}", ex)
+		} finally {
+			// Clean up
+			connection.close()
 		}
 	}
 

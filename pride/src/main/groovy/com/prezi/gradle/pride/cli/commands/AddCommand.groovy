@@ -90,7 +90,11 @@ class AddCommand extends AbstractExistingPrideCommand {
 			}
 			pride.addModule(moduleName, vcs)
 		}
-		pride.reinitialize()
+		try {
+			pride.reinitialize()
+		} catch (Exception ex) {
+			throw new PrideException("There was a problem reinitializing the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex)
+		}
 		pride.save()
 	}
 

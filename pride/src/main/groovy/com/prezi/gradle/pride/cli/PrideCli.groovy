@@ -67,12 +67,21 @@ public class PrideCli {
 				if (verbose) {
 					throw e
 				}
-				log.error "{}", e.message
+				logPrideExceptions(e)
 				System.exit(-1)
 			}
 		} catch (Exception e) {
 			log.error "Exception:", e
 			System.exit(-1)
+		}
+	}
+
+	private static logPrideExceptions(Throwable t) {
+		if (t != null) {
+			logPrideExceptions(t.cause)
+			if (t instanceof PrideException) {
+				log.error "{}", t.message
+			}
 		}
 	}
 }
