@@ -2,6 +2,7 @@ package com.prezi.gradle.pride.vcs.git
 
 import com.prezi.gradle.pride.ProcessUtils
 import com.prezi.gradle.pride.vcs.VcsSupport
+import org.apache.commons.configuration.Configuration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -10,6 +11,11 @@ import org.slf4j.LoggerFactory
  */
 class GitVcsSupport implements VcsSupport {
 	private static final Logger log = LoggerFactory.getLogger(GitVcsSupport)
+	private final Configuration configuration
+
+	GitVcsSupport(Configuration configuration) {
+		this.configuration = configuration
+	}
 
 	@Override
 	void checkout(String repositoryUrl, File targetDirectory, boolean mirrored) {

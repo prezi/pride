@@ -1,5 +1,7 @@
 package com.prezi.gradle.pride.vcs
 
+import org.apache.commons.configuration.Configuration
+
 /**
  * Created by lptr on 24/04/14.
  */
@@ -12,5 +14,5 @@ interface VcsSupportFactory {
 	/**
 	 * Creates the {@link VcsSupport}.
 	 */
-	VcsSupport createVcsSupport()
+	VcsSupport createVcsSupport(Configuration configuration)
 }
