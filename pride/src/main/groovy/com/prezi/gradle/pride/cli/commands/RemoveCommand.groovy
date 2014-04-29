@@ -2,7 +2,6 @@ package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
-import com.prezi.gradle.pride.PrideInitializer
 import com.prezi.gradle.pride.ProcessUtils
 import io.airlift.command.Arguments
 import io.airlift.command.Command
@@ -22,19 +21,18 @@ class RemoveCommand extends AbstractExistingPrideCommand {
 	private boolean force
 
 	@Arguments(required = true, description = "Modules to remove from the pride")
-	private List<String> modules
+	private List<String> modulesNames
 
 	@Override
 	void runInPride(Pride pride) {
 		// Check if anything exists already
 		if (!force) {
-			def missingModules = modules.findAll { module -> !new File(pride.rootDirectory, module).exists() }
+			def missingModules = modulesNames.findAll { !pride.hasModule(it) }
 			if (missingModules) {
-				throw new PrideException("These modules are missing: ${missingModules}")
+				throw new PrideException("These modules are missing: ${missingModules*.name}")
 			}
-			def changedModules = modules.findAll { module ->
-				def moduleDir = new File(pride.rootDirectory, module)
-
+			def changedModules = modulesNames.findAll { moduleName ->
+				def moduleDir = pride.getModuleDirectory(moduleName)
 				def process = ProcessUtils.executeIn(moduleDir, ["git", "status", "--porcelain"], false)
 				return !process.text.trim().empty
 			}
@@ -44,15 +42,13 @@ class RemoveCommand extends AbstractExistingPrideCommand {
 		}
 
 		// Remove modules
-		modules.each { module ->
-			def moduleDir = new File(pride.rootDirectory, module)
-			log.info "Removing ${moduleDir}"
-			// Make sure we remove symlinks and directories alike
-			moduleDir.delete() || moduleDir.deleteDir()
+		modulesNames.each { moduleName ->
+			pride.removeModule(moduleName)
 		}
+		pride.save()
 
 		// Re-initialize pride
-		PrideInitializer.initializePride(pride.rootDirectory, true)
+		pride.reinitialize()
 	}
 }
 

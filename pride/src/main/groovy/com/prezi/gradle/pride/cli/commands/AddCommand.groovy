@@ -2,10 +2,9 @@ package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
-import com.prezi.gradle.pride.PrideInitializer
 import com.prezi.gradle.pride.cli.Configuration
 import com.prezi.gradle.pride.vcs.RepoCache
-import com.prezi.gradle.pride.vcs.VcsSupport
+import com.prezi.gradle.pride.vcs.Vcs
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -54,14 +53,19 @@ class AddCommand extends AbstractExistingPrideCommand {
 	void runInPride(Pride pride) {
 		// Check if anything exists already
 		if (!overwrite) {
+			def existingModules = modules.findAll { pride.hasModule(it) }
+			if (existingModules) {
+				throw new PrideException("These modules already exist in pride: ${existingModules.join(", ")}")
+			}
 			def existingRepos = modules.findAll { new File(pride.rootDirectory, it).exists() }
 			if (existingRepos) {
-				throw new PrideException("These modules already exist in pride: ${existingRepos.join(", ")}")
+				throw new PrideException("These directories already exist: ${existingRepos.join(", ")}")
 			}
 		}
 
 		// Get some support for our VCS
-		def vcsSupport = getVcsSupport()
+		def vcs = getVcs()
+		def vcsSupport = vcs.support
 
 		// Determine if we can use a repo cache
 		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.repoCacheAlways)
@@ -89,10 +93,10 @@ class AddCommand extends AbstractExistingPrideCommand {
 			} else {
 				vcsSupport.checkout(repoUrl, moduleInPride, false)
 			}
+			pride.addModule(moduleName, vcs)
 		}
-
-		// Re-initialize pride
-		PrideInitializer.initializePride(pride.rootDirectory, true)
+		pride.reinitialize()
+		pride.save()
 	}
 
 	private String getRepoBaseUrl() {
@@ -115,11 +119,11 @@ class AddCommand extends AbstractExistingPrideCommand {
 		return path
 	}
 
-	private VcsSupport getVcsSupport() {
+	private Vcs getVcs() {
 		def repoType = explicitRepoType ?: configuration.repoTypeDefault
 		if (!repoType) {
 			throw invalidOptionException("Repository type is not set", "--repo-type", Configuration.REPO_TYPE_DEFAULT)
 		}
-		return getVcsManager().getVcsSupport(repoType)
+		return vcsManager.getVcs(repoType)
 	}
 }

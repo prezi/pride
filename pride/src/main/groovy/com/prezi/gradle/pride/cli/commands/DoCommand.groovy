@@ -18,7 +18,7 @@ class DoCommand extends AbstractExistingPrideCommand {
 	@Option(name = ["-I", "--include"],
 			title = "repo",
 			description = "Execute the command on repo (can be specified multiple times)")
-	private List<File> inlcudeRepos
+	private List<File> includeRepos
 
 	@Option(name = "--exclude",
 			title = "repo",
@@ -34,13 +34,14 @@ class DoCommand extends AbstractExistingPrideCommand {
 
 	@Override
 	void runInPride(Pride pride) {
-		def modules = (inlcudeRepos ? inlcudeRepos : pride.modules).sort { it.name }.findAll { includeRepo ->
+		def include = includeRepos?.sort() ?: pride.modules.collect { pride.getModuleDirectory(it.name) }
+		def moduleDirectories = include.findAll { File includeRepo ->
 			return null == excludeRepos.find { excludeRepo ->
 				includeRepo.absoluteFile.equals(excludeRepo.absoluteFile)
 			}
 		}
 
-		modules.each { moduleDirectory ->
+		moduleDirectories.each { moduleDirectory ->
 			if (!explicitBare) {
 				log.info "\n${moduleDirectory} \$ ${commandLine.join(" ")}"
 			}

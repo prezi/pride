@@ -14,12 +14,12 @@ final class VcsManager {
 		}
 	}
 
-	public VcsSupport getVcsSupport(String type) {
+	public Vcs getVcs(String type) {
 		def vcsSupport = vcss.get(type)
 		if (vcsSupport == null) {
 			throw new PrideException("No support for VCS type \"${type}\"")
 		}
-		return vcsSupport
+		return new Vcs(type, vcsSupport)
 	}
 
 	public Set<String> getSupportedTypes() {

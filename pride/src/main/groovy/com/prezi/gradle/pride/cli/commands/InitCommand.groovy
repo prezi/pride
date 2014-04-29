@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.cli.commands
 
-import com.prezi.gradle.pride.PrideInitializer
+import com.prezi.gradle.pride.Pride
+import com.prezi.gradle.pride.PrideException
 import io.airlift.command.Command
 import io.airlift.command.Option
 
@@ -16,6 +17,9 @@ class InitCommand extends AbstractPrideCommand {
 
 	@Override
 	public void run() {
-		PrideInitializer.initializePride(prideDirectory, overwrite)
+		if (!overwrite && Pride.containsPride(prideDirectory)) {
+			throw new PrideException("A pride already exists in ${prideDirectory}")
+		}
+		Pride.create(prideDirectory, vcsManager)
 	}
 }
