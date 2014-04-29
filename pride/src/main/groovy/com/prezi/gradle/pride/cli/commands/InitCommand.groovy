@@ -22,7 +22,7 @@ class InitCommand extends AbstractPrideCommand {
 	private String explicitRepoType
 
 	@Option(name = "--no-add-existing",
-			description = "Do not automatically add")
+			description = "Do not add existing modules in the pride directory to the pride")
 	boolean explicitNoAddExisting
 
 	@Override
