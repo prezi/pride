@@ -34,26 +34,6 @@ task copy(type: Copy) {
 	into installDir
 }
 
-task setup {
-	dependsOn copy
-	def REPO_CACHE_ALWAYS = "repo.cache.always"
-
-	outputs.file configFile
-	def config = new Properties()
-	if (configFile.exists()) {
-		configFile.withReader { config.load(it) }
-	}
-	def changed = false
-	def repoCacheAlways = config.getProperty(REPO_CACHE_ALWAYS)
-	if (repoCacheAlways == null) {
-		config.setProperty(REPO_CACHE_ALWAYS, "true")
-		changed = true
-	}
-	if (changed) {
-		configFile.withWriter { config.store(it, null) }
-	}
-}
-
 task installUnix {
 	dependsOn copy
 
@@ -80,7 +60,6 @@ task installOther {
 import org.apache.tools.ant.taskdefs.condition.Os
 
 task install {
-	dependsOn setup
 	if (Os.isFamily(Os.FAMILY_UNIX)) {
 		dependsOn installUnix
 	} else {
