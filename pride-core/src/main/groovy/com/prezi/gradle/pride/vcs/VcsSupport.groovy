@@ -39,4 +39,11 @@ interface VcsSupport {
 	 * Normalizes the repository URL, e.g. removes trailing slashes etc.
 	 */
 	String normalizeRepositoryUrl(String repositoryUrl)
+
+	/**
+	 * Resolves the repository name from a repository URL if possible.
+	 * @return
+	 * 		The module name or {@code null} if the repository name is not resolvable.
+	 */
+	String resolveRepositoryName(String repositoryUrl)
 }

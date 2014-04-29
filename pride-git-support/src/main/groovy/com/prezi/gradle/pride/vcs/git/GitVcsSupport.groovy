@@ -44,4 +44,14 @@ class GitVcsSupport implements VcsSupport {
 	String normalizeRepositoryUrl(String repositoryUrl) {
 		return repositoryUrl.replaceAll(/(\.git)|\/$/, "")
 	}
+
+	@Override
+	String resolveRepositoryName(String repositoryUrl) {
+		def m = repositoryUrl =~ /^(?:git@|(?:https?):\\/+).*[:\\/]([-\._\w]+?)(?:\.git)?\\/?$/
+		if (m) {
+			return m[0][1]
+		} else {
+			return null
+		}
+	}
 }

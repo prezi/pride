@@ -73,7 +73,14 @@ class AddCommand extends AbstractExistingPrideCommand {
 
 		// Clone repositories
 		modules.each { module ->
-			def (moduleName, repoUrl) = resolve(module)
+			def moduleName = vcsSupport.resolveRepositoryName(module)
+			def repoUrl
+			if (moduleName) {
+				repoUrl = module
+			} else {
+				moduleName = module
+				repoUrl = repoBaseUrl + moduleName
+			}
 			log.info "Adding ${moduleName} from ${repoUrl}"
 
 			def moduleInPride = new File(prideDirectory, moduleName)
@@ -87,15 +94,6 @@ class AddCommand extends AbstractExistingPrideCommand {
 
 		// Re-initialize pride
 		PrideInitializer.initializePride(pride.rootDirectory, true)
-	}
-
-	private String[] resolve(String module) {
-		def m = module =~ /^(?:git@|(?:https?):\\/+).*[:\\/]([-\._\w]+?)(?:\.git)?\\/?$/
-		if (m) {
-			return [m[0][1], module]
-		} else {
-			return [module, repoBaseUrl + module]
-		}
 	}
 
 	private String getRepoBaseUrl() {
