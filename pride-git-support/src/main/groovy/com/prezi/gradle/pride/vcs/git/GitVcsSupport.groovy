@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 24/04/14.
  */
 class GitVcsSupport implements VcsSupport {
+	public static final GIT_UPDATE = "git.update"
+
 	private static final Logger log = LoggerFactory.getLogger(GitVcsSupport)
 	private final Configuration configuration
 
@@ -43,7 +45,8 @@ class GitVcsSupport implements VcsSupport {
 
 		// Update working copy unless this is a cached clone
 		if (!mirrored) {
-			ProcessUtils.executeIn(targetDirectory, ["git", "rebase", "--autostash"])
+			def updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash")
+			ProcessUtils.executeIn(targetDirectory, updateCommand.tokenize(" "))
 		}
 	}
 
