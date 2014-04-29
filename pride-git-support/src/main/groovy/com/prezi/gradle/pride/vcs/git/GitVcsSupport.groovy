@@ -26,8 +26,19 @@ class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	void update(String repositoryUrl, File targetDirectory, boolean mirrored) {
-		ProcessUtils.executeIn(targetDirectory, ["git", "fetch", "--all"])
+	void update(File targetDirectory, boolean mirrored) {
+		def fetchCommand = ["git", "fetch"]
+
+		// Cached repositories need to update all branches
+		if (mirrored) {
+			fetchCommand.add "--all"
+		}
+		ProcessUtils.executeIn(targetDirectory, fetchCommand)
+
+		// Update working copy unless this is a cached clone
+		if (!mirrored) {
+			ProcessUtils.executeIn(targetDirectory, ["git", "rebase", "--autostash"])
+		}
 	}
 
 	@Override

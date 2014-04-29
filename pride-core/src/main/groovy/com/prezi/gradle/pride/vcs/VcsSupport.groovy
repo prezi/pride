@@ -11,14 +11,12 @@ interface VcsSupport {
 	 * reserved. If the {@code mirrored} property is set, this is a cached mirror clone,
 	 * and local changes should not be expected.
 	 *
-	 * @param repositoryUrl
-	 * 		The URL of the remote repository.
 	 * @param targetDirectory
 	 * 		The directory where the local clone resides.
 	 * @param mirrored
 	 * 		Whether to update a real clone or a cached repository.
 	 */
-	void update(String repositoryUrl, File targetDirectory, boolean mirrored)
+	void update(File targetDirectory, boolean mirrored)
 
 	/**
 	 * Activates a clone just cloned form a cache to work as if it was cloned from

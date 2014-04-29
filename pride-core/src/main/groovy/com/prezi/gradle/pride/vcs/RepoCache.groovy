@@ -38,7 +38,7 @@ class RepoCache {
 			vcsSupport.checkout(repositoryUrl, moduleInCache, true)
 		} else {
 			log.info "Updating cached repository in ${moduleInCacheName}"
-			vcsSupport.update(repositoryUrl, moduleInCache, true)
+			vcsSupport.update(moduleInCache, true)
 		}
 
 		vcsSupport.checkout(moduleInCache.absolutePath, targetDirectory, false)
