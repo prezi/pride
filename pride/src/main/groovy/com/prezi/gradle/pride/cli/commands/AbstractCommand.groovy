@@ -1,5 +1,6 @@
-package com.prezi.gradle.pride.cli
+package com.prezi.gradle.pride.cli.commands
 
+import com.prezi.gradle.pride.cli.Configuration
 import io.airlift.command.Option
 import io.airlift.command.OptionType
 

@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.cli
+package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.ProcessUtils
@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 10/04/14.
  */
 @Command(name = "do", description = "Execute a command on a set of the modules")
-class DoInPrideCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(DoInPrideCommand)
+class DoCommand extends AbstractExistingPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(DoCommand)
 
 	@Option(name = ["-I", "--include"],
 			title = "repo",

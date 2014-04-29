@@ -3,6 +3,14 @@ package com.prezi.gradle.pride.cli
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.prezi.gradle.pride.PrideException
+import com.prezi.gradle.pride.cli.commands.AbstractCommand
+import com.prezi.gradle.pride.cli.commands.AddCommand
+import com.prezi.gradle.pride.cli.commands.ConfigCommand
+import com.prezi.gradle.pride.cli.commands.DoCommand
+import com.prezi.gradle.pride.cli.commands.InitCommand
+import com.prezi.gradle.pride.cli.commands.RemoveCommand
+import com.prezi.gradle.pride.cli.commands.RmCommandAlias
+import com.prezi.gradle.pride.cli.commands.VersionCommand
 import io.airlift.command.Cli
 import io.airlift.command.Help
 import io.airlift.command.ParseException
@@ -19,11 +27,11 @@ public class PrideCli {
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help)
 				.withCommands(
-					AddToPrideCommand,
+					AddCommand,
 					ConfigCommand,
-					DoInPrideCommand,
-					InitPrideCommand,
-					RemoveFromPrideCommand,
+					DoCommand,
+					InitCommand,
+					RemoveCommand,
 					RmCommandAlias,
 					VersionCommand,
 					Help)

@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.cli
+package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.PrideVersion
 import io.airlift.command.Command

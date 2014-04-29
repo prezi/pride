@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.cli
+package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 31/03/14.
  */
 @Command(name = "remove", description = "Remove modules from a pride")
-class RemoveFromPrideCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(RemoveFromPrideCommand)
+class RemoveCommand extends AbstractExistingPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(RemoveCommand)
 
 	@Option(name = ["-f", "--force"],
 			description = "Remove modules even if there are local changes")
@@ -62,5 +62,5 @@ class RemoveFromPrideCommand extends AbstractExistingPrideCommand {
 @Command(name = "rm",
 		hidden = true,
 		description = "Remove modules from a pride")
-class RmCommandAlias extends RemoveFromPrideCommand {
+class RmCommandAlias extends RemoveCommand {
 }

@@ -1,8 +1,9 @@
-package com.prezi.gradle.pride.cli
+package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.PrideInitializer
+import com.prezi.gradle.pride.cli.Configuration
 import com.prezi.gradle.pride.vcs.RepoCache
 import com.prezi.gradle.pride.vcs.VcsManager
 import com.prezi.gradle.pride.vcs.VcsSupport
@@ -16,8 +17,8 @@ import org.slf4j.LoggerFactory
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
-class AddToPrideCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(AddToPrideCommand)
+class AddCommand extends AbstractExistingPrideCommand {
+	private static final Logger log = LoggerFactory.getLogger(AddCommand)
 
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the pride")
