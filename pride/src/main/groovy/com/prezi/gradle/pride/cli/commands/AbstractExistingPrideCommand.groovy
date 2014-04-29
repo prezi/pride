@@ -8,7 +8,7 @@ import com.prezi.gradle.pride.Pride
 abstract class AbstractExistingPrideCommand extends AbstractPrideCommand {
 	@Override
 	final void run() {
-		def pride = Pride.getPride(prideDirectory, vcsManager)
+		def pride = Pride.getPride(prideDirectory, configuration, vcsManager)
 		runInPride(pride)
 	}
 

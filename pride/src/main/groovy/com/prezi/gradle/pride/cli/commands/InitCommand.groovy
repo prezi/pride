@@ -30,7 +30,7 @@ class InitCommand extends AbstractPrideCommand {
 		if (!overwrite && Pride.containsPride(prideDirectory)) {
 			throw new PrideException("A pride already exists in ${prideDirectory}")
 		}
-		def pride = Pride.create(prideDirectory, vcsManager)
+		def pride = Pride.create(prideDirectory, configuration, vcsManager)
 		def vcs = getVcs()
 
 		if (!explicitNoAddExisting) {

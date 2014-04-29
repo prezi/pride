@@ -3,6 +3,7 @@ package com.prezi.gradle.pride
 import com.prezi.gradle.pride.internal.LoggerOutputStream
 import com.prezi.gradle.pride.vcs.Vcs
 import com.prezi.gradle.pride.vcs.VcsManager
+import org.apache.commons.configuration.Configuration
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.model.gradle.GradleBuild
 import org.slf4j.Logger
@@ -40,21 +41,21 @@ class Pride {
 	@SuppressWarnings("GrFinalVariableAccess")
 	private final SortedMap<String, Module> modules
 
-	public static Pride lookupPride(File directory, VcsManager vcsManager) {
+	public static Pride lookupPride(File directory, Configuration configuration, VcsManager vcsManager) {
 		if (containsPride(directory)) {
-			return new Pride(directory, vcsManager)
+			return new Pride(directory, configuration, vcsManager)
 		} else {
 			def parent = directory.parentFile
 			if (parent) {
-				return lookupPride(parent, vcsManager)
+				return lookupPride(parent, configuration, vcsManager)
 			} else {
 				return null
 			}
 		}
 	}
 
-	public static Pride getPride(File directory, VcsManager vcsManager) {
-		def pride = lookupPride(directory, vcsManager)
+	public static Pride getPride(File directory, Configuration configuration, VcsManager vcsManager) {
+		def pride = lookupPride(directory, configuration, vcsManager)
 		if (pride == null) {
 			throw new PrideException("No pride found in ${directory}")
 		}
@@ -68,7 +69,7 @@ class Pride {
 		return result
 	}
 
-	public static Pride create(File prideDirectory, VcsManager vcsManager) {
+	public static Pride create(File prideDirectory, Configuration configuration, VcsManager vcsManager) {
 		log.info "Initializing ${prideDirectory}"
 		prideDirectory.mkdirs()
 
@@ -78,19 +79,19 @@ class Pride {
 		getPrideVersionFile(configDirectory) << "0\n"
 		getPrideModulesFile(configDirectory).createNewFile()
 
-		def pride = getPride(prideDirectory, vcsManager)
+		def pride = getPride(prideDirectory, configuration, vcsManager)
 		pride.reinitialize()
 		return pride
 	}
 
-	private Pride(File rootDirectory, VcsManager vcsManager) {
+	private Pride(File rootDirectory, Configuration configuration, VcsManager vcsManager) {
 		this.rootDirectory = rootDirectory
 		this.vcsManager = vcsManager
 		this.configDirectory = getPrideConfigDirectory(rootDirectory)
 		if (!configDirectory.directory) {
 			throw new PrideException("No pride in directory \"${rootDirectory}\"")
 		}
-		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), vcsManager)
+		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), configuration, vcsManager)
 	}
 
 	public void reinitialize() {
@@ -179,7 +180,7 @@ class Pride {
 		}
 	}
 
-	private static SortedMap<String, Module> loadModules(File rootDirectory, File modulesFile, VcsManager vcsManager) {
+	private static SortedMap<String, Module> loadModules(File rootDirectory, File modulesFile, Configuration configuration, VcsManager vcsManager) {
 		if (!modulesFile.exists()) {
 			throw new PrideException("Cannot find modules file at ${modulesFile}")
 		}
@@ -210,7 +211,7 @@ class Pride {
 			}
 
 			log.debug("Found {} module {}", vcsType, moduleName)
-			return [ new Module(moduleName, vcsManager.getVcs(vcsType)) ]
+			return [ new Module(moduleName, vcsManager.getVcs(vcsType, configuration)) ]
 		}
 		def modulesMap = new TreeMap<String, Module>()
 		modules.collectEntries(modulesMap) { [it.name, it] }
