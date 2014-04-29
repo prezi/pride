@@ -16,11 +16,11 @@ class ConfigCommand extends AbstractCommand {
 	void run() {
 		switch (args.size()) {
 			case 1:
-				log.info configuration.getString(args[0], null)
+				log.info fileConfiguration.getString(args[0], null)
 				break
 			case 2:
-				configuration.setProperty(args[0], args[1])
-				configuration.save()
+				fileConfiguration.setProperty(args[0], args[1])
+				fileConfiguration.save()
 				break
 			default:
 				throw new PrideException("Invalid number of arguments: either specify a configuration property name to read the value of the property, or a name and a value to set it.")

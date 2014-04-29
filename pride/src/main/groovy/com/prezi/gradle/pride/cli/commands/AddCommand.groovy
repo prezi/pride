@@ -2,12 +2,11 @@ package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
-import com.prezi.gradle.pride.cli.PrideConfiguration
 import com.prezi.gradle.pride.vcs.RepoCache
-import com.prezi.gradle.pride.vcs.Vcs
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
+import org.apache.commons.configuration.Configuration
 
 /**
  * Created by lptr on 31/03/14.
@@ -64,7 +63,7 @@ class AddCommand extends AbstractExistingPrideCommand {
 		def vcsSupport = vcs.support
 
 		// Determine if we can use a repo cache
-		def useRepoCache = explicitUseRepoCache || (!explicitDontUseRepoCache && configuration.getBoolean(PrideConfiguration.REPO_CACHE_ALWAYS, true))
+		def useRepoCache = configuration.getBoolean(REPO_CACHE_ALWAYS, true)
 		if (useRepoCache && !vcsSupport.mirroringSupported) {
 			log.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.")
 			useRepoCache = false
@@ -95,11 +94,25 @@ class AddCommand extends AbstractExistingPrideCommand {
 		pride.save()
 	}
 
+	@Override
+	protected void overrideConfiguration(Configuration configuration) {
+		super.overrideConfiguration(configuration)
+		configuration.setProperty(REPO_CACHE_PATH, explicitRepoCachePath)
+		configuration.setProperty(REPO_BASE_URL, explicitRepoBaseUrl)
+		configuration.setProperty(REPO_TYPE_DEFAULT, explicitRepoType)
+		if (explicitUseRepoCache) {
+			configuration.setProperty(REPO_CACHE_ALWAYS, true)
+		}
+		if (explicitDontUseRepoCache) {
+			configuration.setProperty(REPO_CACHE_ALWAYS, false)
+		}
+	}
+
 	private String getRepoBaseUrl() {
-		String repoBaseUrl = explicitRepoBaseUrl ?: configuration.getString(PrideConfiguration.REPO_BASE_URL, null)
+		String repoBaseUrl = configuration.getString(REPO_BASE_URL, null)
 		if (repoBaseUrl == null) {
 			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set",
-					"a full repository URL, specify the base URL via --repo-base-url", PrideConfiguration.REPO_BASE_URL)
+					"a full repository URL, specify the base URL via --repo-base-url", REPO_BASE_URL)
 		}
 		if (!repoBaseUrl.endsWith("/")) {
 			repoBaseUrl += "/"
@@ -108,18 +121,6 @@ class AddCommand extends AbstractExistingPrideCommand {
 	}
 
 	private File getRepoCachePath() {
-		def path = explicitRepoCachePath ?: configuration.getString(PrideConfiguration.REPO_CACHE_PATH, null)
-		if (!path) {
-			throw invalidOptionException("Repository cache path is not set", "--repo-cache-path", PrideConfiguration.REPO_CACHE_PATH)
-		}
-		return new File(path)
-	}
-
-	private Vcs getVcs() {
-		def repoType = explicitRepoType ?: configuration.getString(PrideConfiguration.REPO_TYPE_DEFAULT)
-		if (!repoType) {
-			throw invalidOptionException("Repository type is not set", "--repo-type", PrideConfiguration.REPO_TYPE_DEFAULT)
-		}
-		return vcsManager.getVcs(repoType)
+		return new File(configuration.getString(REPO_CACHE_PATH, "${System.getProperty("user.home")}/.pride/cache"))
 	}
 }
