@@ -9,14 +9,20 @@ import io.airlift.command.Command
  */
 @Command(name = "config", description = "Set configuration parameters")
 class ConfigCommand extends AbstractCommand {
-	@Arguments(required = true, description = "Configuration name to read, name and value to set")
+	@Arguments(required = true,
+			title = "key [<value>]",
+			description = "Configuration name to read, name and value to set")
 	private List<String> args
 
 	@Override
 	void run() {
 		switch (args.size()) {
 			case 1:
-				log.info fileConfiguration.getString(args[0], null)
+				def value = fileConfiguration.getString(args[0], null)
+				log.info value
+				if (value == null) {
+					System.exit(1)
+				}
 				break
 			case 2:
 				fileConfiguration.setProperty(args[0], args[1])
