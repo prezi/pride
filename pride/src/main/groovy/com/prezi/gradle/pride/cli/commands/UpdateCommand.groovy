@@ -13,7 +13,7 @@ class UpdateCommand extends AbstractExistingPrideCommand {
 
 	@Arguments(required = false,
 			title = "modules",
-			description = "The modules to update. Updates all modules if none specified.")
+			description = "The modules to update (updates all modules if none specified)")
 	private List<String> modules
 
 	@Override
