@@ -11,7 +11,7 @@ class ProcessUtils {
 
 	public static Process executeIn(File directory, List<?> commandLine, boolean processOutput = true, boolean redirectErrorStream = true) {
 		def stringCommandLine = commandLine.collect { String.valueOf(it) }
-		log.debug "Executing ${stringCommandLine.join(" ")} in ${directory ?: System.getProperty("user.dir")}"
+		log.debug "Executing in {}: {}", (directory ?: System.getProperty("user.dir")), stringCommandLine.join(" ")
 		def builder = new ProcessBuilder(stringCommandLine)
 		builder.directory(directory)
 		if (redirectErrorStream) {
