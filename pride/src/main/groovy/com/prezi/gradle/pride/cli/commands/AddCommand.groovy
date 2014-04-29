@@ -8,16 +8,12 @@ import com.prezi.gradle.pride.vcs.Vcs
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 @Command(name = "add", description = "Add modules to a pride")
 class AddCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(AddCommand)
-
 	@Option(name = ["-o", "--overwrite"],
 			description = "Overwrite existing modules in the pride")
 	private boolean overwrite

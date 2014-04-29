@@ -3,16 +3,12 @@ package com.prezi.gradle.pride.cli.commands
 import com.prezi.gradle.pride.PrideException
 import io.airlift.command.Arguments
 import io.airlift.command.Command
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 15/04/14.
  */
 @Command(name = "config", description = "Set configuration parameters")
 class ConfigCommand extends AbstractCommand {
-	private static final Logger log = LoggerFactory.getLogger(ConfigCommand)
-
 	@Arguments(required = true, description = "Configuration name to read, name and value to set")
 	private List<String> args
 

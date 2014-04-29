@@ -6,16 +6,12 @@ import com.prezi.gradle.pride.ProcessUtils
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 31/03/14.
  */
 @Command(name = "remove", description = "Remove modules from a pride")
 class RemoveCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(RemoveCommand)
-
 	@Option(name = ["-f", "--force"],
 			description = "Remove modules even if there are local changes")
 	private boolean force

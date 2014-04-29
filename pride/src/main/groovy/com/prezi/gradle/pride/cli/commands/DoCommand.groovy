@@ -5,16 +5,12 @@ import com.prezi.gradle.pride.ProcessUtils
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 10/04/14.
  */
 @Command(name = "do", description = "Execute a command on a set of the modules")
 class DoCommand extends AbstractExistingPrideCommand {
-	private static final Logger log = LoggerFactory.getLogger(DoCommand)
-
 	@Option(name = ["-I", "--include"],
 			title = "repo",
 			description = "Execute the command on repo (can be specified multiple times)")
