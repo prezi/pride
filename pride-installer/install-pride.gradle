@@ -22,8 +22,7 @@ dependencies {
 }
 
 def userHome = System.properties['user.home']
-def installDir = file("${userHome}/.pride")
-def configFile = file("${userHome}/.prideconfig")
+def installDir = file("${userHome}/.pride/versions")
 def getPrideVersion() {
 	return configurations.pride.resolvedConfiguration.firstLevelModuleDependencies.find { it.moduleName == "pride"}.moduleVersion
 }
