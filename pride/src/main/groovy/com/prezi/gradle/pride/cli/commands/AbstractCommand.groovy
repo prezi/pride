@@ -25,7 +25,16 @@ abstract class AbstractCommand implements Runnable {
 			description = "Quite mode")
 	public boolean quiet
 
-	protected final FileConfiguration fileConfiguration = new PropertiesConfiguration("${System.getProperty("user.home")}/.prideconfig")
+	protected final FileConfiguration fileConfiguration = loadConfiguration()
+
+	private static PropertiesConfiguration loadConfiguration() {
+		def configFile = new File("${System.getProperty("user.home")}/.prideconfig")
+		if (!configFile.exists()) {
+			configFile.parentFile.mkdirs()
+			configFile.createNewFile()
+		}
+		return new PropertiesConfiguration(configFile)
+	}
 
 	private CompositeConfiguration processedConfiguration
 	protected final Configuration getConfiguration() {
