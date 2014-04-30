@@ -33,6 +33,17 @@ task copy(type: Copy) {
 	into installDir
 }
 
+def configFile = file("${System.getProperty("user.home")}/.prideconfig")
+task setup() {
+	outputs.file configFile
+	doLast {
+		if (!configFile.exists()) {
+			configFile.parentFile.mkdirs()
+			configFile.createNewFile()
+		}
+	}
+}
+
 task installUnix {
 	dependsOn copy
 
@@ -59,6 +70,7 @@ task installOther {
 import org.apache.tools.ant.taskdefs.condition.Os
 
 task install {
+	dependsOn setup
 	if (Os.isFamily(Os.FAMILY_UNIX)) {
 		dependsOn installUnix
 	} else {
