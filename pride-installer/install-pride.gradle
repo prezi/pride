@@ -37,7 +37,7 @@ task installUnix {
 	dependsOn copy
 
 	def executableLink = file("/usr/local/bin/pride")
-	outputs.file executableLink
+
 	doLast {
 		def prideVersion = getPrideVersion()
 		println "Pride version: ${prideVersion}"
