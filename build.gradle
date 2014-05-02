@@ -187,11 +187,32 @@ project("pride") {
 }
 
 project("gradle-pride-plugin") {
+	// Include Gradle Tooling API in the plugin to avoid having to
+	// download it from http://gradle.artifactoryonline.com/gradle/libs
+	// https://github.com/prezi/pride/issues/38
+	configurations {
+		tooling
+		tooledCompile { extendsFrom compile, tooling }
+	}
+
 	dependencies {
 		compile localGroovy()
 		compile gradleApi()
-		compile project(":pride-core"), {
+		tooling project(":pride-core"), {
 			exclude group: "org.codehaus.groovy"
+		}
+	}
+
+	compileGroovy {
+		groovyClasspath = configurations.tooledCompile
+	}
+
+	jar {
+		from(configurations.tooling.collect { it.isDirectory() ? it : zipTree(it) }) {
+			exclude "META-INF/*.MF"
+			exclude "META-INF/*.SF"
+			exclude "META-INF/*.DSA"
+			exclude "META-INF/*.RSA"
 		}
 	}
 }
