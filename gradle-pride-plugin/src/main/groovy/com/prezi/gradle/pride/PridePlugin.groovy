@@ -12,8 +12,30 @@ import org.gradle.api.artifacts.ModuleDependency
  */
 class PridePlugin implements Plugin<Project> {
 
+	static boolean alreadyWarnedUserAboutNotRunningFromRootOfPride
+
 	@Override
 	void apply(Project project) {
+		// Check if not running from the root of a Pride
+		if (!alreadyWarnedUserAboutNotRunningFromRootOfPride) {
+			project.logger.info "Running from ${project.rootDir}"
+
+			if (!Pride.containsPride(project.rootDir)) {
+				project.logger.info "No pride found in ${project.rootDir}"
+				for (def dir = project.rootDir.parentFile; dir?.canRead(); dir = dir.parentFile) {
+					project.logger.info "Checking pride in $dir}"
+					if (Pride.containsPride(dir)) {
+						project.logger.warn "WARNING: Found a pride in parent directory ${dir}. " +
+								"This means that you are running Gradle from a subproject of the pride. " +
+								"Dynamic dependencies cannot be resolved to local projects this way. " +
+								"To avoid this warning run Gradle from the root of the pride."
+						alreadyWarnedUserAboutNotRunningFromRootOfPride = true
+						break
+					}
+				}
+			}
+		}
+
 		// Add our custom dependency declaration
 		def extension = project.extensions.create("dynamicDependencies", DynamicDependenciesExtension, project)
 
