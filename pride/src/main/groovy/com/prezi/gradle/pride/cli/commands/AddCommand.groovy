@@ -30,11 +30,6 @@ class AddCommand extends AbstractExistingPrideCommand {
 			description = "Do not use local repo cache")
 	private boolean explicitDontUseRepoCache
 
-	@Option(name = "--repo-cache-path",
-			title = "directory",
-			description = "Local repo cache location")
-	private String explicitRepoCachePath
-
 	@Option(name = ["-T", "--repo-type"],
 			title = "type",
 			description = "Repository type")
@@ -101,7 +96,6 @@ class AddCommand extends AbstractExistingPrideCommand {
 	@Override
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration)
-		configuration.setProperty(REPO_CACHE_PATH, explicitRepoCachePath)
 		configuration.setProperty(REPO_BASE_URL, explicitRepoBaseUrl)
 		configuration.setProperty(REPO_TYPE_DEFAULT, explicitRepoType)
 		if (explicitUseRepoCache) {
