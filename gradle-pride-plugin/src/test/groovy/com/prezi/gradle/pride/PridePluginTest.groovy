@@ -57,6 +57,33 @@ class PridePluginTest extends Specification {
 		childA.configurations.getByName("compile").dependencies.find { it.name == "example-test" }.force == true
 	}
 
+	def "dependency configuration is copied to project dependency"() {
+		def root = ProjectBuilder.builder().withName("root").build()
+		def childA = ProjectBuilder.builder().withParent(root).withName("childA").build()
+		ProjectBuilder.builder().withParent(root).withName("childB").build()
+
+		root.allprojects {
+			group = "com.example"
+		}
+
+		childA.apply plugin: "pride"
+		childA.configurations {
+			compile
+		}
+		childA.configure(childA.extensions.getByType(DynamicDependenciesExtension)) {
+			compile "com.example:childB:1.0", {
+				exclude group: "com.example"
+			}
+		}
+		evaluateAllProjects(root.gradle)
+		def dependency = (ProjectDependency) childA.configurations.getByName("compile").dependencies.find { it.name == "childB" }
+
+
+		expect:
+		dependency.excludeRules.size() == 1
+		dependency.excludeRules.iterator().next().group == "com.example"
+	}
+
 	private static List<String> dependencies(Project project, String configuration) {
 		project.configurations.getByName(configuration).dependencies.collect { Dependency dep ->
 			if (dep instanceof ProjectDependency) {

@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
 
 /**
  * Created by lptr on 11/04/14.
@@ -23,6 +24,10 @@ class PridePlugin implements Plugin<Project> {
 		// Apply Pride convention
 		project.convention.plugins.pride = new PrideConvention(project)
 
+		resolveDynamicDependencies(project, extension)
+	}
+
+	private static resolveDynamicDependencies(Project project, extension) {
 		project.gradle.projectsEvaluated {
 			// Collect local projects in the session
 			Map<String, Project> projectsByGroupAndName = project.rootProject.allprojects.collectEntries() { Project p ->
@@ -37,11 +42,9 @@ class PridePlugin implements Plugin<Project> {
 					if (dependency instanceof ExternalDependency) {
 						project.logger.debug "Looking for ${dependency.group}:${dependency.name}"
 						// See if we can resolve this external dependency to a project dependency
-						def depProject = projectsByGroupAndName.get(dependency.group + ":" + dependency.name)
-						if (depProject) {
-							project.logger.debug "Resolved ${dependency.group}:${dependency.name} to ${depProject.path}"
-							String targetConfiguration = dependency instanceof ModuleDependency ? dependency.configuration : null
-							resolvedDependency = depProject.dependencies.project(path: depProject.path, configuration: targetConfiguration)
+						def dependentProject = projectsByGroupAndName.get(dependency.group + ":" + dependency.name)
+						if (dependentProject) {
+							resolvedDependency = convertExternalToProjectDependency(project, dependency, dependentProject)
 						}
 					}
 
@@ -50,6 +53,22 @@ class PridePlugin implements Plugin<Project> {
 				}
 			}
 		}
+	}
+
+	private
+	static ProjectDependency convertExternalToProjectDependency(Project project, ExternalDependency externalDependency, Project dependentProject) {
+		project.logger.debug "Resolved ${externalDependency.group}:${externalDependency.name} to ${dependentProject.path}"
+
+		// Create project dependency
+		String targetConfiguration = externalDependency instanceof ModuleDependency ? externalDependency.configuration : null
+		def resolvedDependency = (ProjectDependency) project.dependencies.project(path: dependentProject.path, configuration: targetConfiguration)
+
+		// Copy parameters from original dependency
+		resolvedDependency.excludeRules.addAll(externalDependency.excludeRules)
+		resolvedDependency.transitive = externalDependency.transitive
+		externalDependency.artifacts.each { resolvedDependency.addArtifact(it) }
+
+		return resolvedDependency
 	}
 
 	private static boolean alreadyCheckedIfRunningFromRootOfPride
