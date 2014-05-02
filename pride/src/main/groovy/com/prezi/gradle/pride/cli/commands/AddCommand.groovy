@@ -2,7 +2,7 @@ package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
-import com.prezi.gradle.pride.vcs.RepoCache
+import com.prezi.gradle.pride.cli.CliConfiguration
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -58,7 +58,7 @@ class AddCommand extends AbstractExistingPrideCommand {
 		def vcsSupport = vcs.support
 
 		// Determine if we can use a repo cache
-		def useRepoCache = configuration.getBoolean(REPO_CACHE_ALWAYS, true)
+		def useRepoCache = configuration.getBoolean(CliConfiguration.REPO_CACHE_ALWAYS)
 		if (useRepoCache && !vcsSupport.mirroringSupported) {
 			log.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.")
 			useRepoCache = false
@@ -78,8 +78,7 @@ class AddCommand extends AbstractExistingPrideCommand {
 
 			def moduleInPride = new File(prideDirectory, moduleName)
 			if (useRepoCache) {
-				def cache = new RepoCache(repoCachePath)
-				cache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride)
+				repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride)
 			} else {
 				vcsSupport.checkout(repoUrl, moduleInPride, false)
 			}
@@ -96,29 +95,13 @@ class AddCommand extends AbstractExistingPrideCommand {
 	@Override
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration)
-		configuration.setProperty(REPO_BASE_URL, explicitRepoBaseUrl)
-		configuration.setProperty(REPO_TYPE_DEFAULT, explicitRepoType)
+		configuration.setProperty(CliConfiguration.REPO_BASE_URL, explicitRepoBaseUrl)
+		configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType)
 		if (explicitUseRepoCache) {
-			configuration.setProperty(REPO_CACHE_ALWAYS, true)
+			configuration.setProperty(CliConfiguration.REPO_CACHE_ALWAYS, true)
 		}
 		if (explicitDontUseRepoCache) {
-			configuration.setProperty(REPO_CACHE_ALWAYS, false)
+			configuration.setProperty(CliConfiguration.REPO_CACHE_ALWAYS, false)
 		}
-	}
-
-	private String getRepoBaseUrl() {
-		String repoBaseUrl = configuration.getString(REPO_BASE_URL, null)
-		if (repoBaseUrl == null) {
-			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set",
-					"a full repository URL, specify the base URL via --repo-base-url", REPO_BASE_URL)
-		}
-		if (!repoBaseUrl.endsWith("/")) {
-			repoBaseUrl += "/"
-		}
-		return repoBaseUrl
-	}
-
-	private File getRepoCachePath() {
-		return new File(configuration.getString(REPO_CACHE_PATH, "${System.getProperty("user.home")}/.pride/cache"))
 	}
 }

@@ -2,6 +2,7 @@ package com.prezi.gradle.pride.cli.commands
 
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
+import com.prezi.gradle.pride.cli.CliConfiguration
 import io.airlift.command.Command
 import io.airlift.command.Option
 import org.apache.commons.configuration.Configuration
@@ -53,6 +54,6 @@ class InitCommand extends AbstractPrideCommand {
 	@Override
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration)
-		configuration.setProperty(REPO_TYPE_DEFAULT, explicitRepoType)
+		configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType)
 	}
 }
