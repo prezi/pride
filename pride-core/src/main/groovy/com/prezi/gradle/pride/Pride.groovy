@@ -123,6 +123,7 @@ class Pride {
 			// Won't work until http://issues.gradle.org/browse/GRADLE-2687
 			builder.standardError = new LoggerOutputStream({ log.error("{}", it) })
 			builder.standardOutput = new LoggerOutputStream({ log.info("{}", it) })
+			builder.withArguments("-q")
 			GradleBuild build = builder.get()
 
 			// Merge settings
