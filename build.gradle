@@ -188,7 +188,6 @@ project("pride") {
 
 project("gradle-pride-plugin") {
 	dependencies {
-		compile localGroovy()
 		compile gradleApi()
 		compile project(":pride-core"), {
 			exclude group: "org.codehaus.groovy"
