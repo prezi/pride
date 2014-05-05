@@ -7,11 +7,15 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Created by lptr on 11/04/14.
  */
 class PridePlugin implements Plugin<Project> {
+
+	protected static final Logger logger = LoggerFactory.getLogger(PridePlugin)
 
 	@Override
 	void apply(Project project) {
@@ -33,14 +37,14 @@ class PridePlugin implements Plugin<Project> {
 			Map<String, Project> projectsByGroupAndName = project.rootProject.allprojects.collectEntries() { Project p ->
 				[p.group + ":" + p.name, p]
 			}
-			project.logger.debug("Resolving dynamic dependencies among projects: ${projectsByGroupAndName.keySet()}")
+			logger.debug "Resolving dynamic dependencies among projects: ${projectsByGroupAndName.keySet()}"
 
 			// Resolve dependencies to projects when possible
 			extension.dependencies.each { Configuration configuration, Collection<Dependency> dependencies ->
 				dependencies.each { Dependency dependency ->
 					Dependency resolvedDependency = dependency
 					if (dependency instanceof ExternalDependency) {
-						project.logger.debug "Looking for ${dependency.group}:${dependency.name}"
+						logger.debug "Looking for ${dependency.group}:${dependency.name}"
 						// See if we can resolve this external dependency to a project dependency
 						def dependentProject = projectsByGroupAndName.get(dependency.group + ":" + dependency.name)
 						if (dependentProject) {
@@ -57,7 +61,7 @@ class PridePlugin implements Plugin<Project> {
 
 	private
 	static ProjectDependency convertExternalToProjectDependency(Project project, ExternalDependency externalDependency, Project dependentProject) {
-		project.logger.debug "Resolved ${externalDependency.group}:${externalDependency.name} to ${dependentProject.path}"
+		logger.debug "Resolved ${externalDependency.group}:${externalDependency.name} to ${dependentProject.path}"
 
 		// Create project dependency
 		String targetConfiguration = externalDependency instanceof ModuleDependency ? externalDependency.configuration : null
@@ -76,11 +80,11 @@ class PridePlugin implements Plugin<Project> {
 	private static void checkIfNotRunningFromRootOfPride(Project project) {
 		if (!alreadyCheckedIfRunningFromRootOfPride) {
 			if (!Pride.containsPride(project.rootDir)) {
-				project.logger.debug "No pride found in ${project.rootDir}"
+				logger.debug "No pride found in ${project.rootDir}"
 				for (def dir = project.rootDir.parentFile; dir?.canRead(); dir = dir.parentFile) {
-					project.logger.debug "Checking pride in $dir}"
+					logger.debug "Checking pride in $dir}"
 					if (Pride.containsPride(dir)) {
-						project.logger.warn "WARNING: Found a pride in parent directory ${dir}. " +
+						logger.warn "WARNING: Found a pride in parent directory ${dir}. " +
 								"This means that you are running Gradle from a subproject of the pride. " +
 								"Dynamic dependencies cannot be resolved to local projects this way. " +
 								"To avoid this warning run Gradle from the root of the pride."
