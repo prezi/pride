@@ -1,102 +1,62 @@
 package com.prezi.gradle.pride
 
-import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.DependencyArtifact
+import org.gradle.api.artifacts.ExcludeRule
+import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.api.internal.GradleInternal
-import org.gradle.api.invocation.Gradle
-import org.gradle.configuration.BuildConfigurer
-import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 
 /**
  * Created by lptr on 28/04/14.
  */
 class PridePluginTest extends Specification {
-	def "single project dependencies"() {
-		def project = ProjectBuilder.builder().build()
-		project.apply plugin: "pride"
-		project.configurations.create("compile")
-		project.configure(project.extensions.getByType(DynamicDependenciesExtension)) {
-			compile "com.example:example-test:1.0"
-		}
-		evaluateAllProjects(project.gradle)
+	def "unable to resolve to project dependency"() {
+		given:
+		def resolver = Mock(LocalProjectResolver)
+		def dependency = Mock(ExternalDependency)
+		def projects = [:]
 
-		expect:
-		dependencies(project, "compile") == ["com.example:example-test:1.0"]
+		when:
+		def actual = PridePlugin.localizeFirstLevelDynamicDependency(dependency, projects, resolver)
+
+		then:
+		_ * dependency.group >> "com.example"
+		_ * dependency.name >> "test"
+		_ * dependency.configuration >> "compile"
+		actual == dependency
+		0 * _
 	}
 
-	def "multi project dependencies"() {
-		def root = ProjectBuilder.builder().withName("root").build()
-		def childA = ProjectBuilder.builder().withParent(root).withName("childA").build()
-		ProjectBuilder.builder().withParent(root).withName("childB").build()
+	def "able to resolve to project dependency"() {
+		given:
+		def resolver = Mock(LocalProjectResolver)
+		def dependency = Mock(ExternalDependency)
+		def expected = Mock(ProjectDependency)
+		def excludeRules = [ Mock(ExcludeRule) ]
+		def mockExcludeRules = Mock(Set)
+		def artifacts = [ Mock(DependencyArtifact) ]
+		def mockArtifacts = Mock(Set)
+		def projects = ["com.example:test": ":test"]
 
-		root.allprojects {
-			group = "com.example"
-		}
+		when:
+		def actual = PridePlugin.localizeFirstLevelDynamicDependency(dependency, projects, resolver)
 
-		childA.apply plugin: "pride"
-		childA.configurations {
-			compile
-			test
-		}
-		childA.configure(childA.extensions.getByType(DynamicDependenciesExtension)) {
-			compile "com.example:example-test:1.0", {
-				force = true
-			}
-			compile "com.example:childB:2.0", {
-				force = true
-			}
-			test (group: "com.example", name: "childB", version: "2.0", configuration: "test")
-		}
-		evaluateAllProjects(root.gradle)
+		then:
+		_ * dependency.group >> "com.example"
+		_ * dependency.name >> "test"
+		_ * dependency.configuration >> "compile"
+		_ * dependency.transitive >> true
+		actual == expected
+		1 * dependency.excludeRules >> excludeRules
+		1 * resolver.resolveLocalProject(":test", "compile") >> expected
+		1 * expected.excludeRules >> mockExcludeRules
+		1 * mockExcludeRules.addAll(_)
 
-		expect:
-		dependencies(childA, "compile") == ["com.example:example-test:1.0", ":childB@default"]
-		dependencies(childA, "test") == [":childB@test"]
-		childA.configurations.getByName("compile").dependencies.find { it.name == "example-test" }.force == true
-	}
+		1 * dependency.artifacts >> artifacts
+		1 * expected.artifacts >> mockArtifacts
+		1 * mockArtifacts.addAll(_)
 
-	def "dependency configuration is copied to project dependency"() {
-		def root = ProjectBuilder.builder().withName("root").build()
-		def childA = ProjectBuilder.builder().withParent(root).withName("childA").build()
-		ProjectBuilder.builder().withParent(root).withName("childB").build()
-
-		root.allprojects {
-			group = "com.example"
-		}
-
-		childA.apply plugin: "pride"
-		childA.configurations {
-			compile
-		}
-		childA.configure(childA.extensions.getByType(DynamicDependenciesExtension)) {
-			compile "com.example:childB:1.0", {
-				exclude group: "com.example"
-			}
-		}
-		evaluateAllProjects(root.gradle)
-		def dependency = (ProjectDependency) childA.configurations.getByName("compile").dependencies.find { it.name == "childB" }
-
-
-		expect:
-		dependency.excludeRules.size() == 1
-		dependency.excludeRules.iterator().next().group == "com.example"
-	}
-
-	private static List<String> dependencies(Project project, String configuration) {
-		project.configurations.getByName(configuration).dependencies.collect { Dependency dep ->
-			if (dep instanceof ProjectDependency) {
-				return "${dep.dependencyProject.path}@${dep.configuration}"
-			} else {
-				return "${dep.group}:${dep.name}:${dep.version}"
-			}
-		}
-	}
-
-	private static void evaluateAllProjects(Gradle gradle) {
-		def internal = (GradleInternal) gradle
-		internal.services.get(BuildConfigurer).configure(internal)
-		internal.buildListenerBroadcaster.projectsEvaluated(internal)
+		1 * expected.setTransitive(true)
+		0 * _
 	}
 }
