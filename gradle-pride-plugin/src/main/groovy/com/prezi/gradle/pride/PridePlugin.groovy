@@ -1,5 +1,7 @@
 package com.prezi.gradle.pride
 
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -7,6 +9,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.ResolvedDependency
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -31,7 +34,7 @@ class PridePlugin implements Plugin<Project> {
 		resolveDynamicDependencies(project, extension)
 	}
 
-	private static resolveDynamicDependencies(Project project, extension) {
+	private static void resolveDynamicDependencies(Project project, DynamicDependenciesExtension dynamicDependencies) {
 		project.gradle.projectsEvaluated {
 			// Collect local projects in the session
 			Map<String, Project> projectsByGroupAndName = project.rootProject.allprojects.collectEntries() { Project p ->
@@ -39,32 +42,45 @@ class PridePlugin implements Plugin<Project> {
 			}
 			logger.debug "Resolving dynamic dependencies among projects: ${projectsByGroupAndName.keySet()}"
 
-			// Resolve dependencies to projects when possible
-			extension.dependencies.each { Configuration configuration, Collection<Dependency> dependencies ->
-				dependencies.each { Dependency dependency ->
-					Dependency resolvedDependency = dependency
+			dynamicDependencies.dependencies.collect { Configuration configuration, Collection<Dependency> dependencies ->
+				// Localize dependencies to projects when possible
+				LinkedHashSet<Dependency> localizedDependencies = dependencies.collect { Dependency dependency ->
+					Dependency localizedDependency = dependency
 					if (dependency instanceof ExternalDependency) {
 						logger.debug "Looking for ${dependency.group}:${dependency.name}"
-						// See if we can resolve this external dependency to a project dependency
+						// See if we can localize this external dependency to a project dependency
 						def dependentProject = projectsByGroupAndName.get(dependency.group + ":" + dependency.name)
 						if (dependentProject) {
-							resolvedDependency = convertExternalToProjectDependency(project, dependency, dependentProject)
+							localizedDependency = convertExternalToProjectDependency(project, dependency, dependentProject)
 						}
 					}
-
-					// Add the resolved dependency
-					configuration.dependencies.add(resolvedDependency)
+					return localizedDependency
 				}
+				// Go through transitive dependencies and replace them with projects when applicable
+				// See https://github.com/prezi/pride/issues/40
+				def detachedConfiguration = project.configurations.detachedConfiguration(*localizedDependencies.toArray(new Dependency[0]))
+				LinkedHashSet<ProjectOverride> projectOverrides = []
+				detachedConfiguration.resolvedConfiguration.firstLevelModuleDependencies.each { ResolvedDependency resolvedDependency ->
+					collectTransitiveDependenciesToOverride(projectsByGroupAndName, resolvedDependency.children, projectOverrides)
+				}
+				projectOverrides.collect(localizedDependencies) { ProjectOverride projectOverride ->
+					project.logger.debug "Adding override project dependency: {}", projectOverride
+					// This overrides the external dependency because project
+					// versions are set to Short.MAX_VALUE in generated build.gradle
+					project.dependencies.project(path: projectOverride.project.path, configuration: projectOverride.configuration)
+				}
+
+				configuration.dependencies.addAll localizedDependencies
 			}
 		}
 	}
 
 	private
 	static ProjectDependency convertExternalToProjectDependency(Project project, ExternalDependency externalDependency, Project dependentProject) {
-		logger.debug "Resolved ${externalDependency.group}:${externalDependency.name} to ${dependentProject.path}"
+		String targetConfiguration = externalDependency instanceof ModuleDependency ? externalDependency.configuration : null
+		logger.debug "Localizing ${externalDependency.group}:${externalDependency.name} to ${dependentProject.path}, configuration: ${targetConfiguration}"
 
 		// Create project dependency
-		String targetConfiguration = externalDependency instanceof ModuleDependency ? externalDependency.configuration : null
 		def resolvedDependency = (ProjectDependency) project.dependencies.project(path: dependentProject.path, configuration: targetConfiguration)
 
 		// Copy parameters from original dependency
@@ -73,6 +89,22 @@ class PridePlugin implements Plugin<Project> {
 		externalDependency.artifacts.each { resolvedDependency.addArtifact(it) }
 
 		return resolvedDependency
+	}
+
+	private static void collectTransitiveDependenciesToOverride(Map<String, Project> projectsByGroupAndName, Set<ResolvedDependency> dependencies, LinkedHashSet<ProjectOverride> projectOverrides) {
+		dependencies.each { ResolvedDependency dependency ->
+			def dependentProject = projectsByGroupAndName.get(dependency.moduleGroup + ":" + dependency.moduleName)
+			if (dependentProject) {
+				// Sometimes we get stuff that point to non-existent configurations like "master",
+				// so we should skip those
+				if (dependentProject.configurations.find({ it.name == dependency.configuration })) {
+					projectOverrides.add(new ProjectOverride(dependency.configuration, dependentProject))
+				}
+			} else {
+				// If a corresponding project is not found locally, traverse children of external dependency
+				collectTransitiveDependenciesToOverride(projectsByGroupAndName, dependency.children, projectOverrides)
+			}
+		}
 	}
 
 	private static boolean alreadyCheckedIfRunningFromRootOfPride
@@ -95,4 +127,11 @@ class PridePlugin implements Plugin<Project> {
 			alreadyCheckedIfRunningFromRootOfPride = true
 		}
 	}
+}
+
+@TupleConstructor
+@ToString(includeNames = true)
+class ProjectOverride {
+	String configuration
+	Project project
 }
