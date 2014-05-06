@@ -138,7 +138,6 @@ subprojects { subproject ->
 project("pride-core") {
 	dependencies {
 		compile "org.codehaus.groovy:groovy:1.8.6"
-		compile "org.gradle:gradle-tooling-api:1.12"
 		compile "commons-configuration:commons-configuration:1.10", {
 			exclude group: "commons-logging"
 		}
@@ -166,6 +165,7 @@ project("pride") {
 	dependencies {
 		compile project(path: ":pride-core")
 		compile project(path: ":pride-git-support")
+		compile "org.gradle:gradle-tooling-api:1.12"
 		compile "io.airlift:airline:0.6"
 		compile "ch.qos.logback:logback-classic:1.1.2"
 	}
