@@ -1,4 +1,16 @@
-#!/bin/env gradle -b
+#!/usr/bin/env bash -e
+
+die() {
+	echo ${@} >&2
+	exit 1
+}
+which gradle > /dev/null || die "Please install Gradle first"
+
+dir=`mktemp -d -t pride-installer-XXXX`
+cd ${dir}
+installer=${dir}/install-gradle
+
+cat > ${installer} << 'EOF'
 defaultTasks "install"
 group = "com.prezi.gradle.pride"
 
@@ -88,3 +100,8 @@ task update {
 task upgrade {
 	dependsOn install
 }
+EOF
+
+gradle -q -b ${installer}
+
+rm -rf ${dir}

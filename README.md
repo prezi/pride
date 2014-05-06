@@ -64,7 +64,7 @@ You need [Gradle](http://gradle.org/) and [Git](http://git-scm.org/) installed.
 
 If you want to install the newest version of Pride, or upgrade your existing installation, run this:
 
-    $ curl -sSLO http://git.io/install-pride && gradle -q -b install-pride && rm install-pride > /dev/null
+    $ curl -sSL http://git.io/install-pride | bash
 
 This will install a symlink in `/usr/local/bin`.
 
