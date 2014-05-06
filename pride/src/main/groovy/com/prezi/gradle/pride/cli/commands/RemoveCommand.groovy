@@ -3,6 +3,7 @@ package com.prezi.gradle.pride.cli.commands
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.ProcessUtils
+import com.prezi.gradle.pride.cli.PrideInitializer
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -44,7 +45,7 @@ class RemoveCommand extends AbstractExistingPrideCommand {
 		pride.save()
 
 		// Re-initialize pride
-		pride.reinitialize()
+		PrideInitializer.reinitialize(pride)
 	}
 }
 

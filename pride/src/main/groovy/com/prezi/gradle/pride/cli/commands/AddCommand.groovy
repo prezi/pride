@@ -3,6 +3,7 @@ package com.prezi.gradle.pride.cli.commands
 import com.prezi.gradle.pride.Pride
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.cli.CliConfiguration
+import com.prezi.gradle.pride.cli.PrideInitializer
 import io.airlift.command.Arguments
 import io.airlift.command.Command
 import io.airlift.command.Option
@@ -85,7 +86,7 @@ class AddCommand extends AbstractExistingPrideCommand {
 			pride.addModule(moduleName, vcs)
 		}
 		try {
-			pride.reinitialize()
+			PrideInitializer.reinitialize(pride)
 		} catch (Exception ex) {
 			throw new PrideException("There was a problem reinitializing the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex)
 		}
