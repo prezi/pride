@@ -26,7 +26,7 @@ class RemoveCommand extends AbstractExistingPrideCommand {
 		if (!force) {
 			def missingModules = modulesNames.findAll { !pride.hasModule(it) }
 			if (missingModules) {
-				throw new PrideException("These modules are missing: ${missingModules*.name}")
+				throw new PrideException("These modules are missing: ${missingModules}")
 			}
 			def changedModules = modulesNames.findAll { moduleName ->
 				def moduleDir = pride.getModuleDirectory(moduleName)
