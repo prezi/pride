@@ -102,6 +102,6 @@ task upgrade {
 }
 EOF
 
-gradle -q -b ${installer}
+gradle -b ${installer}
 
 rm -rf ${dir}
