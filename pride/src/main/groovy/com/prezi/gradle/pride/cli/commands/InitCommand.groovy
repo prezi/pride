@@ -55,6 +55,8 @@ class InitCommand extends AbstractPrideCommand {
 	@Override
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration)
-		configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType)
+		if (explicitRepoType) {
+			configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType)
+		}
 	}
 }
