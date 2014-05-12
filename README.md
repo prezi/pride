@@ -90,7 +90,7 @@ Note: On Windows you will need to add `pride/build/install/pride/bin` to the `PA
 Check if everything works via:
 
     $ pride version
-    Pride version 0.6.1
+    Pride version 0.6.2
 
 ## Usage
 
@@ -120,7 +120,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.6.1"
+        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.6.2"
     }
 }
 
