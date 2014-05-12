@@ -96,8 +96,12 @@ class AddCommand extends AbstractExistingPrideCommand {
 	@Override
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration)
-		configuration.setProperty(CliConfiguration.REPO_BASE_URL, explicitRepoBaseUrl)
-		configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType)
+		if (explicitRepoBaseUrl) {
+			configuration.setProperty(CliConfiguration.REPO_BASE_URL, explicitRepoBaseUrl)
+		}
+		if (explicitRepoType) {
+			configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType)
+		}
 		if (explicitUseRepoCache) {
 			configuration.setProperty(CliConfiguration.REPO_CACHE_ALWAYS, true)
 		}

@@ -43,7 +43,7 @@ abstract class AbstractCommand implements Runnable {
 	protected final Configuration getConfiguration() {
 		if (processedConfiguration == null) {
 			processedConfiguration = new CompositeConfiguration([fileConfiguration, new CliConfiguration.Defaults()])
-			overrideConfiguration(processedConfiguration.inMemoryConfiguration)
+			overrideConfiguration(processedConfiguration)
 		}
 		return processedConfiguration
 	}
