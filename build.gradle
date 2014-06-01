@@ -153,6 +153,12 @@ project("pride-core") {
 }
 
 project("pride-git-support") {
+    dependencies {
+        compile project(path: ":pride-core")
+    }
+}
+
+project("pride-svn-support") {
 	dependencies {
 		compile project(path: ":pride-core")
 	}
@@ -165,6 +171,7 @@ project("pride") {
 	dependencies {
 		compile project(path: ":pride-core")
 		compile project(path: ":pride-git-support")
+        compile project(path: ":pride-svn-support")
 		compile "org.gradle:gradle-tooling-api:1.12"
 		compile "io.airlift:airline:0.6"
 		compile "ch.qos.logback:logback-classic:1.1.2"

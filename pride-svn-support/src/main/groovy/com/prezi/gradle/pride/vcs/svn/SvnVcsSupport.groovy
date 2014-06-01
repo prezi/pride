@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.vcs.git
+package com.prezi.gradle.pride.vcs.svn
 
 import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.ProcessUtils
@@ -8,15 +8,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * Created by lptr on 24/04/14.
+ * Created by jzwolak on 01/06/14.
  */
-class GitVcsSupport implements VcsSupport {
-	public static final GIT_UPDATE = "git.update"
+class SvnVcsSupport implements VcsSupport {
 
-	private static final Logger log = LoggerFactory.getLogger(GitVcsSupport)
+	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport)
 	private final Configuration configuration
 
-	GitVcsSupport(Configuration configuration) {
+	SvnVcsSupport(Configuration configuration) {
 		this.configuration = configuration
 	}
 
@@ -26,50 +25,39 @@ class GitVcsSupport implements VcsSupport {
 		// Make sure we delete symlinks and directories alike
 		targetDirectory.delete() || targetDirectory.deleteDir()
 
-		log.debug "Cloning ${repositoryUrl} into ${targetDirectory}"
-		def commandLine = ["git", "clone", repositoryUrl, targetDirectory]
-		if (mirrored) {
-			commandLine.add "--mirror"
-		}
+		log.debug "Checking out ${repositoryUrl} into ${targetDirectory}"
+		def commandLine = ["svn", "checkout", repositoryUrl, targetDirectory]
 		ProcessUtils.executeIn(null, commandLine)
 	}
 
 	@Override
 	void update(File targetDirectory, boolean mirrored) {
-		def fetchCommand = ["git", "fetch"]
-
-		// Cached repositories need to update all branches
-		if (mirrored) {
-			fetchCommand.add "--all"
-		}
-		ProcessUtils.executeIn(targetDirectory, fetchCommand)
-
-		// Update working copy unless this is a cached clone
-		if (!mirrored) {
-			def updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash")
-			ProcessUtils.executeIn(targetDirectory, updateCommand.tokenize(" "))
-		}
+		def updateCommand = ["svn", "update"]
+		ProcessUtils.executeIn(targetDirectory, updateCommand)
 	}
 
     @Override
     boolean hasChanges(File targetDirectory) {
-        def process = ProcessUtils.executeIn(targetDirectory, ["git", "status", "--porcelain"], false)
+        def statusCommand = ["svn", "status"]
+        def process = ProcessUtils.executeIn(targetDirectory, statusCommand, false)
         return !process.text.trim().empty
     }
 
 	@Override
 	void activate(String repositoryUrl, File targetDirectory) {
-		ProcessUtils.executeIn(targetDirectory, ["git", "remote", "set-url", "origin", repositoryUrl])
+        thrown new PrideException("svn doesn't support activate")
+		//ProcessUtils.executeIn(targetDirectory, ["git", "remote", "set-url", "origin", repositoryUrl])
 	}
 
 	@Override
 	boolean isMirroringSupported() {
-		return true
+		return false
 	}
 
 	@Override
 	String normalizeRepositoryUrl(String repositoryUrl) {
-		return repositoryUrl.replaceAll(/(\.git)|\/$/, "")
+        //TODO: what should we do for SVN here?
+		return repositoryUrl
 	}
 
 	@Override
@@ -77,7 +65,7 @@ class GitVcsSupport implements VcsSupport {
         try {
             // check if the user supplied argument is a repository
             // an exception is thrown if it is not
-            def commandLine = ["git", "ls-remote", repositoryUrl]
+            def commandLine = ["svn", "ls", repositoryUrl]
             def process = ProcessUtils.executeIn(null, commandLine, false)
         } catch ( PrideException ex ) {
             // user supplied argument isn't a repo. return null so it will be tried as a module name
@@ -85,7 +73,7 @@ class GitVcsSupport implements VcsSupport {
         }
         // user supplied argument is a repo
         // try to extract the module name and return it if successful
-        def m = repositoryUrl =~ /^.*?([-\._\w]+?)(?:\.git)?\\/?$/
+        def m = repositoryUrl =~ /^.*?([-\._\w]+?)\\/?$/
         if (m) {
             return m[0][1]
         } else {
