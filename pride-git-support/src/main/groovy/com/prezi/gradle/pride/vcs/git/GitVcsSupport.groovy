@@ -50,11 +50,11 @@ class GitVcsSupport implements VcsSupport {
 		}
 	}
 
-    @Override
-    boolean hasChanges(File targetDirectory) {
-        def process = ProcessUtils.executeIn(targetDirectory, ["git", "status", "--porcelain"], false)
-        return !process.text.trim().empty
-    }
+	@Override
+	boolean hasChanges(File targetDirectory) {
+		def process = ProcessUtils.executeIn(targetDirectory, ["git", "status", "--porcelain"], false)
+		return !process.text.trim().empty
+	}
 
 	@Override
 	void activate(String repositoryUrl, File targetDirectory) {

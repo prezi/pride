@@ -18,12 +18,12 @@ interface VcsSupport {
 	 */
 	void update(File targetDirectory, boolean mirrored)
 
-    /**
-     * Returns true if the local clone has uncommitted/pushed changes.
-     * @param targetDirectory
-     * @return
-     */
-    boolean hasChanges(File targetDirectory)
+	/**
+	 * Returns true if the local clone has uncommitted/pushed changes.
+	 * @param targetDirectory
+	 * @return
+	 */
+	boolean hasChanges(File targetDirectory)
 
 	/**
 	 * Activates a clone just cloned form a cache to work as if it was cloned from
