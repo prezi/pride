@@ -1,6 +1,5 @@
 package com.prezi.gradle.pride.vcs.git
 
-import com.prezi.gradle.pride.PrideException
 import com.prezi.gradle.pride.ProcessUtils
 import com.prezi.gradle.pride.vcs.VcsSupport
 import org.apache.commons.configuration.Configuration
@@ -74,22 +73,11 @@ class GitVcsSupport implements VcsSupport {
 
 	@Override
 	String resolveRepositoryName(String repositoryUrl) {
-        try {
-            // check if the user supplied argument is a repository
-            // an exception is thrown if it is not
-            def commandLine = ["git", "ls-remote", repositoryUrl]
-            def process = ProcessUtils.executeIn(null, commandLine, false)
-        } catch ( PrideException ex ) {
-            // user supplied argument isn't a repo. return null so it will be tried as a module name
-            return null
-        }
-        // user supplied argument is a repo
-        // try to extract the module name and return it if successful
-        def m = repositoryUrl =~ /^.*?([-\._\w]+?)(?:\.git)?\\/?$/
-        if (m) {
-            return m[0][1]
-        } else {
-            return null
-        }
+		def m = repositoryUrl =~ /^(?:git@|(?:https?):\\/+).*[:\\/]([-\._\w]+?)(?:\.git)?\\/?$/
+		if (m) {
+			return m[0][1]
+		} else {
+			return null
+		}
 	}
 }
