@@ -19,6 +19,13 @@ interface VcsSupport {
 	void update(File targetDirectory, boolean mirrored)
 
 	/**
+	 * Returns true if the local clone has uncommitted/pushed changes.
+	 * @param targetDirectory
+	 * @return
+	 */
+	boolean hasChanges(File targetDirectory)
+
+	/**
 	 * Activates a clone just cloned form a cache to work as if it was cloned from
 	 * the original URL. In Git this would do {@code git remote set-url origin <repositoryUrl>}.
 	 * @param repositoryUrl The URL of the remote repository
