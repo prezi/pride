@@ -36,16 +36,16 @@ class SvnVcsSupport implements VcsSupport {
 		ProcessUtils.executeIn(targetDirectory, updateCommand)
 	}
 
-    @Override
-    boolean hasChanges(File targetDirectory) {
-        def statusCommand = ["svn", "status"]
-        def process = ProcessUtils.executeIn(targetDirectory, statusCommand, false)
-        return !process.text.trim().empty
-    }
+	@Override
+	boolean hasChanges(File targetDirectory) {
+		def statusCommand = ["svn", "status"]
+		def process = ProcessUtils.executeIn(targetDirectory, statusCommand, false)
+		return !process.text.trim().empty
+	}
 
 	@Override
 	void activate(String repositoryUrl, File targetDirectory) {
-        thrown new PrideException("svn doesn't support activate")
+		thrown new PrideException("svn doesn't support activate")
 		//ProcessUtils.executeIn(targetDirectory, ["git", "remote", "set-url", "origin", repositoryUrl])
 	}
 
@@ -56,28 +56,28 @@ class SvnVcsSupport implements VcsSupport {
 
 	@Override
 	String normalizeRepositoryUrl(String repositoryUrl) {
-        //TODO: what should we do for SVN here?
+		//TODO: what should we do for SVN here?
 		return repositoryUrl
 	}
 
 	@Override
 	String resolveRepositoryName(String repositoryUrl) {
-        try {
-            // check if the user supplied argument is a repository
-            // an exception is thrown if it is not
-            def commandLine = ["svn", "ls", repositoryUrl]
-            def process = ProcessUtils.executeIn(null, commandLine, false)
-        } catch ( PrideException ex ) {
-            // user supplied argument isn't a repo. return null so it will be tried as a module name
-            return null
-        }
-        // user supplied argument is a repo
-        // try to extract the module name and return it if successful
-        def m = repositoryUrl =~ /^.*?([-\._\w]+?)\\/?$/
-        if (m) {
-            return m[0][1]
-        } else {
-            return null
-        }
+		try {
+			// check if the user supplied argument is a repository
+			// an exception is thrown if it is not
+			def commandLine = ["svn", "ls", repositoryUrl]
+			def process = ProcessUtils.executeIn(null, commandLine, false)
+		} catch ( PrideException ex ) {
+			// user supplied argument isn't a repo. return null so it will be tried as a module name
+			return null
+		}
+		// user supplied argument is a repo
+		// try to extract the module name and return it if successful
+		def m = repositoryUrl =~ /^.*?([-\._\w]+?)\\/?$/
+		if (m) {
+			return m[0][1]
+		} else {
+			return null
+		}
 	}
 }
