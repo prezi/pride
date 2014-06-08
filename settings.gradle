@@ -1,6 +1,5 @@
 rootProject.name = "pride-parent"
 include "pride-core"
 include "pride-git-support"
-include "pride-svn-support"
 include "pride"
 include "gradle-pride-plugin"

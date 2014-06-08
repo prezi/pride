@@ -30,8 +30,8 @@ class RemoveCommand extends AbstractExistingPrideCommand {
 			}
 			def changedModules = modulesNames.findAll { moduleName ->
 				def moduleDir = pride.getModuleDirectory(moduleName)
-                def vcsSupport = pride.getModule(moduleName).vcs.support
-                return vcsSupport.hasChanges(moduleDir)
+				def process = ProcessUtils.executeIn(moduleDir, ["git", "status", "--porcelain"], false)
+				return !process.text.trim().empty
 			}
 			if (changedModules) {
 				throw new PrideException("These modules have uncommitted changes: ${changedModules.join(", ")}")
