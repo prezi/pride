@@ -21,8 +21,9 @@ class GitVcsSupportTest extends Specification {
 		where:
 		input                                         | name
 		"lajos"                                       | null
-		"git@github.com:prezi/lajos.git"              | "lajos"
+		"git@github.com:prezi/lajos.git/"             | "lajos"
 		"http://bela:geza@github.com/prezi/lajos.git" | "lajos"
 		"https://github.com/prezi/lajos"              | "lajos"
+		"https://github.com/prezi/lajos/"             | "lajos"
 	}
 }

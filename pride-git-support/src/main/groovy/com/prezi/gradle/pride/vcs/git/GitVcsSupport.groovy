@@ -77,6 +77,7 @@ class GitVcsSupport implements VcsSupport {
 						)
 						(.+?)				# repo name
 						(?:\.git)?			# optional .git suffix
+						\/?					# optional trailing slash
 					$/
 		def m = repositoryUrl =~ pattern
 		if (m) {
