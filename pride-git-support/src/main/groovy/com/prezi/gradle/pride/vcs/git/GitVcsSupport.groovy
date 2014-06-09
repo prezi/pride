@@ -67,7 +67,18 @@ class GitVcsSupport implements VcsSupport {
 
 	@Override
 	String resolveRepositoryName(String repositoryUrl) {
-		def m = repositoryUrl =~ /^(?:git@|(?:https?):\\/+).*[:\\/]([-\._\w]+?)(?:\.git)?\\/?$/
+		def pattern = /(?x)^
+						(?:
+							.+@.+:(?:.+\/)?	# SSH pattern prefix
+						|
+							https?:\/\/.+\/	# HTTP or HTTPS pattern prefix
+						|
+							git:\/\/.+\/	# Git pattern prefix
+						)
+						(.+?)				# repo name
+						(?:\.git)?			# optional .git suffix
+					$/
+		def m = repositoryUrl =~ pattern
 		if (m) {
 			return m[0][1]
 		} else {
