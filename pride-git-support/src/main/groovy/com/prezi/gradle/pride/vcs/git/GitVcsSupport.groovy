@@ -69,15 +69,24 @@ class GitVcsSupport implements VcsSupport {
 	String resolveRepositoryName(String repositoryUrl) {
 		def pattern = /(?x)^
 						(?:
-							.+@.+:(?:.+\/)?	# SSH pattern prefix
+							\w+@.+:(?:.+\/)?	# SCP-like pattern prefix
 						|
-							https?:\/\/.+\/	# HTTP or HTTPS pattern prefix
-						|
-							git:\/\/.+\/	# Git pattern prefix
+							(?:
+								git
+							|
+								https?
+							|
+								ftps?
+							|
+								rsync
+							|
+								ssh
+							):\/\/				# HTTP, HTTPS, FTP, FTPS and RSYNC pattern prefix
+							.+\/				# path to repo
 						)
-						(.+?)				# repo name
-						(?:\.git)?			# optional .git suffix
-						\/?					# optional trailing slash
+						(.+?)					# repo name
+						(?:\.git)?				# optional .git suffix
+						\/?						# optional trailing slash
 					$/
 		def m = repositoryUrl =~ pattern
 		if (m) {

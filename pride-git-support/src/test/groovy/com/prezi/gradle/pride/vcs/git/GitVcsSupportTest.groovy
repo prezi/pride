@@ -22,8 +22,11 @@ class GitVcsSupportTest extends Specification {
 		input                                         | name
 		"lajos"                                       | null
 		"git@github.com:prezi/lajos.git/"             | "lajos"
+		"tibor_123@github.com:prezi/lajos.git/"       | "lajos"
+		"ssh://git@github.com:prezi/lajos.git/"       | "lajos"
 		"http://bela:geza@github.com/prezi/lajos.git" | "lajos"
 		"https://github.com/prezi/lajos"              | "lajos"
-		"https://github.com/prezi/lajos/"             | "lajos"
+		"ftps://github.com/prezi/lajos.git"           | "lajos"
+		"rsync://github.com/prezi/lajos/"             | "lajos"
 	}
 }
