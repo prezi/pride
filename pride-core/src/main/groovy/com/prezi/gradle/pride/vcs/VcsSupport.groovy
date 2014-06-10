@@ -19,7 +19,7 @@ interface VcsSupport {
 	void update(File targetDirectory, boolean mirrored)
 
 	/**
-	 * Returns true if the local clone has uncommitted/pushed changes.
+	 * Returns true if the working copy / local repository has uncommitted changes.
 	 * @param targetDirectory
 	 * @return
 	 */
