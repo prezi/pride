@@ -46,7 +46,6 @@ class SvnVcsSupport implements VcsSupport {
 	@Override
 	void activate(String repositoryUrl, File targetDirectory) {
 		thrown new PrideException("svn doesn't support activate")
-		//ProcessUtils.executeIn(targetDirectory, ["git", "remote", "set-url", "origin", repositoryUrl])
 	}
 
 	@Override
@@ -56,7 +55,6 @@ class SvnVcsSupport implements VcsSupport {
 
 	@Override
 	String normalizeRepositoryUrl(String repositoryUrl) {
-		//TODO: what should we do for SVN here?
 		return repositoryUrl
 	}
 
