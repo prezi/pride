@@ -62,7 +62,7 @@ public class DoCommand extends AbstractExistingPrideCommand {
 					public boolean apply(final File excludeRepo) {
 						return includeRepo.getAbsoluteFile().equals(excludeRepo.getAbsoluteFile());
 					}
-				});
+				}, null);
 			}
 		});
 
