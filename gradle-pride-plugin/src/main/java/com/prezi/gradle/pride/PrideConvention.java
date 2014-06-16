@@ -14,7 +14,7 @@ import java.util.Map;
  * Adds a few useful methods to look up relative projects via project paths like ":sibling" or "::aunt".
  * We need this because Gradle by default does not allow relative project references to parent projects,
  * only children.
- * <p/>
+ *
  * Created by lptr on 02/04/14.
  */
 public class PrideConvention {
@@ -80,8 +80,9 @@ public class PrideConvention {
 
 	/**
 	 * <p>Locates a project dependency by notation. If the path is relative, it is interpreted relative to this project.
-	 * This is to be used from the <code>dependencies { ... }</code> block.</code></p>
+	 * This is to be used from the {@code dependencies { ... }} block.</p>
 	 *
+	 * @param notation A map containing the parameters to create the projet.
 	 * @return The project with the given path. Never returns null.
 	 * @throws org.gradle.api.UnknownProjectException If no project with the given path exists.
 	 */
