@@ -70,7 +70,7 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public String resolveRepositoryName(String repositoryUrl) {
+	public String resolveRepositoryName(String repository) {
 		// TODO Make this static
 		Pattern pattern = Pattern.compile("^"
 					+ "(?:"
@@ -83,7 +83,7 @@ public class GitVcsSupport implements VcsSupport {
 					+ "(?:\\.git)?"								// optional .git suffix
 					+ "/?"										// optional trailing slash
 					+ "$", Pattern.COMMENTS);
-		Matcher matcher = pattern.matcher(repositoryUrl);
+		Matcher matcher = pattern.matcher(repository);
 		if (matcher.matches()) {
 			return matcher.group(1);
 		} else {
