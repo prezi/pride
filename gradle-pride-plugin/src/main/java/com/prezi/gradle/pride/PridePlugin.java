@@ -144,7 +144,7 @@ public class PridePlugin implements Plugin<Project> {
 		if (!alreadyCheckedIfRunningFromRootOfPride) {
 			if (!Pride.containsPride(project.getRootDir())) {
 				logger.debug("No pride found in " + String.valueOf(project.getRootDir()));
-				for (File dir = project.getRootDir().getParentFile(); dir.canRead(); dir = dir.getParentFile()) {
+				for (File dir = project.getRootDir().getParentFile(); dir != null && dir.canRead(); dir = dir.getParentFile()) {
 					logger.debug("Checking pride in " + dir);
 					if (Pride.containsPride(dir)) {
 						logger.warn("WARNING: Found a pride in parent directory " + dir + ". " +
