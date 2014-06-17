@@ -203,4 +203,7 @@ task wrapper(type: Wrapper) {
 
 allprojects {
 	tasks.withType(Upload).all { task -> task.dependsOn "check" }
+	tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
+		options.compilerArgs << "-Xlint:unchecked"
+	}
 }
