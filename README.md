@@ -186,6 +186,10 @@ You can disable caching on a per-repo basis by using `pride add --no-repo-cache 
 
     repo.cache.always=false
 
+## Contribution
+
+Pull requests are more than welcome. For discussions, please head over to the [mailing list](https://groups.google.com/forum/#!forum/pride-dev).
+
 ## Why the name?
 
 Working with a large modular application is like herding cats. Dangerous cats. Like a pride of lions.
