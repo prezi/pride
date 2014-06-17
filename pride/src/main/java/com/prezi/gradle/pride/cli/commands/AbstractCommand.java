@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.CliConfiguration;
 import com.prezi.gradle.pride.vcs.RepoCache;
@@ -14,8 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public abstract class AbstractCommand implements Runnable {
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
@@ -58,7 +57,7 @@ public abstract class AbstractCommand implements Runnable {
 
 	protected final Configuration getConfiguration() {
 		if (processedConfiguration == null) {
-			processedConfiguration = new CompositeConfiguration(new ArrayList<Configuration>(Arrays.asList(fileConfiguration, new CliConfiguration.Defaults())));
+			processedConfiguration = new CompositeConfiguration(Lists.newArrayList(fileConfiguration, new CliConfiguration.Defaults()));
 			overrideConfiguration(processedConfiguration);
 		}
 

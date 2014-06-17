@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.vcs.git;
 
+import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.ProcessUtils;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import org.apache.commons.configuration.Configuration;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +30,7 @@ public class GitVcsSupport implements VcsSupport {
 		FileUtils.deleteDirectory(targetDirectory);
 
 		log.debug("Cloning {} into {}", repositoryUrl, targetDirectory);
-		List<String> commandLine = Arrays.asList("git", "clone", repositoryUrl, targetDirectory.toString());
+		List<String> commandLine = Lists.newArrayList("git", "clone", repositoryUrl, targetDirectory.toString());
 		if (mirrored) {
 			commandLine.add("--mirror");
 		}
@@ -39,7 +39,7 @@ public class GitVcsSupport implements VcsSupport {
 
 	@Override
 	public void update(File targetDirectory, boolean mirrored) throws IOException {
-		List<String> fetchCommand = Arrays.asList("git", "fetch");
+		List<String> fetchCommand = Lists.newArrayList("git", "fetch");
 
 		// Cached repositories need to update all branches
 		if (mirrored) {
@@ -50,13 +50,13 @@ public class GitVcsSupport implements VcsSupport {
 		// Update working copy unless this is a cached clone
 		if (!mirrored) {
 			String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
-			ProcessUtils.executeIn(targetDirectory, Arrays.asList(updateCommand.split(" ")));
+			ProcessUtils.executeIn(targetDirectory, Lists.newArrayList(updateCommand.split(" ")));
 		}
 	}
 
 	@Override
 	public void activate(String repositoryUrl, File targetDirectory) throws IOException {
-		ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "set-url", "origin", repositoryUrl));
+		ProcessUtils.executeIn(targetDirectory, Lists.newArrayList("git", "remote", "set-url", "origin", repositoryUrl));
 	}
 
 	@Override
