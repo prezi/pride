@@ -143,6 +143,7 @@ project("pride-core") {
 		compile "commons-lang:commons-lang:2.6"
 		compile "commons-codec:commons-codec:1.9"
 		compile "commons-io:commons-io:2.4"
+		compile "com.google.guava:guava:17.0"
 		compile "org.slf4j:jcl-over-slf4j:1.7.7"
 	}
 
@@ -169,7 +170,6 @@ project("pride") {
 		compile project(path: ":pride-git-support")
 		compile "org.gradle:gradle-tooling-api:1.12"
 		compile "io.airlift:airline:0.6"
-		compile "com.google.guava:guava:17.0"
 		compile "ch.qos.logback:logback-classic:1.1.2"
 	}
 
