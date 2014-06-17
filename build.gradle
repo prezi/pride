@@ -1,8 +1,8 @@
 String gitVersion
 if (hasProperty("release")) {
-	gitVersion = [ "git", "describe", "--match", "[0-9]*", "--dirty"].execute().text.trim()
+	gitVersion = ["git", "describe", "--match", "[0-9]*", "--dirty"].execute().text.trim()
 } else {
-	gitVersion = [ "git", "describe", "--match", "[0-9]*", "--abbrev=0"].execute().text.trim() + "-SNAPSHOT"
+	gitVersion = ["git", "describe", "--match", "[0-9]*", "--abbrev=0"].execute().text.trim() + "-SNAPSHOT"
 }
 
 task version {
@@ -149,7 +149,7 @@ project("pride-core") {
 	processResources {
 		inputs.property "version", version
 		filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-			version: version
+				version: version
 		]
 	}
 }
@@ -198,7 +198,7 @@ project("gradle-pride-plugin") {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+	gradleVersion = '1.12'
 }
 
 allprojects {
