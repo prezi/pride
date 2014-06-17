@@ -23,9 +23,9 @@ public class PrideCli {
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(PrideCli.class);
 
+	@SuppressWarnings("unchecked")
 	public static void main(String... args) {
 		Cli.CliBuilder<Runnable> builder = Cli.builder("pride");
-		//noinspection unchecked
 		builder
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help.class)
