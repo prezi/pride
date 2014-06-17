@@ -38,9 +38,7 @@ subprojects { subproject ->
 
 	dependencies {
 		testCompile "junit:junit:4.11"
-		testCompile("org.spockframework:spock-core:0.7-groovy-1.8") {
-			exclude group: "org.codehaus.groovy"
-		}
+		testCompile("org.spockframework:spock-core:0.7-groovy-1.8")
 		testRuntime "org.slf4j:slf4j-simple:1.7.7"
 	}
 
@@ -115,9 +113,10 @@ subprojects { subproject ->
 		}
 	}
 
-	task groovydocJar(type: Jar, dependsOn: groovydoc) {
+	task javadocJar(type: Jar, dependsOn: javadoc) {
+		dependsOn javadoc
 		classifier = "javadoc"
-		from "build/docs/groovydoc"
+		from "build/docs/javadoc"
 	}
 
 	task sourcesJar(type: Jar) {
@@ -131,17 +130,19 @@ subprojects { subproject ->
 
 	artifacts {
 		archives jar
-		archives groovydocJar
+		archives javadocJar
 		archives sourcesJar
 	}
 }
 
 project("pride-core") {
 	dependencies {
-		compile "org.codehaus.groovy:groovy:1.8.6"
 		compile "commons-configuration:commons-configuration:1.10", {
 			exclude group: "commons-logging"
 		}
+		compile "commons-lang:commons-lang:2.6"
+		compile "commons-codec:commons-codec:1.9"
+		compile "commons-io:commons-io:2.4"
 		compile "org.slf4j:jcl-over-slf4j:1.7.7"
 	}
 
@@ -168,6 +169,7 @@ project("pride") {
 		compile project(path: ":pride-git-support")
 		compile "org.gradle:gradle-tooling-api:1.12"
 		compile "io.airlift:airline:0.6"
+		compile "com.google.guava:guava:17.0"
 		compile "ch.qos.logback:logback-classic:1.1.2"
 	}
 
@@ -190,12 +192,15 @@ project("pride") {
 project("gradle-pride-plugin") {
 	dependencies {
 		compile gradleApi()
-		compile project(":pride-core"), {
-			exclude group: "org.codehaus.groovy"
-		}
+		compile project(":pride-core")
+		compile "com.google.guava:guava:17.0"
 	}
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
+}
+
+allprojects {
+	tasks.withType(Upload).all { task -> task.dependsOn "check" }
 }
