@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.ProcessUtils;
@@ -25,12 +26,12 @@ public class DoCommand extends AbstractExistingPrideCommand {
 	@Option(name = {"-I", "--include"},
 			title = "repo",
 			description = "Execute the command on repo (can be specified multiple times)")
-	private List<File> includeRepos;
+	private List<File> includeRepos = Lists.newArrayList();
 
 	@Option(name = "--exclude",
 			title = "repo",
 			description = "Do not execute command on repo (can be specified multiple times)")
-	private List<File> excludeRepos;
+	private List<File> excludeRepos = Lists.newArrayList();
 
 	@Option(name = {"-b", "--bare"},
 			description = "Only print the result of the executed commands")
