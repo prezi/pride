@@ -25,13 +25,13 @@ public class DoCommand extends AbstractExistingPrideCommand {
 
 	@Option(name = {"-I", "--include"},
 			title = "repo",
-			description = "Execute the command on repo (can be specified multiple times)")
-	private List<File> includeRepos = Lists.newArrayList();
+			description = "Execute the command on module (can be specified multiple times)")
+	private List<String> includeModules = Lists.newArrayList();
 
 	@Option(name = "--exclude",
 			title = "repo",
-			description = "Do not execute command on repo (can be specified multiple times)")
-	private List<File> excludeRepos = Lists.newArrayList();
+			description = "Do not execute command on module (can be specified multiple times)")
+	private List<String> excludeModules = Lists.newArrayList();
 
 	@Option(name = {"-b", "--bare"},
 			description = "Only print the result of the executed commands")
@@ -43,31 +43,25 @@ public class DoCommand extends AbstractExistingPrideCommand {
 
 	@Override
 	public void runInPride(final Pride pride) throws IOException {
-		Collection<File> includeDirectories;
-		if (!includeRepos.isEmpty()) {
-			includeDirectories = new TreeSet<File>(includeRepos);
-		} else {
-			includeDirectories = Collections2.transform(pride.getModules(), new Function<Module, File>() {
+		Collection<Module> includeModules;
+		if (!this.includeModules.isEmpty()) {
+			includeModules = Collections2.transform(this.includeModules, new Function<String, Module>() {
 				@Override
-				public File apply(Module module) {
-					return pride.getModuleDirectory(module.name);
+				public Module apply(String module) {
+					return pride.getModule(module);
 				}
 			});
+		} else {
+			includeModules = pride.getModules();
 		}
-
-		Collection<File> moduleDirectories = Collections2.filter(includeDirectories, new Predicate<File>() {
+		Collection<Module> modules = Collections2.filter(includeModules, new Predicate<Module>() {
 			@Override
-			public boolean apply(final File includeRepo) {
-				return null == Iterables.find(excludeRepos, new Predicate<File>() {
-					@Override
-					public boolean apply(final File excludeRepo) {
-						return includeRepo.getAbsoluteFile().equals(excludeRepo.getAbsoluteFile());
-					}
-				}, null);
+			public boolean apply(Module module) {
+				return !excludeModules.contains(module.name);
 			}
 		});
-
-		for (File moduleDirectory : moduleDirectories) {
+		for (Module module : modules) {
+			File moduleDirectory = pride.getModuleDirectory(module.name);
 			if (!explicitBare) {
 				logger.info("\n{} $ {}", moduleDirectory, StringUtils.join(commandLine, " "));
 			}
