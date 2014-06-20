@@ -35,9 +35,9 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 		}
 
 		for (Module module : modulesToUpdate) {
-			logger.info((String) "Updating " + module.name);
-			File moduleDir = pride.getModuleDirectory(module.name);
-			module.vcs.getSupport().update(moduleDir, false);
+			logger.info((String) "Updating " + module.getName());
+			File moduleDir = pride.getModuleDirectory(module.getName());
+			module.getVcs().getSupport().update(moduleDir, false);
 		}
 	}
 }

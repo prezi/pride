@@ -65,7 +65,7 @@ public class PrideInitializer {
 		settingsFile.delete();
 		FileUtils.write(settingsFile, DO_NOT_MODIFY_WARNING);
 		for (Module module : pride.getModules()) {
-			File moduleDirectory = new File(pride.rootDirectory, module.name);
+			File moduleDirectory = new File(pride.rootDirectory, module.getName());
 			if (Pride.isValidModuleDirectory(moduleDirectory)) {
 				PrideInitializer.initializeModule(pride, moduleDirectory, settingsFile);
 			}

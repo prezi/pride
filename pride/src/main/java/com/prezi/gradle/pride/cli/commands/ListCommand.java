@@ -47,6 +47,6 @@ public class ListCommand extends AbstractExistingPrideCommand {
 	}
 
 	private static String formatModule(final Module module, boolean onlyNames) {
-		return onlyNames ? module.name : "m " + module.name + " (" + module.vcs.getType() + ")";
+		return onlyNames ? module.getName() : "m " + module.getName() + " (" + module.getVcs().getType() + ")";
 	}
 }

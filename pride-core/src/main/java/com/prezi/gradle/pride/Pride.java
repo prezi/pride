@@ -106,7 +106,7 @@ public class Pride {
 	public File getModuleDirectory(String name) {
 		// Do this round-trip to make sure we have the module
 		Module module = getModule(name);
-		return new File(rootDirectory, module.name);
+		return new File(rootDirectory, module.getName());
 	}
 
 	public void save() throws IOException {
@@ -114,7 +114,7 @@ public class Pride {
 		modulesFile.delete();
 		modulesFile.createNewFile();
 		for (Module module : modules.values()) {
-			FileUtils.write(modulesFile, module.vcs.getType() + "|" + module.name + "\n", true);
+			FileUtils.write(modulesFile, module.getVcs().getType() + "|" + module.getName() + "\n", true);
 		}
 	}
 
@@ -158,7 +158,7 @@ public class Pride {
 		}
 		TreeMap<String, Module> modulesMap = new TreeMap<String, Module>();
 		for (Module module : modules) {
-			modulesMap.put(module.name, module);
+			modulesMap.put(module.getName(), module);
 		}
 		return modulesMap;
 	}

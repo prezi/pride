@@ -3,7 +3,6 @@ package com.prezi.gradle.pride.cli.commands;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
@@ -17,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.TreeSet;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 @Command(name = "do", description = "Execute a command on a set of the modules")
@@ -57,11 +55,11 @@ public class DoCommand extends AbstractExistingPrideCommand {
 		Collection<Module> modules = Collections2.filter(includeModules, new Predicate<Module>() {
 			@Override
 			public boolean apply(Module module) {
-				return !excludeModules.contains(module.name);
+				return !excludeModules.contains(module.getName());
 			}
 		});
 		for (Module module : modules) {
-			File moduleDirectory = pride.getModuleDirectory(module.name);
+			File moduleDirectory = pride.getModuleDirectory(module.getName());
 			if (!explicitBare) {
 				logger.info("\n{} $ {}", moduleDirectory, StringUtils.join(commandLine, " "));
 			}
