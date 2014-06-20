@@ -18,10 +18,13 @@ import java.io.IOException;
 
 public abstract class AbstractCommand implements Runnable {
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
+
 	@Option(type = OptionType.GLOBAL, name = {"-v", "--verbose"}, description = "Verbose mode")
 	public boolean verbose;
+
 	@Option(type = OptionType.GLOBAL, name = {"-q", "--quiet"}, description = "Quite mode")
 	public boolean quiet;
+
 	protected final FileConfiguration fileConfiguration = loadConfiguration();
 	private CompositeConfiguration processedConfiguration;
 	private RepoCache repoCache;
@@ -30,10 +33,6 @@ public abstract class AbstractCommand implements Runnable {
 	final public void run() {
 		try {
 			runInternal();
-		} catch (PrideException ex) {
-			throw ex;
-		} catch (RuntimeException ex) {
-			throw ex;
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}

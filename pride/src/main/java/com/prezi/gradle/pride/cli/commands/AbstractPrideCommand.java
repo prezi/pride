@@ -13,6 +13,7 @@ public abstract class AbstractPrideCommand extends AbstractCommand {
 			title = "directory",
 			description = "Initializes the pride in the given directory instead of the current directory")
 	private File explicitPrideDirectory;
+
 	private VcsManager vcsManager;
 
 	protected File getPrideDirectory() {
