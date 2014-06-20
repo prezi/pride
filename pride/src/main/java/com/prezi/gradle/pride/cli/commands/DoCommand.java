@@ -1,6 +1,5 @@
 package com.prezi.gradle.pride.cli.commands;
 
-import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.ProcessUtils;
@@ -18,14 +17,14 @@ import java.util.List;
 public class DoCommand extends AbstractExistingPrideCommand {
 
 	@Option(name = {"-I", "--include"},
-			title = "repo",
+			title = "module",
 			description = "Execute the command on module (can be specified multiple times)")
-	private List<String> includeModules = Lists.newArrayList();
+	private List<String> includeModules;
 
 	@Option(name = "--exclude",
-			title = "repo",
+			title = "module",
 			description = "Do not execute command on module (can be specified multiple times)")
-	private List<String> excludeModules = Lists.newArrayList();
+	private List<String> excludeModules;
 
 	@Option(name = {"-b", "--bare"},
 			description = "Only print the result of the executed commands")
