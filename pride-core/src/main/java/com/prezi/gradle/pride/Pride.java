@@ -1,5 +1,8 @@
 package com.prezi.gradle.pride;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
@@ -103,6 +106,29 @@ public class Pride {
 		return modules.get(name);
 	}
 
+	public Collection<Module> filterModules(Collection<String> includes, final Collection<String> excludes) {
+		Collection<Module> modules;
+		if (includes != null && !includes.isEmpty()) {
+			modules = Collections2.transform(includes, new Function<String, Module>() {
+				@Override
+				public Module apply(String module) {
+					return getModule(module);
+				}
+			});
+		} else {
+			modules = getModules();
+		}
+		if (excludes != null && !excludes.isEmpty()) {
+			modules = Collections2.filter(modules, new Predicate<Module>() {
+				@Override
+				public boolean apply(Module module) {
+					return !excludes.contains(module.getName());
+				}
+			});
+		}
+		return modules;
+	}
+
 	public File getModuleDirectory(String name) {
 		// Do this round-trip to make sure we have the module
 		Module module = getModule(name);
@@ -144,7 +170,7 @@ public class Pride {
 
 			final File moduleDir = new File(rootDirectory, moduleName);
 			if (!moduleDir.isDirectory()) {
-				throw new PrideException("Module \"" + moduleName + "\" is missing (" + moduleDir +")");
+				throw new PrideException("Module \"" + moduleName + "\" is missing (" + moduleDir + ")");
 			}
 
 			if (!isValidModuleDirectory(moduleDir)) {

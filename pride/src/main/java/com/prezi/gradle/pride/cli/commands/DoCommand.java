@@ -1,8 +1,5 @@
 package com.prezi.gradle.pride.cli.commands;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
@@ -14,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
@@ -41,24 +37,7 @@ public class DoCommand extends AbstractExistingPrideCommand {
 
 	@Override
 	public void runInPride(final Pride pride) throws IOException {
-		Collection<Module> includeModules;
-		if (!this.includeModules.isEmpty()) {
-			includeModules = Collections2.transform(this.includeModules, new Function<String, Module>() {
-				@Override
-				public Module apply(String module) {
-					return pride.getModule(module);
-				}
-			});
-		} else {
-			includeModules = pride.getModules();
-		}
-		Collection<Module> modules = Collections2.filter(includeModules, new Predicate<Module>() {
-			@Override
-			public boolean apply(Module module) {
-				return !excludeModules.contains(module.getName());
-			}
-		});
-		for (Module module : modules) {
+		for (Module module : pride.filterModules(includeModules, excludeModules)) {
 			File moduleDirectory = pride.getModuleDirectory(module.getName());
 			if (!explicitBare) {
 				logger.info("\n{} $ {}", moduleDirectory, StringUtils.join(commandLine, " "));
