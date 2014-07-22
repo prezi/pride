@@ -34,7 +34,7 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration);
 		if (explicitRefreshDependencies != null) {
-			configuration.setProperty(CliConfiguration.COMMAND_UPDATE_REFRESH, explicitRefreshDependencies);
+			configuration.setProperty(CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 			module.getVcs().getSupport().update(moduleDir, false);
 		}
 
-		if (getConfiguration().getBoolean(CliConfiguration.COMMAND_UPDATE_REFRESH)) {
+		if (getConfiguration().getBoolean(CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES)) {
 			PrideInitializer.refreshDependencies(pride);
 		}
 	}
