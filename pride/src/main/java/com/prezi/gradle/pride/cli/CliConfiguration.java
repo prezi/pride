@@ -9,6 +9,7 @@ public class CliConfiguration {
 	public static final String REPO_TYPE_DEFAULT = "repo.type.default";
 	public static final String REPO_BASE_URL = "repo.base.url";
 	public static final String REPO_CACHE_ALWAYS = "repo.cache.always";
+	public static final String COMMAND_UPDATE_REFRESH = "command.update.refresh.always";
 
 	public static class Defaults extends MapConfiguration {
 		public Defaults() {
@@ -17,6 +18,7 @@ public class CliConfiguration {
 			setProperty(PRIDE_HOME, property != null ? property : System.getProperty("user.home") + "/.pride");
 			setProperty(REPO_TYPE_DEFAULT, "git");
 			setProperty(REPO_CACHE_ALWAYS, true);
+			setProperty(COMMAND_UPDATE_REFRESH, false);
 		}
 	}
 }

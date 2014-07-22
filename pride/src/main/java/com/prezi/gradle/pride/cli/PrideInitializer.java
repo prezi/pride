@@ -100,4 +100,13 @@ public class PrideInitializer {
 			connection.close();
 		}
 	}
+
+	public static void refreshDependencies(Pride pride) {
+		logger.info("Refreshing dependencies");
+		ProjectConnection connection = gradleConnector.get().forProjectDirectory(pride.rootDirectory).connect();
+		connection.newBuild()
+				.forTasks("doNothing")
+				.withArguments("--refresh-dependencies")
+				.run();
+	}
 }

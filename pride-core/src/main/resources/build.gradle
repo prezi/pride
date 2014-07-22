@@ -18,3 +18,7 @@ childProjects.each { _, Project child ->
 		}
 	}
 }
+
+// Required to be able to do nothing during refreshing dependencies
+task doNothing
+
