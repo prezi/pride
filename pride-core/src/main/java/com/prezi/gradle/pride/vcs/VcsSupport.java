@@ -18,6 +18,15 @@ public interface VcsSupport {
 	void update(File targetDirectory, boolean mirrored) throws IOException;
 
 	/**
+	 * Returns true if the working copy / local repository has uncommitted changes.
+	 *
+	 * @param targetDirectory The directory where the local clone resides.
+	 * @return {@code true} if there are changes in the local clone.
+	 * @throws java.io.IOException If an I/O error occurs.
+	 */
+	boolean hasChanges(File targetDirectory) throws IOException;
+
+	/**
 	 * Activates a clone just cloned form a cache to work as if it was cloned from
 	 * the original URL. In Git this would do {@code git remote set-url origin <repositoryUrl>}.
 	 *

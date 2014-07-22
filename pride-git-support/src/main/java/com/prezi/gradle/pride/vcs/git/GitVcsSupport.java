@@ -1,6 +1,8 @@
 package com.prezi.gradle.pride.vcs.git;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
 import com.prezi.gradle.pride.ProcessUtils;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import org.apache.commons.configuration.Configuration;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,6 +55,13 @@ public class GitVcsSupport implements VcsSupport {
 			String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
 			ProcessUtils.executeIn(targetDirectory, Lists.newArrayList(updateCommand.split(" ")));
 		}
+	}
+
+	@Override
+	public boolean hasChanges(File targetDirectory) throws IOException {
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "status", "--porcelain"), false, false);
+		String result = new String(ByteStreams.toByteArray(process.getInputStream()), Charsets.UTF_8);
+		return !result.trim().isEmpty();
 	}
 
 	@Override
