@@ -162,6 +162,12 @@ project("pride-git-support") {
 	}
 }
 
+project("pride-svn-support") {
+	dependencies {
+		compile project(path: ":pride-core")
+	}
+}
+
 project("pride") {
 	apply plugin: "application"
 	mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
@@ -173,6 +179,7 @@ project("pride") {
 		compile "ch.qos.logback:logback-classic:1.1.2"
 
 		runtime project(path: ":pride-git-support")
+		runtime project(path: ":pride-svn-support")
 	}
 
 	configure(applicationDistribution) {
