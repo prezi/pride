@@ -74,7 +74,7 @@ public class AddCommand extends AbstractExistingPrideCommand {
 		}
 
 		// Get some support for our VCS
-		Vcs vcs = getVcs();
+		Vcs vcs = getDefaultVcs();
 		VcsSupport vcsSupport = vcs.getSupport();
 
 		// Determine if we can use a repo cache

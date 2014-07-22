@@ -37,7 +37,7 @@ public class InitCommand extends AbstractPrideCommand {
 		}
 
 		final Pride pride = PrideInitializer.create(getPrideDirectory(), getConfiguration(), getVcsManager());
-		final Vcs vcs = getVcs();
+		final Vcs vcs = getDefaultVcs();
 
 		if (!explicitNoAddExisting) {
 			logger.debug("Adding existing modules");

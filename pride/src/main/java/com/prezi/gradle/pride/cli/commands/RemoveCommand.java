@@ -2,6 +2,7 @@ package com.prezi.gradle.pride.cli.commands;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.PrideInitializer;
@@ -43,9 +44,10 @@ public class RemoveCommand extends AbstractExistingPrideCommand {
 			Collection<String> changedModules = Collections2.filter(modulesNames, new Predicate<String>() {
 				@Override
 				public boolean apply(String moduleName) {
-					File moduleDir = pride.getModuleDirectory(moduleName);
+					Module module = pride.getModule(moduleName);
+					File moduleDir = pride.getModuleDirectory(module.getName());
 					try {
-						return getVcs().getSupport().hasChanges(moduleDir);
+						return module.getVcs().getSupport().hasChanges(moduleDir);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

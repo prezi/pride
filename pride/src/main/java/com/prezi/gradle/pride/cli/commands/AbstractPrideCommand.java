@@ -29,7 +29,7 @@ public abstract class AbstractPrideCommand extends AbstractCommand {
 		return vcsManager;
 	}
 
-	protected Vcs getVcs() {
+	protected Vcs getDefaultVcs() {
 		return getVcs(getConfiguration().getString(CliConfiguration.REPO_TYPE_DEFAULT));
 	}
 
