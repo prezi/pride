@@ -21,7 +21,7 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 			description = "Do not execute command on module (can be specified multiple times)")
 	private List<String> excludeModules;
 
-	@Option(name = {"-R", "--refresh-dependencies"},
+	@Option(name = {"-D", "--refresh-dependencies"},
 			description = "Refresh Gradle dependencies after update completed")
 	private Boolean explicitRefreshDependencies;
 
