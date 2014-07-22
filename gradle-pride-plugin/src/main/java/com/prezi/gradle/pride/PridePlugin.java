@@ -58,8 +58,8 @@ public class PridePlugin implements Plugin<Project> {
 
 				// Collect local projects in the session
 				logger.debug("Resolving dynamic dependencies among projects: " + projectPathsByGroupAndName.keySet());
-				for (Map.Entry<Configuration, List<Dependency>> entry : dynamicDependencies.getDependencies().entrySet()) {
-					Configuration configuration = entry.getKey();
+				for (Map.Entry<String, List<Dependency>> entry : dynamicDependencies.getDependencies().entrySet()) {
+					Configuration configuration = project.getConfigurations().getByName(entry.getKey());
 					List<Dependency> dependencies = entry.getValue();
 					Set<Dependency> localizedDependencies = localizeDynamicDependencies(dependencies, project, projectPathsByGroupAndName);
 					configuration.getDependencies().addAll(localizedDependencies);

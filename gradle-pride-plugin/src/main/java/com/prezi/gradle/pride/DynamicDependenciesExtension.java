@@ -1,5 +1,7 @@
 package com.prezi.gradle.pride;
 
+import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Maps;
 import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
 import groovy.lang.MissingMethodException;
@@ -8,15 +10,13 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DynamicDependenciesExtension extends GroovyObjectSupport {
 
 	private final Project project;
-	private final LinkedHashMap<Configuration, List<Dependency>> dependencies = new LinkedHashMap<Configuration, List<Dependency>>();
+	private final Map<String, List<Dependency>> dependencies = Maps.newLinkedHashMap();
 
 	public DynamicDependenciesExtension(Project project) {
 		this.project = project;
@@ -44,34 +44,38 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		}
 	}
 
+	public void add(Configuration configuration, Dependency dependency) {
+		List<Dependency> dependenciesForConfig = dependencies.get(configuration.getName());
+		if (dependenciesForConfig == null) {
+			dependenciesForConfig = Lists.newArrayList();
+			dependencies.put(configuration.getName(), dependenciesForConfig);
+		}
+
+		dependenciesForConfig.add(dependency);
+		project.getLogger().debug("Added dynamic dependency " + dependency.getGroup() + ":" + dependency.getName() + ":" + dependency.getVersion() + " (" + dependency.getClass().getName() + ")");
+	}
+
 	@SuppressWarnings("unchecked")
 	private Dependency doAdd(Configuration configuration, Object dependencyNotation, Closure closure) {
 		// When not set, group and version should come from the current project
 		if (dependencyNotation instanceof Map) {
-			dependencyNotation = new LinkedHashMap((Map) dependencyNotation);
-			if (!((LinkedHashMap) dependencyNotation).containsKey("group")) {
-				((LinkedHashMap) dependencyNotation).put("group", project.getGroup());
+			dependencyNotation = Maps.newLinkedHashMap((Map) dependencyNotation);
+			if (!((Map) dependencyNotation).containsKey("group")) {
+				((Map) dependencyNotation).put("group", project.getGroup());
 			}
 
-			if (!((LinkedHashMap) dependencyNotation).containsKey("version")) {
-				((LinkedHashMap) dependencyNotation).put("version", project.getVersion());
+			if (!((Map) dependencyNotation).containsKey("version")) {
+				((Map) dependencyNotation).put("version", project.getVersion());
 			}
 		}
 
 		// Let the DependencyHandler parse our dependency definition
 		Dependency dependency = project.getDependencies().create(dependencyNotation, closure);
-		List<Dependency> dependenciesForConfig = dependencies.get(configuration);
-		if (dependenciesForConfig == null) {
-			dependenciesForConfig = new ArrayList();
-			dependencies.put(configuration, dependenciesForConfig);
-		}
-
-		dependenciesForConfig.add(dependency);
-		project.getLogger().debug("Added dynamic dependency " + dependency.getGroup() + ":" + dependency.getName() + ":" + dependency.getVersion() + " (" + dependency.getClass().getName() + ")");
+		add(configuration, dependency);
 		return dependency;
 	}
 
-	public final LinkedHashMap<Configuration, List<Dependency>> getDependencies() {
+	public final Map<String, List<Dependency>> getDependencies() {
 		return dependencies;
 	}
 
