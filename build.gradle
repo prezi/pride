@@ -168,10 +168,11 @@ project("pride") {
 
 	dependencies {
 		compile project(path: ":pride-core")
-		compile project(path: ":pride-git-support")
 		compile "org.gradle:gradle-tooling-api:2.0"
 		compile "io.airlift:airline:0.6"
 		compile "ch.qos.logback:logback-classic:1.1.2"
+
+		runtime project(path: ":pride-git-support")
 	}
 
 	configure(applicationDistribution) {
