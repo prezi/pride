@@ -190,7 +190,15 @@ public class Pride {
 	}
 
 	public static boolean isValidModuleDirectory(File dir) {
-		return !dir.getName().startsWith(".") && ArrayUtils.contains(dir.list(), GRADLE_BUILD_FILE);
+		if (dir.getName().startsWith(".")) {
+			return false;
+		}
+		for (String fileName : dir.list()) {
+			if (GRADLE_BUILD_FILE.equals(fileName) || GRADLE_SETTINGS_FILE.equals(fileName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static File getPrideConfigDirectory(File prideDirectory) {
