@@ -1,6 +1,6 @@
 package com.prezi.gradle.pride;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
