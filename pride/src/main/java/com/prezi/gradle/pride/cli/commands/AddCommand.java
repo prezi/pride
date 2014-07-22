@@ -1,6 +1,8 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.CliConfiguration;
@@ -90,34 +92,44 @@ public class AddCommand extends AbstractExistingPrideCommand {
 		boolean recursive = getConfiguration().getBoolean(CliConfiguration.REPO_RECURSIVE);
 
 		// Clone repositories
+		List<String> failedModules = Lists.newArrayList();
 		for (String module : modules) {
-			String moduleName = vcsSupport.resolveRepositoryName(module);
-			String repoUrl;
-			if (!StringUtils.isEmpty(moduleName)) {
-				repoUrl = module;
-			} else {
-				moduleName = module;
-				repoUrl = getRepoBaseUrl() + moduleName;
+			try {
+				String moduleName = vcsSupport.resolveRepositoryName(module);
+				String repoUrl;
+				if (!StringUtils.isEmpty(moduleName)) {
+					repoUrl = module;
+				} else {
+					moduleName = module;
+					repoUrl = getRepoBaseUrl() + moduleName;
+				}
+
+				logger.info("Adding " + moduleName + " from " + repoUrl);
+
+				File moduleInPride = new File(getPrideDirectory(), moduleName);
+				if (useRepoCache) {
+					getRepoCache().checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
+				} else {
+					vcsSupport.checkout(repoUrl, moduleInPride, recursive, false);
+				}
+				pride.addModule(moduleName, vcs);
+			} catch (Exception ex) {
+				logger.debug("Could not add {}", module, ex);
+				failedModules.add(module);
 			}
-
-			logger.info("Adding " + moduleName + " from " + repoUrl);
-
-			File moduleInPride = new File(getPrideDirectory(), moduleName);
-			if (useRepoCache) {
-				getRepoCache().checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
-			} else {
-				vcsSupport.checkout(repoUrl, moduleInPride, recursive, false);
-			}
-
-			pride.addModule(moduleName, vcs);
 		}
+
+		pride.save();
+
 		try {
 			PrideInitializer.reinitialize(pride);
 		} catch (Exception ex) {
 			throw new PrideException("There was a problem reinitializing the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
+		} finally {
+			if (!failedModules.isEmpty()) {
+				logger.error("Could not add the following modules:\n\n\t* {}", Joiner.on("\n\t* ").join(failedModules));
+			}
 		}
-
-		pride.save();
 	}
 
 	@Override
