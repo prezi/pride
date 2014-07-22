@@ -25,6 +25,10 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 			description = "Refresh Gradle dependencies after update completed")
 	private Boolean explicitRefreshDependencies;
 
+	@Option(name = {"-r", "--recursive"},
+			description = "Update sub-modules recursively")
+	private Boolean explicitRecursive;
+
 	@Arguments(required = false,
 			title = "modules",
 			description = "The modules to update (updates all modules if none specified)")
@@ -33,6 +37,9 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 	@Override
 	protected void overrideConfiguration(Configuration configuration) {
 		super.overrideConfiguration(configuration);
+		if (explicitRecursive != null) {
+			configuration.setProperty(CliConfiguration.REPO_RECURSIVE, explicitRecursive);
+		}
 		if (explicitRefreshDependencies != null) {
 			configuration.setProperty(CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
 		}
@@ -40,10 +47,11 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 
 	@Override
 	public void runInPride(final Pride pride) throws IOException {
+		boolean recursive = getConfiguration().getBoolean(CliConfiguration.REPO_RECURSIVE);
 		for (Module module : pride.filterModules(includeModules, excludeModules)) {
 			logger.info("Updating " + module.getName());
 			File moduleDir = pride.getModuleDirectory(module.getName());
-			module.getVcs().getSupport().update(moduleDir, false);
+			module.getVcs().getSupport().update(moduleDir, recursive, false);
 		}
 
 		if (getConfiguration().getBoolean(CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES)) {

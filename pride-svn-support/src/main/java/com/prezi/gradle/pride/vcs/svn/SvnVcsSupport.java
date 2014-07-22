@@ -27,7 +27,7 @@ public class SvnVcsSupport implements VcsSupport {
 	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport.class);
 
 	@Override
-	public void checkout(String repositoryUrl, File targetDirectory, boolean mirrored) throws IOException {
+	public void checkout(String repositoryUrl, File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
@@ -42,7 +42,7 @@ public class SvnVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public void update(File targetDirectory, boolean mirrored) throws IOException {
+	public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
 		ProcessUtils.executeIn(targetDirectory, Arrays.asList("svn", "update"));
 	}
 

@@ -43,7 +43,7 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public void checkout(String repositoryUrl, File targetDirectory, boolean mirrored) throws IOException {
+	public void checkout(String repositoryUrl, File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
@@ -51,12 +51,14 @@ public class GitVcsSupport implements VcsSupport {
 		List<String> commandLine = Lists.newArrayList("git", "clone", repositoryUrl, targetDirectory.getPath());
 		if (mirrored) {
 			commandLine.add("--mirror");
+		} else if (recursive) {
+			commandLine.add("--recursive");
 		}
 		ProcessUtils.executeIn(null, commandLine);
 	}
 
 	@Override
-	public void update(File targetDirectory, boolean mirrored) throws IOException {
+	public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
 		// Cached repositories need to update all branches
 		if (!mirrored) {
 			// Fetch changes
@@ -65,6 +67,11 @@ public class GitVcsSupport implements VcsSupport {
 			// Update working copy
 			String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
 			ProcessUtils.executeIn(targetDirectory, Arrays.asList((String[]) updateCommand.split(" ")));
+
+			// Update submodules if necessary
+			if (recursive) {
+				ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "submodule", "update", "--init", "--recursive"));
+			}
 		} else {
 			// Update the remote
 			ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "update", "--prune"));

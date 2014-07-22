@@ -4,7 +4,16 @@ import java.io.File;
 import java.io.IOException;
 
 public interface VcsSupport {
-	void checkout(String repositoryUrl, File targetDirectory, boolean mirrored) throws IOException;
+	/**
+	 * Clone a repository into the pride.
+	 *
+	 * @param repositoryUrl   The URL of the remote repository.
+	 * @param targetDirectory The directory where the local clone will reside.
+	 * @param recursive       Clone sub-repositories as well.
+	 * @param mirrored        Whether to create a mirror (to be used as a cache).
+	 * @throws java.io.IOException If an I/O error occurs.
+	 */
+	void checkout(String repositoryUrl, File targetDirectory, boolean recursive, boolean mirrored) throws IOException;
 
 	/**
 	 * Updates a local clone of a repository. If there are local changes, they should be
@@ -12,10 +21,11 @@ public interface VcsSupport {
 	 * and local changes should not be expected.
 	 *
 	 * @param targetDirectory The directory where the local clone resides.
+	 * @param recursive       Update sub-repositories as well.
 	 * @param mirrored        Whether to update a real clone or a cached repository.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
-	void update(File targetDirectory, boolean mirrored) throws IOException;
+	void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException;
 
 	/**
 	 * Returns true if the working copy / local repository has uncommitted changes.
@@ -30,7 +40,7 @@ public interface VcsSupport {
 	 * Activates a clone just cloned form a cache to work as if it was cloned from
 	 * the original URL. In Git this would do {@code git remote set-url origin <repositoryUrl>}.
 	 *
-	 * @param repositoryUrl   The URL of the remote repository
+	 * @param repositoryUrl   The URL of the remote repository.
 	 * @param targetDirectory The directory where the local clone resides.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */

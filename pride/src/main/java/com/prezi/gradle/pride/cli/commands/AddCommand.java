@@ -40,6 +40,10 @@ public class AddCommand extends AbstractExistingPrideCommand {
 			description = "Do not use local repo cache")
 	private boolean explicitDontUseRepoCache;
 
+	@Option(name = {"-r", "--recursive"},
+			description = "Update sub-modules recursively")
+	private Boolean explicitRecursive;
+
 	@Option(name = {"-T", "--repo-type"},
 			title = "type",
 			description = "Repository type")
@@ -83,11 +87,12 @@ public class AddCommand extends AbstractExistingPrideCommand {
 			logger.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.");
 			useRepoCache = false;
 		}
+		boolean recursive = getConfiguration().getBoolean(CliConfiguration.REPO_RECURSIVE);
 
 		// Clone repositories
 		for (String module : modules) {
 			String moduleName = vcsSupport.resolveRepositoryName(module);
-			Object repoUrl;
+			String repoUrl;
 			if (!StringUtils.isEmpty(moduleName)) {
 				repoUrl = module;
 			} else {
@@ -99,9 +104,9 @@ public class AddCommand extends AbstractExistingPrideCommand {
 
 			File moduleInPride = new File(getPrideDirectory(), moduleName);
 			if (useRepoCache) {
-				getRepoCache().checkoutThroughCache(vcsSupport, (String) repoUrl, moduleInPride);
+				getRepoCache().checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
 			} else {
-				vcsSupport.checkout((String) repoUrl, moduleInPride, false);
+				vcsSupport.checkout(repoUrl, moduleInPride, recursive, false);
 			}
 
 			pride.addModule(moduleName, vcs);
@@ -132,6 +137,9 @@ public class AddCommand extends AbstractExistingPrideCommand {
 
 		if (explicitDontUseRepoCache) {
 			configuration.setProperty(CliConfiguration.REPO_CACHE_ALWAYS, false);
+		}
+		if (explicitRecursive != null) {
+			configuration.setProperty(CliConfiguration.REPO_RECURSIVE, explicitRecursive);
 		}
 	}
 }
