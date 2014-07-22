@@ -2,6 +2,8 @@ package com.prezi.gradle.pride.vcs;
 
 import org.apache.commons.configuration.Configuration;
 
+import java.io.File;
+
 public interface VcsSupportFactory {
 	/**
 	 * Returns the type of the supported VCS.
@@ -17,4 +19,12 @@ public interface VcsSupportFactory {
 	 * @return the actual VCS support instance.
 	 */
 	VcsSupport createVcsSupport(Configuration configuration);
+
+	/**
+	 * Checks if this factory can support a local clone in the given directory.
+	 *
+	 * @param targetDirectory    The directory where the local clone resides.
+	 * @return {@code true} when supported, {@code false} otherwise.
+	 */
+	boolean canSupport(File targetDirectory);
 }

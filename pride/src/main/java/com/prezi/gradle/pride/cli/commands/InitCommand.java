@@ -37,7 +37,6 @@ public class InitCommand extends AbstractPrideCommand {
 		}
 
 		final Pride pride = PrideInitializer.create(getPrideDirectory(), getConfiguration(), getVcsManager());
-		final Vcs vcs = getDefaultVcs();
 
 		if (!explicitNoAddExisting) {
 			logger.debug("Adding existing modules");
@@ -49,6 +48,7 @@ public class InitCommand extends AbstractPrideCommand {
 				}
 			})) {
 				if (Pride.isValidModuleDirectory(dir)) {
+					Vcs vcs = findVcsFor(dir);
 					logger.info("Adding existing " + vcs.getType() + " module in " + dir);
 					pride.addModule(dir.getName(), vcs);
 					addedAny = true;

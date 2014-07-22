@@ -3,6 +3,7 @@ package com.prezi.gradle.pride.vcs;
 import com.prezi.gradle.pride.PrideException;
 import org.apache.commons.configuration.Configuration;
 
+import java.io.File;
 import java.util.*;
 
 public final class VcsManager {
@@ -22,6 +23,15 @@ public final class VcsManager {
 		}
 
 		return new Vcs(type, vcsFactory.createVcsSupport(configuration));
+	}
+
+	public Vcs findSupportingVcs(File directory, Configuration configuration) {
+		for (VcsSupportFactory factory : vcss.values()) {
+			if (factory.canSupport(directory)) {
+				return new Vcs(factory.getType(), factory.createVcsSupport(configuration));
+			}
+		}
+		throw new PrideException("No VCS support found for local repository in directory \"" + directory + "\"");
 	}
 
 	public Set<String> getSupportedTypes() {

@@ -36,4 +36,8 @@ public abstract class AbstractPrideCommand extends AbstractCommand {
 	protected Vcs getVcs(String repoType) {
 		return getVcsManager().getVcs(repoType, getConfiguration());
 	}
+
+	protected Vcs findVcsFor(File directory) {
+		return getVcsManager().findSupportingVcs(directory, getConfiguration());
+	}
 }
