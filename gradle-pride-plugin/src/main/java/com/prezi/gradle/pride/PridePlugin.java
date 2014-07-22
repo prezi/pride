@@ -61,7 +61,13 @@ public class PridePlugin implements Plugin<Project> {
 				for (Map.Entry<String, List<Dependency>> entry : dynamicDependencies.getDependencies().entrySet()) {
 					Configuration configuration = project.getConfigurations().getByName(entry.getKey());
 					List<Dependency> dependencies = entry.getValue();
-					Set<Dependency> localizedDependencies = localizeDynamicDependencies(dependencies, project, projectPathsByGroupAndName);
+					Collection<Dependency> localizedDependencies;
+					if (project.hasProperty("pride.disable")) {
+						logger.info("Dynamic dependency resolution is disabled, all dynamic dependencies will be resolved to external dependencies");
+						localizedDependencies = dependencies;
+					} else {
+						localizedDependencies = localizeDynamicDependencies(dependencies, project, projectPathsByGroupAndName);
+					}
 					configuration.getDependencies().addAll(localizedDependencies);
 				}
 			}
