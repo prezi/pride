@@ -2,7 +2,8 @@ package com.prezi.gradle.pride.vcs.git;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
+import com.google.common.io.LineProcessor;
 import com.prezi.gradle.pride.ProcessUtils;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import org.apache.commons.configuration.Configuration;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -32,6 +34,7 @@ public class GitVcsSupport implements VcsSupport {
 				+ "(?:\\.git)?"								// optional .git suffix
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
+	private static final Pattern STATUS_AHEAD = Pattern.compile(".*\\[ahead \\d+\\]");
 
 	private final Configuration configuration;
 
@@ -70,10 +73,37 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
+	@SuppressWarnings("UnnecessaryLocalVariable")
 	public boolean hasChanges(File targetDirectory) throws IOException {
-		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "status", "--porcelain"), false, false);
-		String result = new String(ByteStreams.toByteArray(process.getInputStream()), Charsets.UTF_8);
-		return !result.trim().isEmpty();
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "status", "--branch", "--porcelain"), false, false);
+
+		// ## master...origin/master [ahead 1]
+		//  M non-added-modification.txt
+		// M  added-modification.txt
+		// ?? non-added-file.txt
+
+		boolean hasChanges = CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8), new LineProcessor<Boolean>() {
+			boolean hasChanges = false;
+
+			@Override
+			@SuppressWarnings("NullableProblems")
+			public boolean processLine(String line) throws IOException {
+				if (line.startsWith("#")) {
+					// Check if we have commits to be pushed
+					hasChanges = STATUS_AHEAD.matcher(line).matches();
+				} else if (!line.isEmpty()) {
+					// Check if we have uncommitted files
+					hasChanges = true;
+				}
+				return !hasChanges;
+			}
+
+			@Override
+			public Boolean getResult() {
+				return hasChanges;
+			}
+		});
+		return hasChanges;
 	}
 
 	@Override
