@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.vcs.svn;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import com.prezi.gradle.pride.ProcessUtils;
 import com.prezi.gradle.pride.vcs.VcsSupport;
@@ -38,12 +39,21 @@ public class SvnVcsSupport implements VcsSupport {
 		trunkUrl += "trunk";
 
 		log.debug("Checking out {} into {}", trunkUrl, targetDirectory);
-		ProcessUtils.executeIn(null, Arrays.asList("svn", "checkout", trunkUrl, targetDirectory.getPath()));
+		ImmutableList.Builder<String> checkoutCommand = ImmutableList.<String> builder().add("svn").add("checkout");
+		if (!recursive) {
+			checkoutCommand.add("--depth=immediates");
+		}
+		checkoutCommand.add(trunkUrl).add(targetDirectory.getPath());
+		ProcessUtils.executeIn(null, checkoutCommand.build());
 	}
 
 	@Override
 	public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
-		ProcessUtils.executeIn(targetDirectory, Arrays.asList("svn", "update"));
+		ImmutableList.Builder<String> updateCommand = ImmutableList.<String> builder().add("svn").add("update");
+		if (!recursive) {
+			updateCommand.add("--depth=immediates");
+		}
+		ProcessUtils.executeIn(targetDirectory, updateCommand.build());
 	}
 
 	@Override
