@@ -21,6 +21,18 @@ public class GitVcsSupport implements VcsSupport {
 	public static final String GIT_UPDATE = "git.update";
 
 	private static final Logger log = LoggerFactory.getLogger(GitVcsSupport.class);
+	private static final Pattern REPOSITORY_URL_PATTERN = Pattern.compile("^"
+				+ "(?:"
+					+ "\\w+@.+:(?:.+/)?"					//	SCP-like pattern prefix
+				+ "|"
+					+ "(?:git|https?|ftps?|rsync|ssh)://"	// Protocol prefix
+					+ ".+/"									// path to repo
+				+ ")"
+				+ "(.+?)" 									// repo name
+				+ "(?:\\.git)?"								// optional .git suffix
+				+ "/?"										// optional trailing slash
+				+ "$", Pattern.COMMENTS);
+
 	private final Configuration configuration;
 
 	GitVcsSupport(Configuration configuration) {
@@ -30,10 +42,10 @@ public class GitVcsSupport implements VcsSupport {
 	@Override
 	public void checkout(String repositoryUrl, File targetDirectory, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
-		FileUtils.deleteDirectory(targetDirectory);
+		FileUtils.deleteQuietly(targetDirectory);
 
 		log.debug("Cloning {} into {}", repositoryUrl, targetDirectory);
-		List<String> commandLine = Lists.newArrayList("git", "clone", repositoryUrl, targetDirectory.toString());
+		List<String> commandLine = Lists.newArrayList("git", "clone", repositoryUrl, targetDirectory.getPath());
 		if (mirrored) {
 			commandLine.add("--mirror");
 		}
@@ -81,19 +93,7 @@ public class GitVcsSupport implements VcsSupport {
 
 	@Override
 	public String resolveRepositoryName(String repository) {
-		// TODO Make this static
-		Pattern pattern = Pattern.compile("^"
-					+ "(?:"
-						+ "\\w+@.+:(?:.+/)?"					//	SCP-like pattern prefix
-					+ "|"
-						+ "(?:git|https?|ftps?|rsync|ssh)://"	// Protocol prefix
-						+ ".+/"									// path to repo
-					+ ")"
-					+ "(.+?)" 									// repo name
-					+ "(?:\\.git)?"								// optional .git suffix
-					+ "/?"										// optional trailing slash
-					+ "$", Pattern.COMMENTS);
-		Matcher matcher = pattern.matcher(repository);
+		Matcher matcher = REPOSITORY_URL_PATTERN.matcher(repository);
 		if (matcher.matches()) {
 			return matcher.group(1);
 		} else {
