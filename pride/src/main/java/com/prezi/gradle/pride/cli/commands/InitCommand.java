@@ -30,13 +30,17 @@ public class InitCommand extends AbstractPrideCommand {
 			description = "Do not add existing modules in the pride directory to the pride")
 	private boolean explicitNoAddExisting;
 
+	@Option(name = "--with-wrapper",
+			description = "Add Gradle wrapper to the pride")
+	private String wrapperVersion;
+
 	@Override
 	protected void runInternal() throws IOException {
 		if (!overwrite && Pride.containsPride(getPrideDirectory())) {
 			throw new PrideException("A pride already exists in " + getPrideDirectory());
 		}
 
-		final Pride pride = PrideInitializer.create(getPrideDirectory(), getConfiguration(), getVcsManager());
+		final Pride pride = PrideInitializer.create(getPrideDirectory(), getConfiguration(), getVcsManager(), wrapperVersion);
 
 		if (!explicitNoAddExisting) {
 			logger.debug("Adding existing modules");
