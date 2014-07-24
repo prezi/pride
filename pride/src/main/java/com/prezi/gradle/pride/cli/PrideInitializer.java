@@ -96,7 +96,6 @@ public class PrideInitializer {
 		} catch (Exception ex) {
 			throw new PrideException("Could not parse module in " + moduleDirectory + ": " + ex, ex);
 		} finally {
-			// Clean up
 			connection.close();
 		}
 	}
@@ -104,9 +103,13 @@ public class PrideInitializer {
 	public static void refreshDependencies(Pride pride) {
 		logger.info("Refreshing dependencies");
 		ProjectConnection connection = gradleConnector.get().forProjectDirectory(pride.rootDirectory).connect();
-		connection.newBuild()
-				.forTasks("doNothing")
-				.withArguments("--refresh-dependencies")
-				.run();
+		try {
+			connection.newBuild()
+					.forTasks("doNothing")
+					.withArguments("--refresh-dependencies")
+					.run();
+		} finally {
+			connection.close();
+		}
 	}
 }
