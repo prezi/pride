@@ -3,7 +3,6 @@ package com.prezi.gradle.pride.cli.commands;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import io.airlift.command.Option;
-import io.airlift.command.OptionType;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
