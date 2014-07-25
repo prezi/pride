@@ -16,8 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
-public abstract class AbstractCommand implements Runnable {
+public abstract class AbstractCommand implements Callable<Integer> {
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
 	@Option(type = OptionType.GLOBAL, name = {"-v", "--verbose"}, description = "Verbose mode")
@@ -29,17 +30,6 @@ public abstract class AbstractCommand implements Runnable {
 	protected final FileConfiguration globalConfiguration = loadConfiguration();
 	private CompositeConfiguration processedConfiguration;
 	private RepoCache repoCache;
-
-	@Override
-	final public void run() {
-		try {
-			runInternal();
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	protected abstract void runInternal() throws IOException;
 
 	private static PropertiesConfiguration loadConfiguration() {
 		try {

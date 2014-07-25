@@ -35,7 +35,7 @@ public class InitCommand extends AbstractPrideCommand {
 	private String wrapperVersion;
 
 	@Override
-	protected void runInternal() throws IOException {
+	public Integer call() throws Exception {
 		if (!overwrite && Pride.containsPride(getPrideDirectory())) {
 			throw new PrideException("A pride already exists in " + getPrideDirectory());
 		}
@@ -63,6 +63,7 @@ public class InitCommand extends AbstractPrideCommand {
 				PrideInitializer.reinitialize(pride);
 			}
 		}
+		return 0;
 	}
 
 	@Override

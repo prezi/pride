@@ -37,7 +37,7 @@ public class ConfigCommand extends AbstractPrideCommand {
 	private List<String> args;
 
 	@Override
-	protected void runInternal() throws IOException {
+	public Integer call() throws Exception {
 		if (args.size() < 1 || args.size() > 2) {
 			throw new PrideException("Invalid number of arguments: either specify a configuration property name to read the value of the property, or a name and a value to set it.");
 		}
@@ -57,7 +57,7 @@ public class ConfigCommand extends AbstractPrideCommand {
 		}
 
 		String property = args.get(0);
-
+		int result;
 		if (readConfig) {
 			String value = fileConfiguration.getString(property, null);
 			if (value == null && !useGlobal) {
@@ -65,8 +65,9 @@ public class ConfigCommand extends AbstractPrideCommand {
 			}
 			if (value != null) {
 				logger.info(value);
+				result = 0;
 			} else {
-				System.exit(1);
+				result = 1;
 			}
 		} else {
 			boolean changed = false;
@@ -89,9 +90,8 @@ public class ConfigCommand extends AbstractPrideCommand {
 					throw new PrideException("Could not save configuration: " + e.getMessage(), e);
 				}
 			}
-			if (!changed) {
-				System.exit(1);
-			}
+			result = changed ? 0 : 1;
 		}
+		return result;
 	}
 }

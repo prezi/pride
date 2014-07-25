@@ -19,13 +19,15 @@ import io.airlift.command.ParseException;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Callable;
+
 public class PrideCli {
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(PrideCli.class);
 
 	@SuppressWarnings("unchecked")
 	public static void main(String... args) {
-		Cli.CliBuilder<Runnable> builder = Cli.builder("pride");
+		Cli.CliBuilder<Callable<?>> builder = Cli.builder("pride");
 		builder
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help.class)
@@ -42,11 +44,12 @@ public class PrideCli {
 						Help.class
 				);
 
-		Cli<Runnable> parser = builder.build();
+		Cli<Callable<?>> parser = builder.build();
+		int exitValue;
 		try {
-			Runnable runnable = null;
+			Callable<?> callable = null;
 			try {
-				runnable = parser.parse(args);
+				callable = parser.parse(args);
 			} catch (ParseException e) {
 				if (ArrayUtils.contains(args, "-v") || ArrayUtils.contains(args, "--verbose")) {
 					throw e;
@@ -58,8 +61,8 @@ public class PrideCli {
 
 			boolean verbose = false;
 			try {
-				if (runnable instanceof AbstractCommand) {
-					AbstractCommand command = (AbstractCommand) runnable;
+				if (callable instanceof AbstractCommand) {
+					AbstractCommand command = (AbstractCommand) callable;
 					Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 					if (command.verbose) {
 						rootLogger.setLevel(Level.DEBUG);
@@ -68,19 +71,25 @@ public class PrideCli {
 						rootLogger.setLevel(Level.WARN);
 					}
 				}
-				runnable.run();
+				Object result = callable.call();
+				if (result instanceof Integer) {
+					exitValue = (Integer) result;
+				} else {
+					exitValue = 0;
+				}
 			} catch (PrideException e) {
 				if (verbose) {
 					throw e;
 				}
 
 				logPrideExceptions(e);
-				System.exit(-1);
+				exitValue = -1;
 			}
 		} catch (Exception e) {
 			logger.error("Exception:", e);
-			System.exit(-1);
+			exitValue = -1;
 		}
+		System.exit(exitValue);
 	}
 
 	private static void logPrideExceptions(Throwable t) {
