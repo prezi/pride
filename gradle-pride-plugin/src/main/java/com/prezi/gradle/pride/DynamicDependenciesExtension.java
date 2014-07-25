@@ -75,7 +75,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		return dependency;
 	}
 
-	public final Map<String, List<Dependency>> getDependencies() {
+	public Map<String, List<Dependency>> getDependencies() {
 		return dependencies;
 	}
 

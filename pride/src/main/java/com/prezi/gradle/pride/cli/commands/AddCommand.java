@@ -71,7 +71,7 @@ public class AddCommand extends AbstractExistingPrideCommand {
 			Collection<String> existingRepos = filter(modules, new Predicate<String>() {
 				@Override
 				public boolean apply(String it) {
-					return new File(pride.rootDirectory, it).exists();
+					return new File(pride.getRootDirectory(), it).exists();
 				}
 			});
 			if (!existingRepos.isEmpty()) {

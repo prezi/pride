@@ -66,7 +66,7 @@ public class PrideInitializer {
 	}
 
 	public static void reinitialize(final Pride pride) throws IOException {
-		File buildFile = pride.gradleBuildFile;
+		File buildFile = pride.getGradleBuildFile();
 		buildFile.delete();
 		FileUtils.write(buildFile, DO_NOT_MODIFY_WARNING);
 		FileOutputStream buildOut = new FileOutputStream(buildFile, true);
@@ -76,11 +76,11 @@ public class PrideInitializer {
 			buildOut.close();
 		}
 
-		final File settingsFile = pride.gradleSettingsFile;
+		final File settingsFile = pride.getGradleSettingsFile();
 		settingsFile.delete();
 		FileUtils.write(settingsFile, DO_NOT_MODIFY_WARNING);
 		for (Module module : pride.getModules()) {
-			File moduleDirectory = new File(pride.rootDirectory, module.getName());
+			File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
 			if (Pride.isValidModuleDirectory(moduleDirectory)) {
 				PrideInitializer.initializeModule(pride, moduleDirectory, settingsFile);
 			}
@@ -90,7 +90,7 @@ public class PrideInitializer {
 	private static void initializeModule(Pride pride, final File moduleDirectory, final File settingsFile) {
 		ProjectConnection connection = gradleConnector.get().forProjectDirectory(moduleDirectory).connect();
 		try {
-			final String relativePath = pride.rootDirectory.toURI().relativize(moduleDirectory.toURI()).toString();
+			final String relativePath = pride.getRootDirectory().toURI().relativize(moduleDirectory.toURI()).toString();
 
 			// Load the model for the build
 			ModelBuilder<GradleBuild> builder = connection.model(GradleBuild.class);
@@ -117,7 +117,7 @@ public class PrideInitializer {
 
 	public static void refreshDependencies(Pride pride) {
 		logger.info("Refreshing dependencies");
-		ProjectConnection connection = gradleConnector.get().forProjectDirectory(pride.rootDirectory).connect();
+		ProjectConnection connection = gradleConnector.get().forProjectDirectory(pride.getRootDirectory()).connect();
 		try {
 			connection.newBuild()
 					.forTasks("doNothing")

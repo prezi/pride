@@ -7,7 +7,6 @@ import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +24,17 @@ import java.util.regex.Pattern;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class Pride {
 	private static final Logger logger = LoggerFactory.getLogger(Pride.class);
+
 	public static final String PRIDE_CONFIG_DIRECTORY = ".pride";
 	public static final String PRIDE_MODULES_FILE = "modules";
 	public static final String PRIDE_VERSION_FILE = "version";
 	public static final String GRADLE_SETTINGS_FILE = "settings.gradle";
 	public static final String GRADLE_BUILD_FILE = "build.gradle";
-	public final File rootDirectory;
-	public final File configDirectory;
-	public final File gradleSettingsFile;
-	public final File gradleBuildFile;
+
+	private final File rootDirectory;
+	private final File configDirectory;
+	private final File gradleSettingsFile;
+	private final File gradleBuildFile;
 	private final SortedMap<String, Module> modules;
 
 	public static Pride lookupPride(File directory, Configuration configuration, VcsManager vcsManager) throws IOException {
@@ -211,5 +212,21 @@ public class Pride {
 
 	public static File getPrideVersionFile(File configDirectory) {
 		return new File(configDirectory, PRIDE_VERSION_FILE);
+	}
+
+	public File getRootDirectory() {
+		return rootDirectory;
+	}
+
+	public File getConfigDirectory() {
+		return configDirectory;
+	}
+
+	public File getGradleSettingsFile() {
+		return gradleSettingsFile;
+	}
+
+	public File getGradleBuildFile() {
+		return gradleBuildFile;
 	}
 }

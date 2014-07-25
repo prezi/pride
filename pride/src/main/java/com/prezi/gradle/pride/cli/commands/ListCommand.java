@@ -26,7 +26,7 @@ public class ListCommand extends AbstractExistingPrideCommand {
 				logger.info(ListCommand.formatModule(module, explicitShort));
 			}
 		} else {
-			for (File dir : pride.rootDirectory.listFiles(new FileFilter() {
+			for (File dir : pride.getRootDirectory().listFiles(new FileFilter() {
 				@Override
 				public boolean accept(File path) {
 					return path.isDirectory();
