@@ -49,7 +49,7 @@ public class UpdateCommand extends AbstractPrideCommand {
 		}
 
 		if (refreshDependencies) {
-			PrideInitializer.refreshDependencies(pride);
+			new PrideInitializer(getGradleVersion(config)).refreshDependencies(pride);
 		}
 	}
 }

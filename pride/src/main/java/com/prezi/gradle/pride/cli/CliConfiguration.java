@@ -11,6 +11,7 @@ public class CliConfiguration {
 	public static final String REPO_CACHE_ALWAYS = "repo.cache.always";
 	public static final String REPO_RECURSIVE = "repo.recursive.always";
 	public static final String COMMAND_UPDATE_REFRESH_DEPENDENCIES = "command.update.refresh_dependencies.always";
+	public static final String GRADLE_VERSION = "gradle.version";
 
 	public static class Defaults extends MapConfiguration {
 		public Defaults() {
@@ -21,6 +22,7 @@ public class CliConfiguration {
 			setProperty(REPO_CACHE_ALWAYS, true);
 			setProperty(REPO_RECURSIVE, false);
 			setProperty(COMMAND_UPDATE_REFRESH_DEPENDENCIES, false);
+			setProperty(GRADLE_VERSION, null);
 		}
 	}
 }

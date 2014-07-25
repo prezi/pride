@@ -256,6 +256,10 @@ public class Pride {
 		return new File(configDirectory, PRIDE_VERSION_FILE);
 	}
 
+	public static File getPrideConfigFile(File configDirectory) {
+		return new File(configDirectory, PRIDE_CONFIG_FILE);
+	}
+
 	public File getRootDirectory() {
 		return rootDirectory;
 	}

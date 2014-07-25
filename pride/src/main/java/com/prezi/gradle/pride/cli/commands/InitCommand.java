@@ -22,11 +22,6 @@ public class InitCommand extends AbstractConfiguredCommand {
 			description = "Do not add existing modules in the pride directory to the pride")
 	private boolean explicitNoAddExisting;
 
-	@Option(name = "--gradle-version",
-			title = "version",
-			description = "Use specified Gradle version")
-	private String explicitGradleVersion;
-
 	@Override
 	protected int executeWithConfiguration(Configuration globalConfig) throws Exception {
 		boolean prideExistsAlready = Pride.containsPride(getPrideDirectory());
@@ -44,7 +39,8 @@ public class InitCommand extends AbstractConfiguredCommand {
 				logger.debug("Exception was", ex);
 			}
 		}
-		final Pride pride = PrideInitializer.create(getPrideDirectory(), globalConfig, getVcsManager());
+		PrideInitializer prideInitializer = new PrideInitializer(getGradleVersion(config));
+		final Pride pride = prideInitializer.create(getPrideDirectory(), globalConfig, getVcsManager());
 
 		if (!explicitNoAddExisting) {
 			logger.debug("Adding existing modules");
@@ -64,7 +60,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 			}
 			if (addedAny) {
 				pride.save();
-				PrideInitializer.reinitialize(pride);
+				prideInitializer.reinitialize(pride);
 			}
 		}
 		return 0;

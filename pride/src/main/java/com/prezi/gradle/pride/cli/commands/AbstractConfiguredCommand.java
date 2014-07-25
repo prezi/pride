@@ -2,6 +2,7 @@ package com.prezi.gradle.pride.cli.commands;
 
 import com.google.common.base.Strings;
 import com.prezi.gradle.pride.cli.CliConfiguration;
+import io.airlift.command.Option;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -9,6 +10,11 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import java.util.Arrays;
 
 public abstract class AbstractConfiguredCommand extends AbstractCommand {
+	@Option(name = "--gradle-version",
+			title = "version",
+			description = "Use specified Gradle version")
+	private String explicitGradleVersion;
+
 	@Override
 	final public Integer call() throws Exception {
 		PropertiesConfiguration globalConfiguration = loadGlobalConfiguration();
@@ -17,6 +23,10 @@ public abstract class AbstractConfiguredCommand extends AbstractCommand {
 	}
 
 	abstract protected int executeWithConfiguration(Configuration globalConfig) throws Exception;
+
+	protected String getGradleVersion(Configuration config) {
+		return override(config, CliConfiguration.GRADLE_VERSION, explicitGradleVersion);
+	}
 
 	protected static boolean override(Configuration config, String property, Boolean override) {
 		if (override != null) {

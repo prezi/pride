@@ -66,7 +66,6 @@ public class RemoveCommand extends AbstractPrideCommand {
 		pride.save();
 
 		// Re-initialize pride
-		PrideInitializer.reinitialize(pride);
+		new PrideInitializer(getGradleVersion(pride.getConfiguration())).reinitialize(pride);
 	}
 }
-

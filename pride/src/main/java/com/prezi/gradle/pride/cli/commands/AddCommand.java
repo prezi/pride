@@ -136,7 +136,7 @@ public class AddCommand extends AbstractPrideCommand {
 		pride.save();
 
 		try {
-			PrideInitializer.reinitialize(pride);
+			new PrideInitializer(getGradleVersion(config)).reinitialize(pride);
 		} catch (Exception ex) {
 			throw new PrideException("There was a problem reinitializing the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
 		} finally {
