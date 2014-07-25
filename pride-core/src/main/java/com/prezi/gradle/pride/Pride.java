@@ -43,21 +43,21 @@ public class Pride {
 
 	private final SortedMap<String, Module> modules;
 
-	public static Pride lookupPride(File directory, Configuration configuration, VcsManager vcsManager) throws IOException {
+	public static Pride lookupPride(File directory, Configuration globalConfig, VcsManager vcsManager) throws IOException {
 		if (containsPride(directory)) {
-			return new Pride(directory, configuration, vcsManager);
+			return new Pride(directory, globalConfig, vcsManager);
 		} else {
 			File parent = directory.getParentFile();
 			if (parent != null) {
-				return lookupPride(parent, configuration, vcsManager);
+				return lookupPride(parent, globalConfig, vcsManager);
 			} else {
 				return null;
 			}
 		}
 	}
 
-	public static Pride getPride(final File directory, Configuration configuration, VcsManager vcsManager) throws IOException {
-		Pride pride = lookupPride(directory, configuration, vcsManager);
+	public static Pride getPride(final File directory, Configuration globalConfig, VcsManager vcsManager) throws IOException {
+		Pride pride = lookupPride(directory, globalConfig, vcsManager);
 		if (pride == null) {
 			throw new PrideException("No pride found in " + directory);
 		}
@@ -72,7 +72,7 @@ public class Pride {
 		return result;
 	}
 
-	private Pride(final File rootDirectory, Configuration globalConfiguration, VcsManager vcsManager) throws IOException {
+	private Pride(final File rootDirectory, Configuration globalConfig, VcsManager vcsManager) throws IOException {
 		this.rootDirectory = rootDirectory;
 		this.configDirectory = getPrideConfigDirectory(rootDirectory);
 		this.gradleSettingsFile = new File(rootDirectory, GRADLE_SETTINGS_FILE);
@@ -81,7 +81,7 @@ public class Pride {
 			throw new PrideException("No pride in directory \"" + rootDirectory + "\"");
 		}
 		this.localConfiguration = loadLocalConfiguration(configDirectory);
-		this.configuration = new CompositeConfiguration(Arrays.asList(localConfiguration, globalConfiguration));
+		this.configuration = new CompositeConfiguration(Arrays.asList(localConfiguration, globalConfig));
 
 		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), configuration, vcsManager);
 	}
@@ -101,6 +101,11 @@ public class Pride {
 		}
 	}
 
+	/**
+	 * Returns the local configuration.
+	 *
+	 * @return the local configuration.
+	 */
 	public PropertiesConfiguration getLocalConfiguration() {
 		return localConfiguration;
 	}
