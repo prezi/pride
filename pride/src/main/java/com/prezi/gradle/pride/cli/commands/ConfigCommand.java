@@ -60,7 +60,7 @@ public class ConfigCommand extends AbstractPrideCommand {
 		int result;
 		if (readConfig) {
 			String value = fileConfiguration.getString(property, null);
-			if (value == null && !useGlobal) {
+			if (value == null && !useGlobal && !explicitLocal) {
 				value = globalConfiguration.getString(property, null);
 			}
 			if (value != null) {

@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 
 @Command(name = "init", description = "Initialize pride")
 public class InitCommand extends AbstractPrideCommand {
