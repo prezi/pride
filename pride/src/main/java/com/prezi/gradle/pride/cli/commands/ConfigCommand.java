@@ -77,12 +77,14 @@ public class ConfigCommand extends AbstractCommand {
 					fileConfiguration.clearProperty(property);
 					changed = true;
 				}
+				result = changed ? 0 : 1;
 			} else {
 				if (!explicitDefault || !fileConfiguration.containsKey(property)) {
 					String value = args.get(1);
 					fileConfiguration.setProperty(property, value);
 					changed = true;
 				}
+				result = 0;
 			}
 			if (changed) {
 				try {
@@ -91,7 +93,6 @@ public class ConfigCommand extends AbstractCommand {
 					throw new PrideException("Could not save configuration: " + e.getMessage(), e);
 				}
 			}
-			result = changed ? 0 : 1;
 		}
 		return result;
 	}
