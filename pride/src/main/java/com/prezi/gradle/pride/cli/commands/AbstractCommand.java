@@ -15,10 +15,12 @@ import java.util.concurrent.Callable;
 public abstract class AbstractCommand implements Callable<Integer> {
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
-	@Option(type = OptionType.GLOBAL, name = {"-v", "--verbose"}, description = "Verbose mode")
+	@Option(name = {"-v", "--verbose"},
+			description = "Verbose mode")
 	public boolean verbose;
 
-	@Option(type = OptionType.GLOBAL, name = {"-q", "--quiet"}, description = "Quite mode")
+	@Option(name = {"-q", "--quiet"},
+			description = "Quite mode")
 	public boolean quiet;
 
 	@Option(name = {"-p", "--pride-directory"},
