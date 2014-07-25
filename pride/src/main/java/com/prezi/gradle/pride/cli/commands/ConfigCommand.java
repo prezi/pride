@@ -7,12 +7,12 @@ import io.airlift.command.Command;
 import io.airlift.command.Option;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.FileConfiguration;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
-import java.io.IOException;
 import java.util.List;
 
 @Command(name = "config", description = "Set configuration parameters")
-public class ConfigCommand extends AbstractPrideCommand {
+public class ConfigCommand extends AbstractCommand {
 
 	@Option(name = "--default",
 			description = "Only set the option if it is not set already")
@@ -48,11 +48,12 @@ public class ConfigCommand extends AbstractPrideCommand {
 		boolean readConfig = args.size() == 1 && !explicitUnset;
 		boolean useGlobal = explicitGlobal || (!explicitLocal && !Pride.containsPride(getPrideDirectory()));
 
+		PropertiesConfiguration globalConfiguration = loadGlobalConfiguration();
 		FileConfiguration fileConfiguration;
 		if (useGlobal) {
-			fileConfiguration = this.globalConfiguration;
+			fileConfiguration = globalConfiguration;
 		} else {
-			Pride pride = Pride.getPride(getPrideDirectory(), this.globalConfiguration, getVcsManager());
+			Pride pride = Pride.getPride(getPrideDirectory(), globalConfiguration, getVcsManager());
 			fileConfiguration = pride.getLocalConfiguration();
 		}
 

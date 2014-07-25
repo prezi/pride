@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Command(name = "remove", description = "Remove modules from a pride")
-public class RemoveCommand extends AbstractExistingPrideCommand {
+public class RemoveCommand extends AbstractPrideCommand {
 
 	@Option(name = {"-f", "--force"},
 			description = "Remove modules even if there are local changes")
@@ -28,7 +28,7 @@ public class RemoveCommand extends AbstractExistingPrideCommand {
 	private List<String> modulesNames;
 
 	@Override
-	public void runInPride(final Pride pride) throws IOException {
+	public void executeInPride(final Pride pride) throws IOException {
 		// Check if anything exists already
 		if (!force) {
 			Collection<String> missingModules = Collections2.filter(modulesNames, new Predicate<String>() {

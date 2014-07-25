@@ -1,8 +1,5 @@
 package com.prezi.gradle.pride.cli;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
-import com.google.common.io.Files;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -38,21 +35,9 @@ public class PrideInitializer {
 		}
 	};
 
-	public static Pride create(final File prideDirectory, Configuration configuration, VcsManager vcsManager, String wrapperVersion) throws IOException {
+	public static Pride create(final File prideDirectory, Configuration configuration, VcsManager vcsManager) throws IOException {
 		logger.info("Initializing " + prideDirectory);
 		prideDirectory.mkdirs();
-
-		if (!Strings.isNullOrEmpty(wrapperVersion)) {
-			Files.write("task wrapper(type: Wrapper) { gradleVersion = '" + wrapperVersion + "' }\n", new File(prideDirectory, "build.gradle"), Charsets.UTF_8);
-			ProjectConnection connection = gradleConnector.get().forProjectDirectory(prideDirectory).connect();
-			try {
-				connection.newBuild()
-						.forTasks("wrapper")
-						.run();
-			} finally {
-				connection.close();
-			}
-		}
 
 		File configDirectory = Pride.getPrideConfigDirectory(prideDirectory);
 		FileUtils.deleteDirectory(configDirectory);

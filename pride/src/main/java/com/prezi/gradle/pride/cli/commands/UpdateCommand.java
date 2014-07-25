@@ -2,7 +2,6 @@ package com.prezi.gradle.pride.cli.commands;
 
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
-import com.prezi.gradle.pride.cli.CliConfiguration;
 import com.prezi.gradle.pride.cli.PrideInitializer;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
@@ -13,8 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static com.prezi.gradle.pride.cli.CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
+import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_RECURSIVE;
+
 @Command(name = "update", description = "Updates a pride")
-public class UpdateCommand extends AbstractExistingPrideCommand {
+public class UpdateCommand extends AbstractPrideCommand {
 
 	@Option(name = "--exclude",
 			title = "module",
@@ -35,26 +37,18 @@ public class UpdateCommand extends AbstractExistingPrideCommand {
 	private List<String> includeModules;
 
 	@Override
-	protected void overrideConfiguration(Configuration configuration) {
-		super.overrideConfiguration(configuration);
-		if (explicitRecursive != null) {
-			configuration.setProperty(CliConfiguration.REPO_RECURSIVE, explicitRecursive);
-		}
-		if (explicitRefreshDependencies != null) {
-			configuration.setProperty(CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
-		}
-	}
+	public void executeInPride(Pride pride) throws IOException {
+		Configuration config = pride.getConfiguration();
+		boolean recursive = override(config, REPO_RECURSIVE, explicitRecursive);
+		boolean refreshDependencies = override(config, COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
 
-	@Override
-	public void runInPride(final Pride pride) throws IOException {
-		boolean recursive = getConfiguration().getBoolean(CliConfiguration.REPO_RECURSIVE);
 		for (Module module : pride.filterModules(includeModules, excludeModules)) {
 			logger.info("Updating " + module.getName());
 			File moduleDir = pride.getModuleDirectory(module.getName());
 			module.getVcs().getSupport().update(moduleDir, recursive, false);
 		}
 
-		if (getConfiguration().getBoolean(CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES)) {
+		if (refreshDependencies) {
 			PrideInitializer.refreshDependencies(pride);
 		}
 	}

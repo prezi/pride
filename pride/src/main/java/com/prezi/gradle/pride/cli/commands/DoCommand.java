@@ -14,7 +14,7 @@ import java.util.List;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 @Command(name = "do", description = "Execute a command on a set of the modules")
-public class DoCommand extends AbstractExistingPrideCommand {
+public class DoCommand extends AbstractPrideCommand {
 
 	@Option(name = {"-I", "--include"},
 			title = "module",
@@ -35,7 +35,7 @@ public class DoCommand extends AbstractExistingPrideCommand {
 	private List<String> commandLine;
 
 	@Override
-	public void runInPride(final Pride pride) throws IOException {
+	public void executeInPride(Pride pride) throws IOException {
 		for (Module module : pride.filterModules(includeModules, excludeModules)) {
 			File moduleDirectory = pride.getModuleDirectory(module.getName());
 			if (!explicitBare) {

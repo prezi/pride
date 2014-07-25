@@ -1,43 +1,15 @@
 package com.prezi.gradle.pride.cli.commands;
 
-import com.prezi.gradle.pride.cli.CliConfiguration;
-import com.prezi.gradle.pride.vcs.Vcs;
-import com.prezi.gradle.pride.vcs.VcsManager;
-import io.airlift.command.Option;
+import com.prezi.gradle.pride.Pride;
+import org.apache.commons.configuration.Configuration;
 
-import java.io.File;
-
-public abstract class AbstractPrideCommand extends AbstractCommand {
-
-	@Option(name = {"-p", "--pride-directory"},
-			title = "directory",
-			description = "Initializes the pride in the given directory instead of the current directory")
-	private File explicitPrideDirectory;
-
-	private VcsManager vcsManager;
-
-	protected File getPrideDirectory() {
-		final File directory = explicitPrideDirectory;
-		return directory != null ? directory : new File(System.getProperty("user.dir"));
+public abstract class AbstractPrideCommand extends AbstractConfiguredCommand {
+	@Override
+	final protected int executeWithConfiguration(Configuration globalConfig) throws Exception {
+		Pride pride = Pride.getPride(getPrideDirectory(), globalConfig, getVcsManager());
+		executeInPride(pride);
+		return 0;
 	}
 
-	protected VcsManager getVcsManager() {
-		if (vcsManager == null) {
-			vcsManager = new VcsManager();
-		}
-
-		return vcsManager;
-	}
-
-	protected Vcs getDefaultVcs() {
-		return getVcs(getConfiguration().getString(CliConfiguration.REPO_TYPE_DEFAULT));
-	}
-
-	protected Vcs getVcs(String repoType) {
-		return getVcsManager().getVcs(repoType, getConfiguration());
-	}
-
-	protected Vcs findVcsFor(File directory) {
-		return getVcsManager().findSupportingVcs(directory, getConfiguration());
-	}
+	public abstract void executeInPride(Pride pride) throws Exception;
 }

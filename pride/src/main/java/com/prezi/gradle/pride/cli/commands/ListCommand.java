@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileFilter;
 
 @Command(name = "list", description = "Lists modules in a pride")
-public class ListCommand extends AbstractExistingPrideCommand {
+public class ListCommand extends AbstractPrideCommand {
 
 	@Option(name = {"-m", "--modules"},
 			description = "Show only the modules in the pride")
@@ -20,7 +20,7 @@ public class ListCommand extends AbstractExistingPrideCommand {
 	private boolean explicitShort;
 
 	@Override
-	public void runInPride(final Pride pride) {
+	public void executeInPride(Pride pride) {
 		if (explicitShort || explicitModules) {
 			for (Module module : pride.getModules()) {
 				logger.info(ListCommand.formatModule(module, explicitShort));
@@ -46,7 +46,7 @@ public class ListCommand extends AbstractExistingPrideCommand {
 
 	}
 
-	private static String formatModule(final Module module, boolean onlyNames) {
+	private static String formatModule(Module module, boolean onlyNames) {
 		return onlyNames ? module.getName() : "m " + module.getName() + " (" + module.getVcs().getType() + ")";
 	}
 }

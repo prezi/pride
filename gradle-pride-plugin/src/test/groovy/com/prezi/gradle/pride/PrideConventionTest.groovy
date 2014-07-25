@@ -2,7 +2,7 @@ package com.prezi.gradle.pride
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import spock.lang.*
+import spock.lang.Specification
 
 /**
  * Created by lptr on 02/04/14.

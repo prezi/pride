@@ -4,7 +4,11 @@ import com.prezi.gradle.pride.PrideException;
 import org.apache.commons.configuration.Configuration;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
 
 public final class VcsManager {
 

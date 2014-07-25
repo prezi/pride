@@ -1,21 +1,15 @@
 package com.prezi.gradle.pride.cli.commands;
 
-import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.PrideException;
-import com.prezi.gradle.pride.cli.CliConfiguration;
-import com.prezi.gradle.pride.vcs.RepoCache;
+import com.prezi.gradle.pride.vcs.VcsManager;
 import io.airlift.command.Option;
 import io.airlift.command.OptionType;
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.FileConfiguration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public abstract class AbstractCommand implements Callable<Integer> {
@@ -27,11 +21,13 @@ public abstract class AbstractCommand implements Callable<Integer> {
 	@Option(type = OptionType.GLOBAL, name = {"-q", "--quiet"}, description = "Quite mode")
 	public boolean quiet;
 
-	protected final FileConfiguration globalConfiguration = loadConfiguration();
-	private CompositeConfiguration processedConfiguration;
-	private RepoCache repoCache;
+	@Option(name = {"-p", "--pride-directory"},
+			title = "directory",
+			description = "Initializes the pride in the given directory instead of the current directory")
+	private File explicitPrideDirectory;
+	private VcsManager vcsManager;
 
-	private static PropertiesConfiguration loadConfiguration() {
+	static PropertiesConfiguration loadGlobalConfiguration() {
 		try {
 			File configFile = new File(System.getProperty("user.home") + "/.prideconfig");
 			if (!configFile.exists()) {
@@ -46,41 +42,19 @@ public abstract class AbstractCommand implements Callable<Integer> {
 		}
 	}
 
-	protected final Configuration getConfiguration() {
-		if (processedConfiguration == null) {
-			processedConfiguration = new CompositeConfiguration(Lists.newArrayList(globalConfiguration, new CliConfiguration.Defaults()));
-			overrideConfiguration(processedConfiguration);
-		}
-
-		return processedConfiguration;
-	}
-
-	protected void overrideConfiguration(Configuration configuration) {
-	}
-
-	protected RepoCache getRepoCache() throws IOException {
-		if (repoCache == null) {
-			File cachePath = new File(getConfiguration().getString(CliConfiguration.PRIDE_HOME) + "/cache");
-			repoCache = new RepoCache(cachePath);
-		}
-
-		return repoCache;
-	}
-
-	protected String getRepoBaseUrl() {
-		String repoBaseUrl = getConfiguration().getString(CliConfiguration.REPO_BASE_URL);
-		if (repoBaseUrl == null) {
-			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set", "a full repository URL, specify the base URL via --repo-base-url", CliConfiguration.REPO_BASE_URL);
-		}
-
-		if (!repoBaseUrl.endsWith("/")) {
-			repoBaseUrl += "/";
-		}
-
-		return repoBaseUrl;
-	}
-
-	protected static PrideException invalidOptionException(final String message, final String option, final String configuration) {
+	protected static PrideException invalidOptionException(String message, String option, String configuration) {
 		return new PrideException(message + ". Either use " + option + ", or set it in the global configuration (~/.prideconfig) as \"" + configuration + "\". See \'pride help config\' for more information.");
+	}
+
+	protected File getPrideDirectory() {
+		File directory = explicitPrideDirectory;
+		return directory != null ? directory : new File(System.getProperty("user.dir"));
+	}
+
+	protected VcsManager getVcsManager() {
+		if (vcsManager == null) {
+			vcsManager = new VcsManager();
+		}
+		return vcsManager;
 	}
 }

@@ -7,6 +7,7 @@ import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.CliConfiguration;
 import com.prezi.gradle.pride.cli.PrideInitializer;
+import com.prezi.gradle.pride.vcs.RepoCache;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import io.airlift.command.Arguments;
@@ -21,9 +22,13 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Collections2.filter;
+import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_BASE_URL;
+import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_CACHE_ALWAYS;
+import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_RECURSIVE;
+import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_TYPE_DEFAULT;
 
 @Command(name = "add", description = "Add modules to a pride")
-public class AddCommand extends AbstractExistingPrideCommand {
+public class AddCommand extends AbstractPrideCommand {
 
 	@Option(name = {"-o", "--overwrite"},
 			description = "Overwrite existing modules in the pride")
@@ -40,7 +45,7 @@ public class AddCommand extends AbstractExistingPrideCommand {
 
 	@Option(name = {"--no-repo-cache"},
 			description = "Do not use local repo cache")
-	private boolean explicitDontUseRepoCache;
+	private boolean explicitNoRepoCache;
 
 	@Option(name = {"-r", "--recursive"},
 			description = "Update sub-modules recursively")
@@ -56,7 +61,13 @@ public class AddCommand extends AbstractExistingPrideCommand {
 	private List<String> modules;
 
 	@Override
-	public void runInPride(final Pride pride) throws IOException {
+	public void executeInPride(final Pride pride) throws IOException {
+		Configuration config = pride.getConfiguration();
+		String repoBaseUrl = override(config, REPO_BASE_URL, explicitRepoBaseUrl);
+		String repoType = override(config, REPO_TYPE_DEFAULT, explicitRepoType);
+		boolean useRepoCache = override(config, REPO_CACHE_ALWAYS, explicitUseRepoCache, explicitNoRepoCache);
+		boolean recursive = override(config, REPO_RECURSIVE, explicitRecursive);
+
 		// Check if anything exists already
 		if (!overwrite) {
 			Collection<String> existingModules = filter(modules, new Predicate<String>() {
@@ -80,19 +91,18 @@ public class AddCommand extends AbstractExistingPrideCommand {
 		}
 
 		// Get some support for our VCS
-		Vcs vcs = getDefaultVcs();
+		Vcs vcs = getVcsManager().getVcs(repoType, config);
 		VcsSupport vcsSupport = vcs.getSupport();
 
 		// Determine if we can use a repo cache
-		boolean useRepoCache = getConfiguration().getBoolean(CliConfiguration.REPO_CACHE_ALWAYS);
 		if (useRepoCache && !vcsSupport.isMirroringSupported()) {
 			logger.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.");
 			useRepoCache = false;
 		}
-		boolean recursive = getConfiguration().getBoolean(CliConfiguration.REPO_RECURSIVE);
 
 		// Clone repositories
 		List<String> failedModules = Lists.newArrayList();
+		RepoCache repoCache = null;
 		for (String module : modules) {
 			try {
 				String moduleName = vcsSupport.resolveRepositoryName(module);
@@ -101,14 +111,18 @@ public class AddCommand extends AbstractExistingPrideCommand {
 					repoUrl = module;
 				} else {
 					moduleName = module;
-					repoUrl = getRepoBaseUrl() + moduleName;
+					repoUrl = getRepoUrl(repoBaseUrl, moduleName);
 				}
 
 				logger.info("Adding " + moduleName + " from " + repoUrl);
 
 				File moduleInPride = new File(getPrideDirectory(), moduleName);
 				if (useRepoCache) {
-					getRepoCache().checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
+					if (repoCache == null) {
+						File cachePath = new File(config.getString(CliConfiguration.PRIDE_HOME) + "/cache");
+						repoCache = new RepoCache(cachePath);
+					}
+					repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
 				} else {
 					vcsSupport.checkout(repoUrl, moduleInPride, recursive, false);
 				}
@@ -132,26 +146,15 @@ public class AddCommand extends AbstractExistingPrideCommand {
 		}
 	}
 
-	@Override
-	protected void overrideConfiguration(Configuration configuration) {
-		super.overrideConfiguration(configuration);
-		if (!StringUtils.isEmpty(explicitRepoBaseUrl)) {
-			configuration.setProperty(CliConfiguration.REPO_BASE_URL, explicitRepoBaseUrl);
+	protected static String getRepoUrl(String repoBaseUrl, String moduleName) {
+		if (repoBaseUrl == null) {
+			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set", "a full repository URL, specify the base URL via --repo-base-url", CliConfiguration.REPO_BASE_URL);
 		}
 
-		if (!StringUtils.isEmpty(explicitRepoType)) {
-			configuration.setProperty(CliConfiguration.REPO_TYPE_DEFAULT, explicitRepoType);
+		if (!repoBaseUrl.endsWith("/")) {
+			repoBaseUrl += "/";
 		}
 
-		if (explicitUseRepoCache) {
-			configuration.setProperty(CliConfiguration.REPO_CACHE_ALWAYS, true);
-		}
-
-		if (explicitDontUseRepoCache) {
-			configuration.setProperty(CliConfiguration.REPO_CACHE_ALWAYS, false);
-		}
-		if (explicitRecursive != null) {
-			configuration.setProperty(CliConfiguration.REPO_RECURSIVE, explicitRecursive);
-		}
+		return repoBaseUrl + moduleName;
 	}
 }
