@@ -25,7 +25,7 @@ public class ConfigCommand extends AbstractCommand {
 	protected void runInternal() {
 		switch (args.size()) {
 			case 1:
-				String value = fileConfiguration.getString(args.get(0), null);
+				String value = globalConfiguration.getString(args.get(0), null);
 				logger.info(value);
 				if (value == null) {
 					System.exit(1);
@@ -33,10 +33,10 @@ public class ConfigCommand extends AbstractCommand {
 
 				break;
 			case 2:
-				if (!explicitDefault || !fileConfiguration.containsKey(args.get(0))) {
-					fileConfiguration.setProperty(args.get(0), args.get(1));
+				if (!explicitDefault || !globalConfiguration.containsKey(args.get(0))) {
+					globalConfiguration.setProperty(args.get(0), args.get(1));
 					try {
-						fileConfiguration.save();
+						globalConfiguration.save();
 					} catch (ConfigurationException e) {
 						throw new PrideException("Could not save configuration: " + e.getMessage(), e);
 					}

@@ -10,6 +10,7 @@ import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.FileConfiguration;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public abstract class AbstractCommand implements Runnable {
 	@Option(type = OptionType.GLOBAL, name = {"-q", "--quiet"}, description = "Quite mode")
 	public boolean quiet;
 
-	protected final FileConfiguration fileConfiguration = loadConfiguration();
+	protected final FileConfiguration globalConfiguration = loadConfiguration();
 	private CompositeConfiguration processedConfiguration;
 	private RepoCache repoCache;
 
@@ -44,7 +45,8 @@ public abstract class AbstractCommand implements Runnable {
 		try {
 			File configFile = new File(System.getProperty("user.home") + "/.prideconfig");
 			if (!configFile.exists()) {
-				configFile.getParentFile().mkdirs();
+				FileUtils.forceMkdir(configFile.getParentFile());
+				//noinspection ResultOfMethodCallIgnored
 				configFile.createNewFile();
 			}
 
@@ -56,7 +58,7 @@ public abstract class AbstractCommand implements Runnable {
 
 	protected final Configuration getConfiguration() {
 		if (processedConfiguration == null) {
-			processedConfiguration = new CompositeConfiguration(Lists.newArrayList(fileConfiguration, new CliConfiguration.Defaults()));
+			processedConfiguration = new CompositeConfiguration(Lists.newArrayList(globalConfiguration, new CliConfiguration.Defaults()));
 			overrideConfiguration(processedConfiguration);
 		}
 

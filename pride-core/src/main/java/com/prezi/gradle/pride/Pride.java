@@ -5,7 +5,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
+import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,13 +24,13 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
 public class Pride {
 	private static final Logger logger = LoggerFactory.getLogger(Pride.class);
 
 	public static final String PRIDE_CONFIG_DIRECTORY = ".pride";
 	public static final String PRIDE_MODULES_FILE = "modules";
 	public static final String PRIDE_VERSION_FILE = "version";
+	public static final String PRIDE_CONFIG_FILE = "config";
 	public static final String GRADLE_SETTINGS_FILE = "settings.gradle";
 	public static final String GRADLE_BUILD_FILE = "build.gradle";
 
@@ -35,6 +38,9 @@ public class Pride {
 	private final File configDirectory;
 	private final File gradleSettingsFile;
 	private final File gradleBuildFile;
+	private final PropertiesConfiguration localConfiguration;
+	private final Configuration configuration;
+
 	private final SortedMap<String, Module> modules;
 
 	public static Pride lookupPride(File directory, Configuration configuration, VcsManager vcsManager) throws IOException {
@@ -66,7 +72,7 @@ public class Pride {
 		return result;
 	}
 
-	private Pride(final File rootDirectory, Configuration configuration, VcsManager vcsManager) throws IOException {
+	private Pride(final File rootDirectory, Configuration globalConfiguration, VcsManager vcsManager) throws IOException {
 		this.rootDirectory = rootDirectory;
 		this.configDirectory = getPrideConfigDirectory(rootDirectory);
 		this.gradleSettingsFile = new File(rootDirectory, GRADLE_SETTINGS_FILE);
@@ -74,8 +80,38 @@ public class Pride {
 		if (!configDirectory.isDirectory()) {
 			throw new PrideException("No pride in directory \"" + rootDirectory + "\"");
 		}
+		this.localConfiguration = loadLocalConfiguration(configDirectory);
+		this.configuration = new CompositeConfiguration(Arrays.asList(localConfiguration, globalConfiguration));
 
 		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), configuration, vcsManager);
+	}
+
+	private static PropertiesConfiguration loadLocalConfiguration(File configDirectory) {
+		try {
+			File configFile = new File(configDirectory, PRIDE_CONFIG_FILE);
+			if (!configFile.exists()) {
+				FileUtils.forceMkdir(configFile.getParentFile());
+				//noinspection ResultOfMethodCallIgnored
+				configFile.createNewFile();
+			}
+
+			return new PropertiesConfiguration(configFile);
+		} catch (Exception ex) {
+			throw new RuntimeException("Couldn't load configuration file", ex);
+		}
+	}
+
+	public PropertiesConfiguration getLocalConfiguration() {
+		return localConfiguration;
+	}
+
+	/**
+	 * Returns the merged local and global configurations.
+	 *
+	 * @return the merged configuration.
+	 */
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 
 	public Collection<Module> getModules() {
@@ -138,7 +174,8 @@ public class Pride {
 
 	public void save() throws IOException {
 		final File modulesFile = getPrideModulesFile(configDirectory);
-		modulesFile.delete();
+		FileUtils.deleteQuietly(modulesFile);
+		//noinspection ResultOfMethodCallIgnored
 		modulesFile.createNewFile();
 		for (Module module : modules.values()) {
 			FileUtils.write(modulesFile, module.getVcs().getType() + "|" + module.getName() + "\n", true);
