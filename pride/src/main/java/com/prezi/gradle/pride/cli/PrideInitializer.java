@@ -126,4 +126,16 @@ public class PrideInitializer {
 			connection.close();
 		}
 	}
+
+	public void addWrapper(Pride pride) {
+		logger.info("Adding Gradle wrapper version {}", gradleVersion);
+		ProjectConnection connection = gradleConnector.get().forProjectDirectory(pride.getRootDirectory()).connect();
+		try {
+			connection.newBuild()
+					.forTasks("wrapper")
+					.run();
+		} finally {
+			connection.close();
+		}
+	}
 }

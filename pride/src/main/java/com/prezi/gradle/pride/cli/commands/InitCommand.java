@@ -11,12 +11,22 @@ import org.apache.commons.configuration.Configuration;
 import java.io.File;
 import java.io.FileFilter;
 
+import static com.prezi.gradle.pride.cli.CliConfiguration.GRADLE_WRAPPER;
+
 @Command(name = "init", description = "Initialize pride")
 public class InitCommand extends AbstractConfiguredCommand {
 
 	@Option(name = {"-f", "--force"},
 			description = "Force initialization of a pride, even if one already exists")
 	private boolean explicitForce;
+
+	@Option(name = "--with-wrapper",
+			description = "Add a Gradle wrapper")
+	private boolean explicitWithWrapper;
+
+	@Option(name = "--no-wrapper",
+			description = "Do not add Gradle wrapper")
+	private boolean explicitNoWrapper;
 
 	@Option(name = "--no-add-existing",
 			description = "Do not add existing modules in the pride directory to the pride")
@@ -39,8 +49,14 @@ public class InitCommand extends AbstractConfiguredCommand {
 				logger.debug("Exception was", ex);
 			}
 		}
+		boolean addWrapper = override(config, GRADLE_WRAPPER, explicitWithWrapper, explicitNoWrapper);
+
 		PrideInitializer prideInitializer = new PrideInitializer(getGradleVersion(config));
 		final Pride pride = prideInitializer.create(getPrideDirectory(), globalConfig, getVcsManager());
+
+		if (addWrapper) {
+			prideInitializer.addWrapper(pride);
+		}
 
 		if (!explicitNoAddExisting) {
 			logger.debug("Adding existing modules");
