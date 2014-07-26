@@ -16,7 +16,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 
 	@Option(name = {"-f", "--force"},
 			description = "Force initialization of a pride, even if one already exists")
-	private boolean overwrite;
+	private boolean explicitForce;
 
 	@Option(name = "--no-add-existing",
 			description = "Do not add existing modules in the pride directory to the pride")
@@ -25,7 +25,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 	@Override
 	protected int executeWithConfiguration(Configuration globalConfig) throws Exception {
 		boolean prideExistsAlready = Pride.containsPride(getPrideDirectory());
-		if (!overwrite && prideExistsAlready) {
+		if (!explicitForce && prideExistsAlready) {
 			throw new PrideException("A pride already exists in " + getPrideDirectory());
 		}
 
