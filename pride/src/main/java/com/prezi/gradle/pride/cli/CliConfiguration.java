@@ -24,7 +24,7 @@ public class CliConfiguration {
 			setProperty(REPO_RECURSIVE, false);
 			setProperty(COMMAND_UPDATE_REFRESH_DEPENDENCIES, false);
 			setProperty(GRADLE_VERSION, null);
-			setProperty(GRADLE_WRAPPER, false);
+			setProperty(GRADLE_WRAPPER, true);
 		}
 	}
 }
