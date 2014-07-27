@@ -7,6 +7,7 @@ import com.prezi.gradle.pride.cli.commands.AbstractCommand;
 import com.prezi.gradle.pride.cli.commands.AddCommand;
 import com.prezi.gradle.pride.cli.commands.ConfigCommand;
 import com.prezi.gradle.pride.cli.commands.DoCommand;
+import com.prezi.gradle.pride.cli.commands.GradleCommand;
 import com.prezi.gradle.pride.cli.commands.InitCommand;
 import com.prezi.gradle.pride.cli.commands.ListCommand;
 import com.prezi.gradle.pride.cli.commands.RemoveCommand;
@@ -35,6 +36,7 @@ public class PrideCli {
 						AddCommand.class,
 						ConfigCommand.class,
 						DoCommand.class,
+						GradleCommand.class,
 						InitCommand.class,
 						ListCommand.class,
 						RemoveCommand.class,
