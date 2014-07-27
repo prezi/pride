@@ -2,18 +2,20 @@ package com.prezi.gradle.pride.cli.commands;
 
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
-import com.prezi.gradle.pride.cli.PrideInitializer;
+import com.prezi.gradle.pride.RuntimeConfiguration;
+import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
+import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
-import org.apache.commons.configuration.Configuration;
+import org.gradle.tooling.ProjectConnection;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.prezi.gradle.pride.cli.CliConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
-import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_RECURSIVE;
+import static com.prezi.gradle.pride.RuntimeConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
+import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_RECURSIVE;
 
 @Command(name = "update", description = "Updates a pride")
 public class UpdateCommand extends AbstractPrideCommand {
@@ -38,9 +40,9 @@ public class UpdateCommand extends AbstractPrideCommand {
 
 	@Override
 	public void executeInPride(Pride pride) throws IOException {
-		Configuration config = pride.getConfiguration();
-		boolean recursive = override(config, REPO_RECURSIVE, explicitRecursive);
-		boolean refreshDependencies = override(config, COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
+		RuntimeConfiguration config = pride.getConfiguration();
+		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
+		boolean refreshDependencies = config.override(COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
 
 		for (Module module : pride.filterModules(includeModules, excludeModules)) {
 			logger.info("Updating " + module.getName());
@@ -49,7 +51,17 @@ public class UpdateCommand extends AbstractPrideCommand {
 		}
 
 		if (refreshDependencies) {
-			new PrideInitializer(getGradleVersion(config)).refreshDependencies(pride);
+			logger.info("Refreshing dependencies");
+			new GradleConnectorManager(config).executeInProject(pride.getRootDirectory(), new GradleProjectExecution<Void, RuntimeException>() {
+				@Override
+				public Void execute(File projectDirectory, ProjectConnection connection) {
+					connection.newBuild()
+							.forTasks("doNothing")
+							.withArguments("--refresh-dependencies")
+							.run();
+					return null;
+				}
+			});
 		}
 	}
 }

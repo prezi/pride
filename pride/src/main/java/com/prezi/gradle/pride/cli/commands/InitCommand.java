@@ -2,16 +2,17 @@ package com.prezi.gradle.pride.cli.commands;
 
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
+import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.PrideInitializer;
+import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.vcs.Vcs;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
-import org.apache.commons.configuration.Configuration;
 
 import java.io.File;
 import java.io.FileFilter;
 
-import static com.prezi.gradle.pride.cli.CliConfiguration.GRADLE_WRAPPER;
+import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_WRAPPER;
 
 @Command(name = "init", description = "Initialize pride")
 public class InitCommand extends AbstractConfiguredCommand {
@@ -33,13 +34,13 @@ public class InitCommand extends AbstractConfiguredCommand {
 	private boolean explicitNoAddExisting;
 
 	@Override
-	protected int executeWithConfiguration(Configuration globalConfig) throws Exception {
+	protected int executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
 		boolean prideExistsAlready = Pride.containsPride(getPrideDirectory());
 		if (!explicitForce && prideExistsAlready) {
 			throw new PrideException("A pride already exists in " + getPrideDirectory());
 		}
 
-		Configuration config = globalConfig;
+		RuntimeConfiguration config = globalConfig;
 		if (prideExistsAlready) {
 			try {
 				Pride pride = Pride.getPride(getPrideDirectory(), globalConfig, getVcsManager());
@@ -49,9 +50,10 @@ public class InitCommand extends AbstractConfiguredCommand {
 				logger.debug("Exception was", ex);
 			}
 		}
-		boolean addWrapper = override(config, GRADLE_WRAPPER, explicitWithWrapper, explicitNoWrapper);
+		boolean addWrapper = config.override(GRADLE_WRAPPER, explicitWithWrapper, explicitNoWrapper);
 
-		PrideInitializer prideInitializer = new PrideInitializer(getGradleVersion(config));
+		GradleConnectorManager gradleConnectorManager = new GradleConnectorManager(config);
+		PrideInitializer prideInitializer = new PrideInitializer(gradleConnectorManager);
 		final Pride pride = prideInitializer.create(getPrideDirectory(), globalConfig, getVcsManager());
 
 		if (addWrapper) {

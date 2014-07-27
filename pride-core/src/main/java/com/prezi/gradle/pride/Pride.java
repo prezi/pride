@@ -5,7 +5,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
-import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,11 +37,11 @@ public class Pride {
 	private final File gradleSettingsFile;
 	private final File gradleBuildFile;
 	private final PropertiesConfiguration localConfiguration;
-	private final Configuration configuration;
+	private final RuntimeConfiguration configuration;
 
 	private final SortedMap<String, Module> modules;
 
-	public static Pride lookupPride(File directory, Configuration globalConfig, VcsManager vcsManager) throws IOException {
+	public static Pride lookupPride(File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
 		if (containsPride(directory)) {
 			return new Pride(directory, globalConfig, vcsManager);
 		} else {
@@ -56,23 +54,22 @@ public class Pride {
 		}
 	}
 
-	public static Pride getPride(final File directory, Configuration globalConfig, VcsManager vcsManager) throws IOException {
+	public static Pride getPride(final File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
 		Pride pride = lookupPride(directory, globalConfig, vcsManager);
 		if (pride == null) {
 			throw new PrideException("No pride found in " + directory);
 		}
-
 		return pride;
 	}
 
-	public static boolean containsPride(final File directory) throws IOException {
+	public static boolean containsPride(File directory) throws IOException {
 		File versionFile = new File(new File(directory, PRIDE_CONFIG_DIRECTORY), PRIDE_VERSION_FILE);
 		boolean result = versionFile.exists() && FileUtils.readFileToString(versionFile).equals("0\n");
 		logger.debug("Directory " + directory + " contains a pride: " + result);
 		return result;
 	}
 
-	private Pride(final File rootDirectory, Configuration globalConfig, VcsManager vcsManager) throws IOException {
+	private Pride(final File rootDirectory, RuntimeConfiguration configuration, VcsManager vcsManager) throws IOException {
 		this.rootDirectory = rootDirectory;
 		this.configDirectory = getPrideConfigDirectory(rootDirectory);
 		this.gradleSettingsFile = new File(rootDirectory, GRADLE_SETTINGS_FILE);
@@ -81,9 +78,8 @@ public class Pride {
 			throw new PrideException("No pride in directory \"" + rootDirectory + "\"");
 		}
 		this.localConfiguration = loadLocalConfiguration(configDirectory);
-		this.configuration = new CompositeConfiguration(Arrays.asList(localConfiguration, globalConfig));
-
-		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), configuration, vcsManager);
+		this.configuration = configuration.withConfiguration(localConfiguration);
+		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), this.configuration, vcsManager);
 	}
 
 	private static PropertiesConfiguration loadLocalConfiguration(File configDirectory) {
@@ -115,7 +111,7 @@ public class Pride {
 	 *
 	 * @return the merged configuration.
 	 */
-	public Configuration getConfiguration() {
+	public RuntimeConfiguration getConfiguration() {
 		return configuration;
 	}
 

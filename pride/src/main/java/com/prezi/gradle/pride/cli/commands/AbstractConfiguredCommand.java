@@ -1,53 +1,33 @@
 package com.prezi.gradle.pride.cli.commands;
 
-import com.google.common.base.Strings;
-import com.prezi.gradle.pride.cli.CliConfiguration;
+import com.prezi.gradle.pride.RuntimeConfiguration;
 import io.airlift.command.Option;
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
-import java.util.Arrays;
+import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_HOME;
+import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_VERSION;
 
 public abstract class AbstractConfiguredCommand extends AbstractCommand {
 	@Option(name = "--gradle-version",
 			title = "version",
-			description = "Use specified Gradle version")
+			description = "Use specified Gradle version (can be a version number, a URL of a distribution, or a location of an installation)")
 	private String explicitGradleVersion;
+
+	@Option(name = "--gradle-home",
+			title = "directory",
+			description = "Use specified Gradle home")
+	private String explicitGradleHome;
 
 	@Override
 	final public Integer call() throws Exception {
 		PropertiesConfiguration globalConfiguration = loadGlobalConfiguration();
-		Configuration config = new CompositeConfiguration(Arrays.<Configuration> asList(globalConfiguration, new CliConfiguration.Defaults()));
+		RuntimeConfiguration config = RuntimeConfiguration.create(globalConfiguration);
+
+		config.override(GRADLE_VERSION, explicitGradleVersion);
+		config.override(GRADLE_HOME, explicitGradleHome);
+
 		return executeWithConfiguration(config);
 	}
 
-	abstract protected int executeWithConfiguration(Configuration globalConfig) throws Exception;
-
-	protected String getGradleVersion(Configuration config) {
-		return override(config, CliConfiguration.GRADLE_VERSION, explicitGradleVersion);
-	}
-
-	protected static boolean override(Configuration config, String property, Boolean override) {
-		if (override != null) {
-			config.setProperty(property, override);
-		}
-		return config.getBoolean(property);
-	}
-
-	protected static boolean override(Configuration config, String property, boolean overrideEnabled, boolean overrideDisabled) {
-		if (overrideEnabled) {
-			config.setProperty(property, true);
-		} else if (overrideDisabled) {
-			config.setProperty(property, false);
-		}
-		return config.getBoolean(property);
-	}
-
-	protected static String override(Configuration config, String property, String override) {
-		if (!Strings.isNullOrEmpty(override)) {
-			config.setProperty(property, override);
-		}
-		return config.getString(property);
-	}
+	abstract protected int executeWithConfiguration(RuntimeConfiguration config) throws Exception;
 }

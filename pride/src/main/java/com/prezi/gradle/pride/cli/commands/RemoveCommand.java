@@ -6,6 +6,7 @@ import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.PrideInitializer;
+import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
@@ -66,6 +67,6 @@ public class RemoveCommand extends AbstractPrideCommand {
 		pride.save();
 
 		// Re-initialize pride
-		new PrideInitializer(getGradleVersion(pride.getConfiguration())).reinitialize(pride);
+		new PrideInitializer(new GradleConnectorManager(pride.getConfiguration())).reinitialize(pride);
 	}
 }

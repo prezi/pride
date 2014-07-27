@@ -5,15 +5,15 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
-import com.prezi.gradle.pride.cli.CliConfiguration;
+import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.PrideInitializer;
+import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.vcs.RepoCache;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
@@ -22,10 +22,11 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Collections2.filter;
-import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_BASE_URL;
-import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_CACHE_ALWAYS;
-import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_RECURSIVE;
-import static com.prezi.gradle.pride.cli.CliConfiguration.REPO_TYPE_DEFAULT;
+import static com.prezi.gradle.pride.RuntimeConfiguration.PRIDE_HOME;
+import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_BASE_URL;
+import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_CACHE_ALWAYS;
+import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_RECURSIVE;
+import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_TYPE_DEFAULT;
 
 @Command(name = "add", description = "Add modules to a pride")
 public class AddCommand extends AbstractPrideCommand {
@@ -62,11 +63,11 @@ public class AddCommand extends AbstractPrideCommand {
 
 	@Override
 	public void executeInPride(final Pride pride) throws IOException {
-		Configuration config = pride.getConfiguration();
-		String repoBaseUrl = override(config, REPO_BASE_URL, explicitRepoBaseUrl);
-		String repoType = override(config, REPO_TYPE_DEFAULT, explicitRepoType);
-		boolean useRepoCache = override(config, REPO_CACHE_ALWAYS, explicitUseRepoCache, explicitNoRepoCache);
-		boolean recursive = override(config, REPO_RECURSIVE, explicitRecursive);
+		RuntimeConfiguration config = pride.getConfiguration();
+		String repoBaseUrl = config.override(REPO_BASE_URL, explicitRepoBaseUrl);
+		String repoType = config.override(REPO_TYPE_DEFAULT, explicitRepoType);
+		boolean useRepoCache = config.override(REPO_CACHE_ALWAYS, explicitUseRepoCache, explicitNoRepoCache);
+		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
 
 		// Check if anything exists already
 		if (!overwrite) {
@@ -119,7 +120,7 @@ public class AddCommand extends AbstractPrideCommand {
 				File moduleInPride = new File(getPrideDirectory(), moduleName);
 				if (useRepoCache) {
 					if (repoCache == null) {
-						File cachePath = new File(config.getString(CliConfiguration.PRIDE_HOME) + "/cache");
+						File cachePath = new File(config.getString(PRIDE_HOME) + "/cache");
 						repoCache = new RepoCache(cachePath);
 					}
 					repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
@@ -136,7 +137,7 @@ public class AddCommand extends AbstractPrideCommand {
 		pride.save();
 
 		try {
-			new PrideInitializer(getGradleVersion(config)).reinitialize(pride);
+			new PrideInitializer(new GradleConnectorManager(config)).reinitialize(pride);
 		} catch (Exception ex) {
 			throw new PrideException("There was a problem reinitializing the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
 		} finally {
@@ -148,7 +149,7 @@ public class AddCommand extends AbstractPrideCommand {
 
 	protected static String getRepoUrl(String repoBaseUrl, String moduleName) {
 		if (repoBaseUrl == null) {
-			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set", "a full repository URL, specify the base URL via --repo-base-url", CliConfiguration.REPO_BASE_URL);
+			throw invalidOptionException("You have specified a module name, but base URL for Git repos is not set", "a full repository URL, specify the base URL via --repo-base-url", REPO_BASE_URL);
 		}
 
 		if (!repoBaseUrl.endsWith("/")) {
