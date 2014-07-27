@@ -1,11 +1,12 @@
 package com.prezi.gradle.pride.cli.commands;
 
 import com.prezi.gradle.pride.RuntimeConfiguration;
+import com.prezi.gradle.pride.cli.DefaultRuntimeConfiguration;
 import io.airlift.command.Option;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
-import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_HOME;
-import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_VERSION;
+import static com.prezi.gradle.pride.cli.Configurations.GRADLE_HOME;
+import static com.prezi.gradle.pride.cli.Configurations.GRADLE_VERSION;
 
 public abstract class AbstractConfiguredCommand extends AbstractCommand {
 	@Option(name = "--gradle-version",
@@ -21,7 +22,7 @@ public abstract class AbstractConfiguredCommand extends AbstractCommand {
 	@Override
 	final public Integer call() throws Exception {
 		PropertiesConfiguration globalConfiguration = loadGlobalConfiguration();
-		RuntimeConfiguration config = RuntimeConfiguration.create(globalConfiguration);
+		RuntimeConfiguration config = DefaultRuntimeConfiguration.create(globalConfiguration);
 
 		config.override(GRADLE_VERSION, explicitGradleVersion);
 		config.override(GRADLE_HOME, explicitGradleHome);

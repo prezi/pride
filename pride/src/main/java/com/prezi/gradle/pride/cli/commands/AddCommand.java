@@ -22,11 +22,11 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Collections2.filter;
-import static com.prezi.gradle.pride.RuntimeConfiguration.PRIDE_HOME;
-import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_BASE_URL;
-import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_CACHE_ALWAYS;
-import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_RECURSIVE;
-import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_TYPE_DEFAULT;
+import static com.prezi.gradle.pride.cli.Configurations.PRIDE_HOME;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_BASE_URL;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_CACHE_ALWAYS;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_TYPE_DEFAULT;
 
 @Command(name = "add", description = "Add modules to a pride")
 public class AddCommand extends AbstractPrideCommand {

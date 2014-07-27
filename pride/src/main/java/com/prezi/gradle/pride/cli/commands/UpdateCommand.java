@@ -14,8 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.prezi.gradle.pride.RuntimeConfiguration.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
-import static com.prezi.gradle.pride.RuntimeConfiguration.REPO_RECURSIVE;
+import static com.prezi.gradle.pride.cli.Configurations.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 
 @Command(name = "update", description = "Updates a pride")
 public class UpdateCommand extends AbstractPrideCommand {

@@ -3,6 +3,7 @@ package com.prezi.gradle.pride.cli.commands;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
+import com.prezi.gradle.pride.cli.DefaultRuntimeConfiguration;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
@@ -54,7 +55,7 @@ public class ConfigCommand extends AbstractCommand {
 		if (useGlobal) {
 			fileConfiguration = globalConfiguration;
 		} else {
-			RuntimeConfiguration runtimeConfig = RuntimeConfiguration.create(globalConfiguration);
+			RuntimeConfiguration runtimeConfig = DefaultRuntimeConfiguration.create(globalConfiguration);
 			Pride pride = Pride.getPride(getPrideDirectory(), runtimeConfig, getVcsManager());
 			fileConfiguration = pride.getLocalConfiguration();
 		}

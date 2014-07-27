@@ -13,8 +13,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
-import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_HOME;
-import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_VERSION;
+import static com.prezi.gradle.pride.cli.Configurations.GRADLE_HOME;
+import static com.prezi.gradle.pride.cli.Configurations.GRADLE_VERSION;
 
 public class GradleConnectorManager {
 	private static final Logger logger = LoggerFactory.getLogger(GradleConnectorManager.class);

@@ -12,7 +12,7 @@ import io.airlift.command.Option;
 import java.io.File;
 import java.io.FileFilter;
 
-import static com.prezi.gradle.pride.RuntimeConfiguration.GRADLE_WRAPPER;
+import static com.prezi.gradle.pride.cli.Configurations.GRADLE_WRAPPER;
 
 @Command(name = "init", description = "Initialize pride")
 public class InitCommand extends AbstractConfiguredCommand {
