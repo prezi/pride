@@ -3,9 +3,12 @@ package com.prezi.gradle.pride;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -25,10 +29,14 @@ import java.util.regex.Pattern;
 public class Pride {
 	private static final Logger logger = LoggerFactory.getLogger(Pride.class);
 
+	private static final Pattern MODULE_ID_MATCHER = Pattern.compile("modules\\.(\\d+)\\..*");
+
 	public static final String PRIDE_CONFIG_DIRECTORY = ".pride";
-	public static final String PRIDE_MODULES_FILE = "modules";
 	public static final String PRIDE_VERSION_FILE = "version";
 	public static final String PRIDE_CONFIG_FILE = "config";
+
+	public static final String MODULES_KEY = "modules";
+
 	public static final String GRADLE_SETTINGS_FILE = "settings.gradle";
 	public static final String GRADLE_BUILD_FILE = "build.gradle";
 
@@ -79,7 +87,7 @@ public class Pride {
 		}
 		this.localConfiguration = loadLocalConfiguration(configDirectory);
 		this.configuration = configuration.withConfiguration(localConfiguration);
-		this.modules = loadModules(rootDirectory, getPrideModulesFile(configDirectory), this.configuration, vcsManager);
+		this.modules = loadModules(rootDirectory, this.configuration, vcsManager);
 	}
 
 	private static PropertiesConfiguration loadLocalConfiguration(File configDirectory) {
@@ -122,6 +130,7 @@ public class Pride {
 	public Module addModule(String name, Vcs vcs) {
 		Module module = new Module(name, vcs);
 		modules.put(name, module);
+		updateModulesConfiguration();
 		return module;
 	}
 
@@ -130,6 +139,21 @@ public class Pride {
 		logger.info("Removing " + name + " from " + moduleDir);
 		modules.remove(name);
 		FileUtils.deleteDirectory(moduleDir);
+		updateModulesConfiguration();
+	}
+
+	private void updateModulesConfiguration() {
+		// Remove all module configurations
+		for (String moduleKey : Iterators.toArray(localConfiguration.getKeys(MODULES_KEY), String.class)) {
+			localConfiguration.clearProperty(moduleKey);
+		}
+		int id = 0;
+		for (Module module : modules.values()) {
+			String moduleId = MODULES_KEY + "." + id;
+			localConfiguration.setProperty(moduleId + ".name", module.getName());
+			localConfiguration.setProperty(moduleId + ".vcs", module.getVcs().getType());
+			id++;
+		}
 	}
 
 	public boolean hasModule(String name) {
@@ -173,41 +197,27 @@ public class Pride {
 		return new File(rootDirectory, module.getName());
 	}
 
-	public void save() throws IOException {
-		final File modulesFile = getPrideModulesFile(configDirectory);
-		FileUtils.deleteQuietly(modulesFile);
-		//noinspection ResultOfMethodCallIgnored
-		modulesFile.createNewFile();
-		for (Module module : modules.values()) {
-			FileUtils.write(modulesFile, module.getVcs().getType() + "|" + module.getName() + "\n", true);
-		}
+	public void save() throws ConfigurationException {
+		localConfiguration.save();
 	}
 
-	private static SortedMap<String, Module> loadModules(final File rootDirectory, final File modulesFile, final Configuration configuration, final VcsManager vcsManager) throws IOException {
-		if (!modulesFile.exists()) {
-			throw new PrideException("Cannot find modules file at " + modulesFile);
-		}
-
+	private static SortedMap<String, Module> loadModules(File rootDirectory, Configuration configuration, VcsManager vcsManager) throws IOException {
 		List<Module> modules = new ArrayList<Module>();
-		for (String line : FileUtils.readLines(modulesFile)) {
-			String moduleLine = line.trim();
-			if (moduleLine.isEmpty() || moduleLine.startsWith("#")) {
-				continue;
+		Set<String> moduleIds = Sets.newLinkedHashSet();
+		for (String moduleKey : Iterators.toArray(configuration.getKeys(MODULES_KEY), String.class)) {
+			Matcher matcher = MODULE_ID_MATCHER.matcher(moduleKey);
+			if (!matcher.matches()) {
+				throw new PrideException("Invalid module setting: " + moduleKey);
 			}
+			String moduleId = matcher.group(1);
+			moduleIds.add(moduleId);
+		}
+		for (String moduleId : moduleIds) {
+			String moduleKeyPrefix = MODULES_KEY + "." + moduleId;
+			String moduleName = configuration.getString(moduleKeyPrefix + ".name");
+			String vcsType = configuration.getString(moduleKeyPrefix + ".vcs");
 
-			String moduleName;
-			String vcsType;
-			Matcher matcher = Pattern.compile("(.*)?\\|(.*)").matcher(moduleLine);
-			if (matcher.matches()) {
-				vcsType = matcher.group(1);
-				moduleName = matcher.group(2);
-			} else {
-				// Default to git for backwards compatibility
-				vcsType = "git";
-				moduleName = moduleLine;
-			}
-
-			final File moduleDir = new File(rootDirectory, moduleName);
+			File moduleDir = new File(rootDirectory, moduleName);
 			if (!moduleDir.isDirectory()) {
 				throw new PrideException("Module \"" + moduleName + "\" is missing (" + moduleDir + ")");
 			}
@@ -242,10 +252,6 @@ public class Pride {
 
 	public static File getPrideConfigDirectory(File prideDirectory) {
 		return new File(prideDirectory, PRIDE_CONFIG_DIRECTORY);
-	}
-
-	public static File getPrideModulesFile(File configDirectory) {
-		return new File(configDirectory, PRIDE_MODULES_FILE);
 	}
 
 	public static File getPrideVersionFile(File configDirectory) {

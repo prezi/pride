@@ -50,9 +50,6 @@ public class PrideInitializer {
 		if (gradleConnectorManager.setGradleConfiguration(prideConfig)) {
 			prideConfig.save();
 		}
-		//noinspection ResultOfMethodCallIgnored
-		Pride.getPrideModulesFile(configDirectory).createNewFile();
-
 		Pride pride = Pride.getPride(prideDirectory, configuration, vcsManager);
 		reinitialize(pride);
 		return pride;
