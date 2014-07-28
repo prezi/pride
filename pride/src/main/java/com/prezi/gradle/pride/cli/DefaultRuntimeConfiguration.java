@@ -41,6 +41,7 @@ public class DefaultRuntimeConfiguration extends AbstractConfiguration implement
 		return new DefaultRuntimeConfiguration(builder.build());
 	}
 
+	@Override
 	public boolean override(String property, Boolean override) {
 		if (override != null) {
 			setProperty(property, override);
@@ -48,6 +49,7 @@ public class DefaultRuntimeConfiguration extends AbstractConfiguration implement
 		return getBoolean(property);
 	}
 
+	@Override
 	public boolean override(String property, boolean overrideEnabled, boolean overrideDisabled) {
 		if (overrideEnabled) {
 			setProperty(property, true);
@@ -57,6 +59,7 @@ public class DefaultRuntimeConfiguration extends AbstractConfiguration implement
 		return getBoolean(property);
 	}
 
+	@Override
 	public String override(String property, String override) {
 		if (!Strings.isNullOrEmpty(override)) {
 			setProperty(property, override);
