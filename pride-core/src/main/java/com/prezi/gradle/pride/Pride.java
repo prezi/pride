@@ -83,8 +83,8 @@ public class Pride {
 	}
 
 	private static PropertiesConfiguration loadLocalConfiguration(File configDirectory) {
+		File configFile = new File(configDirectory, PRIDE_CONFIG_FILE);
 		try {
-			File configFile = new File(configDirectory, PRIDE_CONFIG_FILE);
 			if (!configFile.exists()) {
 				FileUtils.forceMkdir(configFile.getParentFile());
 				//noinspection ResultOfMethodCallIgnored
@@ -93,7 +93,7 @@ public class Pride {
 
 			return new PropertiesConfiguration(configFile);
 		} catch (Exception ex) {
-			throw new RuntimeException("Couldn't load configuration file", ex);
+			throw new PrideException("Couldn't load configuration file: " + configFile, ex);
 		}
 	}
 

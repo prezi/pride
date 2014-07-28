@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride;
 
 import com.google.common.base.Function;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
@@ -33,7 +34,7 @@ public class PridePlugin implements Plugin<Project> {
 		try {
 			checkIfNotRunningFromRootOfPride(project);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw Throwables.propagate(e);
 		}
 
 		// Add our custom dependency declaration

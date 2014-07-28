@@ -17,7 +17,6 @@ import io.airlift.command.Option;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -62,7 +61,7 @@ public class AddCommand extends AbstractPrideCommand {
 	private List<String> modules;
 
 	@Override
-	public void executeInPride(final Pride pride) throws IOException {
+	public void executeInPride(final Pride pride) throws Exception {
 		RuntimeConfiguration config = pride.getConfiguration();
 		String repoBaseUrl = config.override(REPO_BASE_URL, explicitRepoBaseUrl);
 		String repoType = config.override(REPO_TYPE_DEFAULT, explicitRepoType);

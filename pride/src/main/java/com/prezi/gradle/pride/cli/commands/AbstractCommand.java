@@ -29,8 +29,8 @@ public abstract class AbstractCommand implements Callable<Integer> {
 	private VcsManager vcsManager;
 
 	static PropertiesConfiguration loadGlobalConfiguration() {
+		File configFile = new File(System.getProperty("user.home") + "/.prideconfig");
 		try {
-			File configFile = new File(System.getProperty("user.home") + "/.prideconfig");
 			if (!configFile.exists()) {
 				FileUtils.forceMkdir(configFile.getParentFile());
 				//noinspection ResultOfMethodCallIgnored
@@ -39,7 +39,7 @@ public abstract class AbstractCommand implements Callable<Integer> {
 
 			return new PropertiesConfiguration(configFile);
 		} catch (Exception ex) {
-			throw new RuntimeException("Couldn't load configuration file", ex);
+			throw new PrideException("Couldn't load configuration file: " + configFile, ex);
 		}
 	}
 

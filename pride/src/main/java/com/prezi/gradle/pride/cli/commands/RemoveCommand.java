@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.cli.commands;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
@@ -13,7 +14,6 @@ import io.airlift.command.Option;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class RemoveCommand extends AbstractPrideCommand {
 	private List<String> modulesNames;
 
 	@Override
-	public void executeInPride(final Pride pride) throws IOException {
+	public void executeInPride(final Pride pride) throws Exception {
 		// Check if anything exists already
 		if (!force) {
 			Collection<String> missingModules = Collections2.filter(modulesNames, new Predicate<String>() {
@@ -49,8 +49,8 @@ public class RemoveCommand extends AbstractPrideCommand {
 					File moduleDir = pride.getModuleDirectory(module.getName());
 					try {
 						return module.getVcs().getSupport().hasChanges(moduleDir);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					} catch (Exception e) {
+						throw Throwables.propagate(e);
 					}
 				}
 			});
