@@ -47,6 +47,6 @@ public class InitCommand extends AbstractConfiguredCommand {
 		} else {
 			initAction = InitActionFromImportedConfig.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitFromConfig);
 		}
-		return initAction.createPride(addWrapper);
+		return initAction.createPride(addWrapper, isVerbose());
 	}
 }

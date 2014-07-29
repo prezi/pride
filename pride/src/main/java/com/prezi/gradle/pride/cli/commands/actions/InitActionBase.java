@@ -28,13 +28,13 @@ public abstract class InitActionBase {
 		this.vcsManager = vcsManager;
 	}
 
-	public final int createPride(boolean addWrapper) throws Exception {
+	public final int createPride(boolean addWrapper, boolean verbose) throws Exception {
 		// Make sure we take the local config into account when choosing the Gradle installation
 		RuntimeConfiguration configForGradle = globalConfig.withConfiguration(prideConfig);
 		GradleConnectorManager gradleConnectorManager = new GradleConnectorManager(configForGradle);
 
 		// Create the pride
-		PrideInitializer prideInitializer = new PrideInitializer(gradleConnectorManager);
+		PrideInitializer prideInitializer = new PrideInitializer(gradleConnectorManager, verbose);
 		Pride pride = prideInitializer.create(prideDirectory, globalConfig, prideConfig, vcsManager);
 
 		if (addWrapper) {

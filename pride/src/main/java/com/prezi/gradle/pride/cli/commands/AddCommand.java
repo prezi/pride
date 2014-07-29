@@ -89,6 +89,6 @@ public class AddCommand extends AbstractPrideCommand {
 		ModuleAdder.addModules(pride, modules, getVcsManager());
 
 		pride.save();
-		new PrideInitializer(new GradleConnectorManager(config)).reinitialize(pride);
+		new PrideInitializer(new GradleConnectorManager(config), isVerbose()).reinitialize(pride);
 	}
 }

@@ -16,11 +16,11 @@ public abstract class AbstractCommand implements Callable<Integer> {
 
 	@Option(name = {"-v", "--verbose"},
 			description = "Verbose mode")
-	public boolean verbose;
+	private boolean verbose;
 
 	@Option(name = {"-q", "--quiet"},
 			description = "Quite mode")
-	public boolean quiet;
+	private boolean quiet;
 
 	@Option(name = {"-p", "--pride-directory"},
 			title = "directory",
@@ -53,5 +53,13 @@ public abstract class AbstractCommand implements Callable<Integer> {
 			vcsManager = new VcsManager();
 		}
 		return vcsManager;
+	}
+
+	public boolean isVerbose() {
+		return verbose;
+	}
+
+	public boolean isQuiet() {
+		return quiet;
 	}
 }

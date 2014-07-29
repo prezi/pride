@@ -67,6 +67,6 @@ public class RemoveCommand extends AbstractPrideCommand {
 		pride.save();
 
 		// Re-initialize pride
-		new PrideInitializer(new GradleConnectorManager(pride.getConfiguration())).reinitialize(pride);
+		new PrideInitializer(new GradleConnectorManager(pride.getConfiguration()), isVerbose()).reinitialize(pride);
 	}
 }

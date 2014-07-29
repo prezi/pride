@@ -66,10 +66,10 @@ public class PrideCli {
 				if (callable instanceof AbstractCommand) {
 					AbstractCommand command = (AbstractCommand) callable;
 					Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-					if (command.verbose) {
+					if (command.isVerbose()) {
 						rootLogger.setLevel(Level.DEBUG);
 						verbose = true;
-					} else if (command.quiet) {
+					} else if (command.isQuiet()) {
 						rootLogger.setLevel(Level.WARN);
 					}
 				}
