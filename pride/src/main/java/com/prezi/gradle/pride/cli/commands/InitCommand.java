@@ -1,5 +1,8 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
@@ -11,6 +14,7 @@ import io.airlift.command.Option;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Map;
 
 import static com.prezi.gradle.pride.cli.Configurations.GRADLE_WRAPPER;
 
@@ -33,6 +37,10 @@ public class InitCommand extends AbstractConfiguredCommand {
 			description = "Do not add existing modules in the pride directory to the pride")
 	private boolean explicitNoAddExisting;
 
+	@Option(name = "--ignore-config",
+			description = "Ignore existing pride's configuration (to be used with --force)")
+	private boolean explicitIgnoreConfig;
+
 	@Override
 	protected int executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
 		boolean prideExistsAlready = Pride.containsPride(getPrideDirectory());
@@ -41,10 +49,18 @@ public class InitCommand extends AbstractConfiguredCommand {
 		}
 
 		RuntimeConfiguration config = globalConfig;
-		if (prideExistsAlready) {
+		Map<String, Module> existingModules = Maps.newTreeMap();
+		if (prideExistsAlready && !explicitIgnoreConfig) {
 			try {
 				Pride pride = Pride.getPride(getPrideDirectory(), globalConfig, getVcsManager());
 				config = pride.getConfiguration();
+				// Get existing modules
+				existingModules = Maps.uniqueIndex(pride.getModules(), new Function<Module, String>() {
+					@Override
+					public String apply(Module module) {
+						return module.getName();
+					}
+				});
 			} catch (Exception ex) {
 				logger.warn("Could not load existing pride, ignoring existing configuration");
 				logger.debug("Exception was", ex);
@@ -54,7 +70,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 
 		GradleConnectorManager gradleConnectorManager = new GradleConnectorManager(config);
 		PrideInitializer prideInitializer = new PrideInitializer(gradleConnectorManager);
-		final Pride pride = prideInitializer.create(getPrideDirectory(), globalConfig, getVcsManager());
+		Pride pride = prideInitializer.create(getPrideDirectory(), globalConfig, getVcsManager());
 
 		if (addWrapper) {
 			prideInitializer.addWrapper(pride);
@@ -69,16 +85,27 @@ public class InitCommand extends AbstractConfiguredCommand {
 					return path.isDirectory();
 				}
 			})) {
-				if (Pride.isValidModuleDirectory(dir)) {
-					Vcs vcs = getVcsManager().findSupportingVcs(dir, config);
-					logger.info("Adding existing " + vcs.getType() + " module in " + dir);
-					String repositoryUrl = vcs.getSupport().getRepositoryUrl(dir);
+				String moduleName = dir.getName();
+				String repositoryUrl;
+				Vcs vcs;
+
+				Module existingModule = existingModules.get(moduleName);
+				if (existingModule != null) {
+					logger.info("Found existing module from previous configuration: {}", moduleName);
+					repositoryUrl = existingModule.getRemote();
+					vcs = existingModule.getVcs();
+				} else if (Pride.isValidModuleDirectory(dir)) {
+					vcs = getVcsManager().findSupportingVcs(dir, config);
+					repositoryUrl = vcs.getSupport().getRepositoryUrl(dir);
 					if (repositoryUrl == null) {
 						throw new PrideException("Could not detect remote URL for " + dir);
 					}
-					pride.addModule(dir.getName(), repositoryUrl, vcs);
-					addedAny = true;
+				} else {
+					continue;
 				}
+				logger.info("Adding existing {} module in {}", vcs.getType(), dir);
+				pride.addModule(moduleName, repositoryUrl, vcs);
+				addedAny = true;
 			}
 			if (addedAny) {
 				pride.save();
