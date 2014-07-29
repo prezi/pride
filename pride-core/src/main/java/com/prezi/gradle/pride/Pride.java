@@ -203,22 +203,10 @@ public class Pride {
 	}
 
 	private static SortedMap<String, Module> loadModules(File rootDirectory, Configuration configuration, VcsManager vcsManager) throws IOException {
-		List<Module> modules = new ArrayList<Module>();
-		Set<String> moduleIds = Sets.newLinkedHashSet();
-		for (String moduleKey : Iterators.toArray(configuration.getKeys(MODULES_KEY), String.class)) {
-			Matcher matcher = MODULE_ID_MATCHER.matcher(moduleKey);
-			if (!matcher.matches()) {
-				throw new PrideException("Invalid module setting: " + moduleKey);
-			}
-			String moduleId = matcher.group(1);
-			moduleIds.add(moduleId);
-		}
-		for (String moduleId : moduleIds) {
-			String moduleKeyPrefix = MODULES_KEY + "." + moduleId;
-			String moduleName = configuration.getString(moduleKeyPrefix + ".name");
-			String moduleRemote = configuration.getString(moduleKeyPrefix + ".remote");
-			String vcsType = configuration.getString(moduleKeyPrefix + ".vcs");
-
+		TreeMap<String, Module> modulesMap = new TreeMap<String, Module>();
+		Collection<Module> modules = getModulesFromConfiguration(configuration, vcsManager);
+		for (Module module : modules) {
+			String moduleName = module.getName();
 			File moduleDir = new File(rootDirectory, moduleName);
 			if (!moduleDir.isDirectory()) {
 				throw new PrideException("Module \"" + moduleName + "\" is missing (" + moduleDir + ")");
@@ -228,16 +216,33 @@ public class Pride {
 				throw new PrideException("No module found in \"" + moduleDir + "\"");
 			}
 
-			logger.debug("Found {} module {}", vcsType, moduleName);
+			logger.debug("Found {} module {}", module.getVcs().getType(), moduleName);
 
-			Module module = new Module(moduleName, moduleRemote, vcsManager.getVcs(vcsType, configuration));
-			modules.add(module);
-		}
-		TreeMap<String, Module> modulesMap = new TreeMap<String, Module>();
-		for (Module module : modules) {
 			modulesMap.put(module.getName(), module);
 		}
 		return modulesMap;
+	}
+
+	public static List<Module> getModulesFromConfiguration(Configuration config, VcsManager vcsManager) {
+		List<Module> modules = new ArrayList<Module>();
+		Set<String> moduleIds = Sets.newLinkedHashSet();
+		for (String moduleKey : Iterators.toArray(config.getKeys(MODULES_KEY), String.class)) {
+			Matcher matcher = MODULE_ID_MATCHER.matcher(moduleKey);
+			if (!matcher.matches()) {
+				throw new PrideException("Invalid module setting: " + moduleKey);
+			}
+			String moduleId = matcher.group(1);
+			moduleIds.add(moduleId);
+		}
+		for (String moduleId : moduleIds) {
+			String moduleKeyPrefix = MODULES_KEY + "." + moduleId;
+			String moduleName = config.getString(moduleKeyPrefix + ".name");
+			String moduleRemote = config.getString(moduleKeyPrefix + ".remote");
+			String vcsType = config.getString(moduleKeyPrefix + ".vcs");
+			Module module = new Module(moduleName, moduleRemote, vcsManager.getVcs(vcsType, config));
+			modules.add(module);
+		}
+		return modules;
 	}
 
 	public static boolean isValidModuleDirectory(File dir) {

@@ -43,10 +43,6 @@ public abstract class AbstractCommand implements Callable<Integer> {
 		}
 	}
 
-	protected static PrideException invalidOptionException(String message, String option, String configuration) {
-		return new PrideException(message + ". Either use " + option + ", or set it in the global configuration (~/.prideconfig) as \"" + configuration + "\". See \'pride help config\' for more information.");
-	}
-
 	protected File getPrideDirectory() {
 		File directory = explicitPrideDirectory;
 		return directory != null ? directory : new File(System.getProperty("user.dir"));
