@@ -4,10 +4,12 @@ import com.prezi.gradle.pride.vcs.Vcs;
 
 public class Module implements Comparable<Module> {
 	private final String name;
+	private final String remote;
 	private final Vcs vcs;
 
-	public Module(String name, Vcs vcs) {
+	public Module(String name, String remote, Vcs vcs) {
 		this.name = name;
+		this.remote = remote;
 		this.vcs = vcs;
 	}
 
@@ -18,6 +20,10 @@ public class Module implements Comparable<Module> {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getRemote() {
+		return remote;
 	}
 
 	public Vcs getVcs() {

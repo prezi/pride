@@ -126,7 +126,7 @@ public class AddCommand extends AbstractPrideCommand {
 				} else {
 					vcsSupport.checkout(repoUrl, moduleInPride, recursive, false);
 				}
-				pride.addModule(moduleName, vcs);
+				pride.addModule(moduleName, repoUrl, vcs);
 			} catch (Exception ex) {
 				logger.debug("Could not add {}", module, ex);
 				failedModules.add(module);

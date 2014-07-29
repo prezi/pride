@@ -1,7 +1,9 @@
 package com.prezi.gradle.pride.vcs.git;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 import com.google.common.io.LineProcessor;
 import com.prezi.gradle.pride.ProcessUtils;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +38,7 @@ public class GitVcsSupport implements VcsSupport {
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
 	private static final Pattern STATUS_AHEAD = Pattern.compile(".*\\[ahead \\d+\\]");
+	private static final Pattern REMOTE_LINE = Pattern.compile("(\\S+)\\s+(\\S+)\\s+\\((\\S+)\\)");
 
 	private final Configuration configuration;
 
@@ -114,12 +118,48 @@ public class GitVcsSupport implements VcsSupport {
 
 	@Override
 	public void activate(String repositoryUrl, File targetDirectory) throws IOException {
-		ProcessUtils.executeIn(targetDirectory, Lists.newArrayList("git", "remote", "set-url", "origin", repositoryUrl));
+		ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "set-url", "origin", repositoryUrl));
 	}
 
 	@Override
 	public boolean isMirroringSupported() {
 		return true;
+	}
+
+	@Override
+	public String getRepositoryUrl(File targetDirectory) throws IOException {
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "-v"), false, false);
+		List<String> remoteLines = CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
+		Map<String, String> remoteUrls = Maps.newLinkedHashMap();
+		for (String remoteLine : remoteLines) {
+			Matcher matcher = REMOTE_LINE.matcher(remoteLine);
+			if (!matcher.matches()) {
+				continue;
+			}
+			if (!"fetch".equals(matcher.group(3))) {
+				continue;
+			}
+			String remote = matcher.group(1);
+			String url = matcher.group(2);
+			remoteUrls.put(remote, url);
+		}
+
+		if (remoteUrls.size() == 0) {
+			// We found no remotes
+			return null;
+		} else if (remoteUrls.size() == 1) {
+			// There's only one, use it
+			return Iterables.getLast(remoteUrls.values());
+		} else {
+			String origin = remoteUrls.get("origin");
+			if (origin != null) {
+				// There's one called 'origin', use that
+				return origin;
+			} else {
+				// Use the first one, for better or worse
+				return Iterables.getFirst(remoteUrls.values(), null);
+			}
+		}
 	}
 
 	@Override

@@ -72,7 +72,11 @@ public class InitCommand extends AbstractConfiguredCommand {
 				if (Pride.isValidModuleDirectory(dir)) {
 					Vcs vcs = getVcsManager().findSupportingVcs(dir, config);
 					logger.info("Adding existing " + vcs.getType() + " module in " + dir);
-					pride.addModule(dir.getName(), vcs);
+					String repositoryUrl = vcs.getSupport().getRepositoryUrl(dir);
+					if (repositoryUrl == null) {
+						throw new PrideException("Could not detect remote URL for " + dir);
+					}
+					pride.addModule(dir.getName(), repositoryUrl, vcs);
 					addedAny = true;
 				}
 			}

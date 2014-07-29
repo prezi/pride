@@ -56,6 +56,14 @@ public interface VcsSupport {
 	boolean isMirroringSupported();
 
 	/**
+	 * Returns the remote URL of the local clone.
+	 *
+	 * @return the URL of the repository, or {@code null} if one cannot be inferred.
+	 * @throws java.io.IOException If an I/O error occurs.
+	 */
+	String getRepositoryUrl(File targetDirectory) throws IOException;
+
+	/**
 	 * Normalizes the repository URL, e.g. removes trailing slashes etc.
 	 *
 	 * @param repositoryUrl the URL to normalize.

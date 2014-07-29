@@ -3,6 +3,7 @@ package com.prezi.gradle.pride.vcs.svn;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import com.prezi.gradle.pride.ProcessUtils;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import org.apache.commons.io.FileUtils;
@@ -11,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +27,7 @@ public class SvnVcsSupport implements VcsSupport {
 				+ "(?:\\.git)?"								// optional .git suffix
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
+	private static final Pattern ROOT_URL = Pattern.compile("Repository Root: (.*)");
 
 	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport.class);
 
@@ -71,6 +75,20 @@ public class SvnVcsSupport implements VcsSupport {
 	@Override
 	public boolean isMirroringSupported() {
 		return false;
+	}
+
+	@Override
+	public String getRepositoryUrl(File targetDirectory) throws IOException {
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("svn", "info"), false, false);
+		List<String> infoLines = CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
+		for (String remoteLine : infoLines) {
+			Matcher matcher = ROOT_URL.matcher(remoteLine);
+			if (!matcher.matches()) {
+				continue;
+			}
+			return matcher.group(1);
+		}
+		return null;
 	}
 
 	@Override

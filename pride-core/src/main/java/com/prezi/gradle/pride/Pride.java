@@ -127,8 +127,8 @@ public class Pride {
 		return Collections.unmodifiableCollection(modules.values());
 	}
 
-	public Module addModule(String name, Vcs vcs) {
-		Module module = new Module(name, vcs);
+	public Module addModule(String name, String remote, Vcs vcs) {
+		Module module = new Module(name, remote, vcs);
 		modules.put(name, module);
 		updateModulesConfiguration();
 		return module;
@@ -151,6 +151,7 @@ public class Pride {
 		for (Module module : modules.values()) {
 			String moduleId = MODULES_KEY + "." + id;
 			localConfiguration.setProperty(moduleId + ".name", module.getName());
+			localConfiguration.setProperty(moduleId + ".remote", module.getRemote());
 			localConfiguration.setProperty(moduleId + ".vcs", module.getVcs().getType());
 			id++;
 		}
@@ -215,6 +216,7 @@ public class Pride {
 		for (String moduleId : moduleIds) {
 			String moduleKeyPrefix = MODULES_KEY + "." + moduleId;
 			String moduleName = configuration.getString(moduleKeyPrefix + ".name");
+			String moduleRemote = configuration.getString(moduleKeyPrefix + ".remote");
 			String vcsType = configuration.getString(moduleKeyPrefix + ".vcs");
 
 			File moduleDir = new File(rootDirectory, moduleName);
@@ -228,7 +230,7 @@ public class Pride {
 
 			logger.debug("Found {} module {}", vcsType, moduleName);
 
-			Module module = new Module(moduleName, vcsManager.getVcs(vcsType, configuration));
+			Module module = new Module(moduleName, moduleRemote, vcsManager.getVcs(vcsType, configuration));
 			modules.add(module);
 		}
 		TreeMap<String, Module> modulesMap = new TreeMap<String, Module>();
