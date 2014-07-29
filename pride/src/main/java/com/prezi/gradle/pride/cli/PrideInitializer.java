@@ -127,17 +127,4 @@ public class PrideInitializer {
 			}
 		});
 	}
-
-	public void addWrapper(Pride pride) {
-		logger.info("Adding Gradle wrapper");
-		gradleConnectorManager.executeInProject(pride.getRootDirectory(), new GradleProjectExecution<Void, RuntimeException>() {
-			@Override
-			public Void execute(File projectDirectory, ProjectConnection connection) {
-				connection.newBuild()
-						.forTasks("wrapper")
-						.run();
-				return null;
-			}
-		});
-	}
 }

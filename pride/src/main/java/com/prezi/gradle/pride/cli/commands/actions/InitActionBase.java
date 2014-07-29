@@ -4,12 +4,18 @@ import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.PrideInitializer;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
+import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
+import org.gradle.tooling.ProjectConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 public abstract class InitActionBase {
+	private static final Logger logger = LoggerFactory.getLogger(InitActionBase.class);
+
 	private final File prideDirectory;
 	protected final RuntimeConfiguration globalConfig;
 	protected final Configuration prideConfig;
@@ -32,7 +38,16 @@ public abstract class InitActionBase {
 		Pride pride = prideInitializer.create(prideDirectory, globalConfig, prideConfig, vcsManager);
 
 		if (addWrapper) {
-			prideInitializer.addWrapper(pride);
+			logger.info("Adding Gradle wrapper");
+			gradleConnectorManager.executeInProject(pride.getRootDirectory(), new GradleProjectExecution<Void, RuntimeException>() {
+				@Override
+				public Void execute(File projectDirectory, ProjectConnection connection) {
+					connection.newBuild()
+							.forTasks("wrapper")
+							.run();
+					return null;
+				}
+			});
 		}
 
 		return initPride(prideInitializer, pride);
