@@ -26,7 +26,7 @@ subprojects { subproject ->
 	sourceCompatibility = 1.6
 	targetCompatibility = 1.6
 
-	description = "Pride is a tool to manage a pride of Gradle-built modules stored in different GitHub repositories"
+	description = "Pride manages Gradle-built modules as a single Gradle project"
 
 	repositories {
 		mavenLocal()
