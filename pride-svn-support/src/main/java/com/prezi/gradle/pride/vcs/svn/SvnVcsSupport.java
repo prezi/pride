@@ -41,7 +41,7 @@ public class SvnVcsSupport implements VcsSupport {
 		log.debug("Checking out {} into {}", trunkUrl, targetDirectory);
 		ImmutableList.Builder<String> checkoutCommand = ImmutableList.<String> builder().add("svn").add("checkout");
 		if (!recursive) {
-			checkoutCommand.add("--depth=immediates");
+			checkoutCommand.add("--depth=files");
 		}
 		checkoutCommand.add(trunkUrl).add(targetDirectory.getPath());
 		ProcessUtils.executeIn(null, checkoutCommand.build());
@@ -51,7 +51,7 @@ public class SvnVcsSupport implements VcsSupport {
 	public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
 		ImmutableList.Builder<String> updateCommand = ImmutableList.<String> builder().add("svn").add("update");
 		if (!recursive) {
-			updateCommand.add("--depth=immediates");
+			updateCommand.add("--depth=files");
 		}
 		ProcessUtils.executeIn(targetDirectory, updateCommand.build());
 	}
