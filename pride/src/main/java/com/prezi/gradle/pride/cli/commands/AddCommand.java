@@ -1,6 +1,5 @@
 package com.prezi.gradle.pride.cli.commands;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -87,16 +86,9 @@ public class AddCommand extends AbstractPrideCommand {
 		}
 
 		// Clone repositories
-		List<String> failedModules = ModuleAdder.addModules(pride, modules, getVcsManager());
+		ModuleAdder.addModules(pride, modules, getVcsManager());
 
-		try {
-			new PrideInitializer(new GradleConnectorManager(config)).reinitialize(pride);
-		} catch (Exception ex) {
-			throw new PrideException("There was a problem reinitializing the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
-		} finally {
-			if (!failedModules.isEmpty()) {
-				logger.error("Could not add the following modules:\n\n\t* {}", Joiner.on("\n\t* ").join(failedModules));
-			}
-		}
+		pride.save();
+		new PrideInitializer(new GradleConnectorManager(config)).reinitialize(pride);
 	}
 }

@@ -41,7 +41,6 @@ public class Pride {
 	public static final String GRADLE_BUILD_FILE = "build.gradle";
 
 	private final File rootDirectory;
-	private final File configDirectory;
 	private final File gradleSettingsFile;
 	private final File gradleBuildFile;
 	private final PropertiesConfiguration localConfiguration;
@@ -51,7 +50,8 @@ public class Pride {
 
 	public static Pride lookupPride(File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
 		if (containsPride(directory)) {
-			return new Pride(directory, globalConfig, vcsManager);
+			PropertiesConfiguration prideConfig = loadLocalConfiguration(getPrideConfigDirectory(directory));
+			return new Pride(directory, globalConfig, prideConfig, vcsManager);
 		} else {
 			File parent = directory.getParentFile();
 			if (parent != null) {
@@ -77,16 +77,12 @@ public class Pride {
 		return result;
 	}
 
-	private Pride(final File rootDirectory, RuntimeConfiguration configuration, VcsManager vcsManager) throws IOException {
+	public Pride(final File rootDirectory, RuntimeConfiguration globalConfiguration, PropertiesConfiguration prideConfiguration, VcsManager vcsManager) throws IOException {
 		this.rootDirectory = rootDirectory;
-		this.configDirectory = getPrideConfigDirectory(rootDirectory);
 		this.gradleSettingsFile = new File(rootDirectory, GRADLE_SETTINGS_FILE);
 		this.gradleBuildFile = new File(rootDirectory, GRADLE_BUILD_FILE);
-		if (!configDirectory.isDirectory()) {
-			throw new PrideException("No pride in directory \"" + rootDirectory + "\"");
-		}
-		this.localConfiguration = loadLocalConfiguration(configDirectory);
-		this.configuration = configuration.withConfiguration(localConfiguration);
+		this.localConfiguration = prideConfiguration;
+		this.configuration = globalConfiguration.withConfiguration(prideConfiguration);
 		this.modules = loadModules(rootDirectory, this.configuration, vcsManager);
 	}
 
@@ -271,10 +267,6 @@ public class Pride {
 
 	public File getRootDirectory() {
 		return rootDirectory;
-	}
-
-	public File getConfigDirectory() {
-		return configDirectory;
 	}
 
 	public File getGradleSettingsFile() {

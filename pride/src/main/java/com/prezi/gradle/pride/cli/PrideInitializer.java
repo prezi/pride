@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli;
 
+import com.google.common.collect.Iterators;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -7,6 +8,7 @@ import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
 import com.prezi.gradle.pride.vcs.VcsManager;
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -35,8 +37,8 @@ public class PrideInitializer {
 		this.gradleConnectorManager = gradleConnectorManager;
 	}
 
-	public Pride create(File prideDirectory, RuntimeConfiguration configuration, VcsManager vcsManager) throws IOException, ConfigurationException {
-		logger.info("Initializing " + prideDirectory);
+	public Pride create(File prideDirectory, RuntimeConfiguration globalConfig, Configuration prideConfig, VcsManager vcsManager) throws IOException, ConfigurationException {
+		logger.info("Initializing {}", prideDirectory);
 		FileUtils.forceMkdir(prideDirectory);
 
 		File configDirectory = Pride.getPrideConfigDirectory(prideDirectory);
@@ -44,36 +46,54 @@ public class PrideInitializer {
 		FileUtils.forceMkdir(configDirectory);
 		FileUtils.write(Pride.getPrideVersionFile(configDirectory), "0\n");
 
-		// Create config file with Gradle details
+		// Create config file
 		File configFile = Pride.getPrideConfigFile(configDirectory);
-		PropertiesConfiguration prideConfig = new PropertiesConfiguration(configFile);
-		if (gradleConnectorManager.setGradleConfiguration(prideConfig)) {
-			prideConfig.save();
+		PropertiesConfiguration prideFileConfig = new PropertiesConfiguration(configFile);
+		boolean prideConfigModified = false;
+		for (String key : Iterators.toArray(prideConfig.getKeys(), String.class)) {
+			// Skip modules
+			if (key.startsWith("modules.")) {
+				continue;
+			}
+			prideFileConfig.setProperty(key, prideConfig.getProperty(key));
+			prideConfigModified = true;
 		}
-		Pride pride = Pride.getPride(prideDirectory, configuration, vcsManager);
+		// Override Gradle details
+		if (gradleConnectorManager.setGradleConfiguration(prideFileConfig)) {
+			prideConfigModified = true;
+		}
+		if (prideConfigModified) {
+			prideFileConfig.save();
+		}
+
+		Pride pride = new Pride(prideDirectory, globalConfig, prideFileConfig, vcsManager);
 		reinitialize(pride);
 		return pride;
 	}
 
-	public void reinitialize(final Pride pride) throws IOException {
-		File buildFile = pride.getGradleBuildFile();
-		FileUtils.deleteQuietly(buildFile);
-		FileUtils.write(buildFile, DO_NOT_MODIFY_WARNING);
-		FileOutputStream buildOut = new FileOutputStream(buildFile, true);
+	public void reinitialize(final Pride pride) {
 		try {
-			IOUtils.copy(PrideInitializer.class.getResourceAsStream("/build.gradle"), buildOut);
-		} finally {
-			buildOut.close();
-		}
-
-		final File settingsFile = pride.getGradleSettingsFile();
-		FileUtils.deleteQuietly(settingsFile);
-		FileUtils.write(settingsFile, DO_NOT_MODIFY_WARNING);
-		for (Module module : pride.getModules()) {
-			File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
-			if (Pride.isValidModuleDirectory(moduleDirectory)) {
-				initializeModule(pride, moduleDirectory, settingsFile);
+			File buildFile = pride.getGradleBuildFile();
+			FileUtils.deleteQuietly(buildFile);
+			FileUtils.write(buildFile, DO_NOT_MODIFY_WARNING);
+			FileOutputStream buildOut = new FileOutputStream(buildFile, true);
+			try {
+				IOUtils.copy(PrideInitializer.class.getResourceAsStream("/build.gradle"), buildOut);
+			} finally {
+				buildOut.close();
 			}
+
+			final File settingsFile = pride.getGradleSettingsFile();
+			FileUtils.deleteQuietly(settingsFile);
+			FileUtils.write(settingsFile, DO_NOT_MODIFY_WARNING);
+			for (Module module : pride.getModules()) {
+				File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
+				if (Pride.isValidModuleDirectory(moduleDirectory)) {
+					initializeModule(pride, moduleDirectory, settingsFile);
+				}
+			}
+		} catch (Exception ex) {
+			throw new PrideException("There was a problem during the initialization of the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
 		}
 	}
 

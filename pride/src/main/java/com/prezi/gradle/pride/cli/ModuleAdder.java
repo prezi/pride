@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -75,7 +76,9 @@ public class ModuleAdder {
 			}
 		}
 
-		pride.save();
+		if (!failedModules.isEmpty()) {
+			logger.error("Could not add the following modules:\n\n\t* {}", Joiner.on("\n\t* ").join(failedModules));
+		}
 
 		return failedModules;
 	}
