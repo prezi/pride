@@ -58,6 +58,7 @@ public interface VcsSupport {
 	/**
 	 * Returns the remote URL of the local clone.
 	 *
+	 * @param targetDirectory The directory where the local clone resides.
 	 * @return the URL of the repository, or {@code null} if one cannot be inferred.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
