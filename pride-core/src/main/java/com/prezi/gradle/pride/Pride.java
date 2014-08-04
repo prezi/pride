@@ -1,10 +1,12 @@
 package com.prezi.gradle.pride;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
@@ -22,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +37,7 @@ public class Pride {
 	public static final String PRIDE_CONFIG_DIRECTORY = ".pride";
 	public static final String PRIDE_VERSION_FILE = "version";
 	public static final String PRIDE_CONFIG_FILE = "config";
+	public static final String PRIDE_PROJECTS_FILE = "projects";
 
 	public static final String MODULES_KEY = "modules";
 
@@ -98,6 +102,35 @@ public class Pride {
 			return new PropertiesConfiguration(configFile);
 		} catch (Exception ex) {
 			throw new PrideException("Couldn't load configuration file: " + configFile, ex);
+		}
+	}
+
+	// Format is: com.example.test:test::test
+	private static final Pattern PROJECT_PATTERN = Pattern.compile("(.+?):(.+?):(:.+)");
+
+	public static SortedSet<PrideProjectData> loadProjects(File projectsFile) throws IOException {
+		SortedSet<PrideProjectData> projects = Sets.newTreeSet();
+		if (projectsFile.exists()) {
+			for (String line : Files.asCharSource(projectsFile, Charsets.UTF_8).readLines()) {
+				line = line.trim();
+				if (line.isEmpty() || line.startsWith("#")) {
+					continue;
+				}
+				Matcher matcher = PROJECT_PATTERN.matcher(line);
+				if (!matcher.matches()) {
+					throw new IllegalStateException("Cannot read line in " + projectsFile + ": " + line);
+				}
+
+				projects.add(new PrideProjectData(matcher.group(1), matcher.group(2), matcher.group(3)));
+			}
+		}
+		return projects;
+	}
+
+	public static void saveProjects(File projectsFile, Collection<PrideProjectData> projects) throws IOException {
+		FileUtils.deleteQuietly(projectsFile);
+		for (PrideProjectData project : projects) {
+			FileUtils.write(projectsFile, project.getGroup() + ":" + project.getName() + ":" + project.getPath() + "\n", true);
 		}
 	}
 
@@ -263,6 +296,10 @@ public class Pride {
 
 	public static File getPrideConfigFile(File configDirectory) {
 		return new File(configDirectory, PRIDE_CONFIG_FILE);
+	}
+
+	public static File getPrideProjectsFile(File configDirectory) {
+		return new File(configDirectory, PRIDE_PROJECTS_FILE);
 	}
 
 	public File getRootDirectory() {

@@ -1,9 +1,9 @@
 package com.prezi.gradle.pride;
 
-import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.prezi.gradle.pride.model.PrideProjectModelBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.gradle.BuildAdapter;
 import org.gradle.api.Plugin;
@@ -14,9 +14,11 @@ import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.invocation.Gradle;
+import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -24,9 +26,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
+
+	private final ToolingModelBuilderRegistry registry;
+
+	@Inject
+	public PridePlugin(ToolingModelBuilderRegistry registry) {
+		this.registry = registry;
+	}
 
 	@Override
 	public void apply(Project project) {
@@ -37,25 +47,31 @@ public class PridePlugin implements Plugin<Project> {
 			throw Throwables.propagate(e);
 		}
 
+		// Register a builder for the pride tooling model
+		registry.register(new PrideProjectModelBuilder());
+
 		// Add our custom dependency declaration
 		DynamicDependenciesExtension extension = project.getExtensions().create("dynamicDependencies", DynamicDependenciesExtension.class, project);
 
 		// Apply Pride convention
 		project.getConvention().getPlugins().put("pride", new PrideConvention(project));
 
-		localizeDynamicDependencies(project, extension);
+		try {
+			localizeDynamicDependencies(project, extension);
+		} catch (IOException e) {
+			Throwables.propagate(e);
+		}
 	}
 
-	private static void localizeDynamicDependencies(final Project project, final DynamicDependenciesExtension dynamicDependencies) {
+	private static void localizeDynamicDependencies(final Project project, final DynamicDependenciesExtension dynamicDependencies) throws IOException {
+		final SortedSet<PrideProjectData> allProjectData = Pride.loadProjects(Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(project.getRootDir())));
 		project.getGradle().addBuildListener(new BuildAdapter() {
 			@Override
 			public void projectsEvaluated(Gradle gradle) {
-				final Map<String, Project> projectPathsByGroupAndName = Maps.uniqueIndex(project.getRootProject().getAllprojects(), new Function<Project, String>() {
-					@Override
-					public String apply(Project p) {
-						return p.getGroup() + ":" + p.getName();
-					}
-				});
+				final Map<String, Project> projectPathsByGroupAndName = Maps.newTreeMap();
+				for (PrideProjectData p : allProjectData) {
+					projectPathsByGroupAndName.put(p.getGroup() + ":" + p.getName(), project.getRootProject().findProject(p.getPath()));
+				}
 
 				// Collect local projects in the session
 				logger.debug("Resolving dynamic dependencies among projects: " + projectPathsByGroupAndName.keySet());
@@ -162,10 +178,8 @@ public class PridePlugin implements Plugin<Project> {
 					}
 				}
 			}
-
 			alreadyCheckedIfRunningFromRootOfPride = true;
 		}
-
 	}
 }
 

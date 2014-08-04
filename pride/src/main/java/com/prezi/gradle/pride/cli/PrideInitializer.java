@@ -1,12 +1,16 @@
 package com.prezi.gradle.pride.cli;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
+import com.prezi.gradle.pride.PrideProjectData;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
+import com.prezi.gradle.pride.model.PrideProjectModel;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -15,14 +19,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProjectConnection;
-import org.gradle.tooling.model.gradle.BasicGradleProject;
-import org.gradle.tooling.model.gradle.GradleBuild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 public class PrideInitializer {
 
@@ -73,7 +78,7 @@ public class PrideInitializer {
 		return pride;
 	}
 
-	public void reinitialize(final Pride pride) {
+	public void reinitialize(Pride pride) {
 		try {
 			File buildFile = pride.getGradleBuildFile();
 			FileUtils.deleteQuietly(buildFile);
@@ -85,47 +90,82 @@ public class PrideInitializer {
 				buildOut.close();
 			}
 
-			final File settingsFile = pride.getGradleSettingsFile();
-			FileUtils.deleteQuietly(settingsFile);
-			FileUtils.write(settingsFile, DO_NOT_MODIFY_WARNING);
+			Map<File, PrideProjectModel> rootProjects = Maps.newLinkedHashMap();
 			for (Module module : pride.getModules()) {
 				File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
 				if (Pride.isValidModuleDirectory(moduleDirectory)) {
-					initializeModule(pride, moduleDirectory, settingsFile);
+					PrideProjectModel rootProject = getRootProjectModel(moduleDirectory);
+					rootProjects.put(moduleDirectory, rootProject);
 				}
 			}
+
+			createSettingsFile(pride, rootProjects);
+			createProjectsFile(pride, rootProjects);
 		} catch (Exception ex) {
 			throw new PrideException("There was a problem during the initialization of the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
 		}
 	}
 
-	private void initializeModule(final Pride pride, File moduleDirectory, final File settingsFile) {
-		gradleConnectorManager.executeInProject(moduleDirectory, new GradleProjectExecution<Void, RuntimeException>() {
-			@Override
-			public Void execute(File moduleDirectory, ProjectConnection connection) {
-				try {
-					final String relativePath = pride.getRootDirectory().toURI().relativize(moduleDirectory.toURI()).toString();
+	private void createSettingsFile(Pride pride, Map<File, PrideProjectModel> rootProjects) throws IOException {
+		File settingsFile = pride.getGradleSettingsFile();
+		FileUtils.deleteQuietly(settingsFile);
+		FileUtils.write(settingsFile, DO_NOT_MODIFY_WARNING);
+		for (Map.Entry<File, PrideProjectModel> entry : rootProjects.entrySet()) {
+			File moduleDirectory = entry.getKey();
+			PrideProjectModel rootProject = entry.getValue();
 
+			// Merge settings
+			String relativePath = pride.getRootDirectory().toURI().relativize(moduleDirectory.toURI()).toString();
+			FileUtils.write(settingsFile, "\n// Settings from project in directory /" + relativePath + "\n\n", true);
+			// Write the root project
+			FileUtils.write(settingsFile, "include \'" + rootProject.getName() + "\'\n", true);
+			FileUtils.write(settingsFile, "project(\':" + rootProject.getName() + "\').projectDir = file(\'" + moduleDirectory.getName() + "\')\n", true);
+			writeSettingsForChildren(settingsFile, rootProject.getName(), rootProject.getChildren());
+		}
+	}
+
+	private void writeSettingsForChildren(File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
+		for (PrideProjectModel child : children) {
+			FileUtils.write(settingsFile, "include \'" + rootProjectName + child.getPath() + "\'\n", true);
+			writeSettingsForChildren(settingsFile, rootProjectName, child.getChildren());
+		}
+	}
+
+	private void createProjectsFile(Pride pride, Map<File, PrideProjectModel> rootProjects) throws IOException {
+		File projectsFile = Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(pride.getRootDirectory()));
+		Set<PrideProjectData> projects = Sets.newTreeSet();
+		for (PrideProjectModel projectModel : rootProjects.values()) {
+			addProjectData("", projectModel, projects);
+		}
+		Pride.saveProjects(projectsFile, projects);
+	}
+
+	private void addProjectData(String parentPath, PrideProjectModel projectModel, Collection<PrideProjectData> projects) {
+		String group = projectModel.getGroup();
+		String path = parentPath + ":" + projectModel.getName();
+		if (group != null) {
+			PrideProjectData projectData = new PrideProjectData(group, projectModel.getName(), path);
+			logger.debug("Found project {}", projectData);
+			projects.add(projectData);
+		}
+		for (PrideProjectModel child : projectModel.getChildren()) {
+			addProjectData(parentPath, child, projects);
+		}
+	}
+
+	private PrideProjectModel getRootProjectModel(File moduleDirectory) {
+		return gradleConnectorManager.executeInProject(moduleDirectory, new GradleProjectExecution<PrideProjectModel, RuntimeException>() {
+			@Override
+			public PrideProjectModel execute(File moduleDirectory, ProjectConnection connection) {
+				try {
 					// Load the model for the build
-					ModelBuilder<GradleBuild> builder = connection.model(GradleBuild.class);
+					ModelBuilder<PrideProjectModel> builder = connection.model(PrideProjectModel.class);
 					if (verbose) {
 						builder.withArguments("--info", "--stacktrace");
 					} else {
 						builder.withArguments("-q");
 					}
-					final GradleBuild build = builder.get();
-
-					// Merge settings
-					FileUtils.write(settingsFile, "\n// Settings from project in directory /" + relativePath + "\n\n", true);
-					for (BasicGradleProject project : build.getProjects()) {
-						if (project.equals(build.getRootProject())) {
-							FileUtils.write(settingsFile, "include \'" + build.getRootProject().getName() + "\'\n", true);
-							FileUtils.write(settingsFile, "project(\':" + build.getRootProject().getName() + "\').projectDir = file(\'" + moduleDirectory.getName() + "\')\n", true);
-						} else {
-							FileUtils.write(settingsFile, "include \'" + build.getRootProject().getName() + project.getPath() + "\'\n", true);
-						}
-					}
-					return null;
+					return builder.get();
 				} catch (Exception ex) {
 					throw new PrideException("Could not parse module in " + moduleDirectory + ": " + ex, ex);
 				}
