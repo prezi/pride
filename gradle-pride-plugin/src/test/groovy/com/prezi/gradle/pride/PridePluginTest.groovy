@@ -6,9 +6,7 @@ import org.gradle.api.artifacts.ExternalDependency
 import org.gradle.api.artifacts.ProjectDependency
 import spock.lang.Specification
 
-/**
- * Created by lptr on 28/04/14.
- */
+/*
 class PridePluginTest extends Specification {
 	def "unable to resolve to project dependency"() {
 		given:
@@ -60,3 +58,4 @@ class PridePluginTest extends Specification {
 		0 * _
 	}
 }
+ */
