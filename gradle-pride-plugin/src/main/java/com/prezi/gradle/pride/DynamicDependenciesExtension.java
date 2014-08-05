@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
 import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
 import groovy.lang.MissingMethodException;
@@ -15,6 +14,7 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DynamicDependenciesExtension extends GroovyObjectSupport {
 
@@ -35,6 +34,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 	public DynamicDependenciesExtension(Project project, final Map<String, Project> projectsByGroupAndName) throws IOException {
 		this.project = project;
 		this.projectsByGroupAndName = projectsByGroupAndName;
+
 		// Go through transitive dependencies and replace them with projects when applicable
 		// See https://github.com/prezi/pride/issues/40
 		project.afterEvaluate(new Action<Project>() {
@@ -46,40 +46,25 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 					Configuration detachedConfiguration = project.getConfigurations().detachedConfiguration(
 							dependencies.toArray(new Dependency[dependencies.size()])
 					);
-					// TODO Do not add override if transitive dependency is also a direct dependency
-					Set<ProjectOverride> projectOverrides = Sets.newLinkedHashSet();
 					for (ResolvedDependency resolvedDependency : detachedConfiguration.getResolvedConfiguration().getFirstLevelModuleDependencies()) {
-						collectTransitiveDependenciesToOverride(resolvedDependency.getChildren(), projectOverrides);
-					}
-					for (ProjectOverride projectOverride : projectOverrides) {
-						logger.debug("Adding override project dependency: {}", projectOverride);
-						// This overrides the external dependency because project
-						// versions are set to Short.MAX_VALUE in generated build.gradle
-						ProjectDependency projectDependency = (ProjectDependency) project.getDependencies().project(
-								ImmutableMap.of(
-										"path", projectOverride.project.getPath(),
-										"configuration", projectOverride.configuration
-								)
-						);
-						projectDependency.setTransitive(false);
-						configuration.getDependencies().add(projectDependency);
+						addTransitiveDependenciesIfNecessary(project, configuration, resolvedDependency.getChildren());
 					}
 				}
 			}
 
-			private void collectTransitiveDependenciesToOverride(Set<ResolvedDependency> dependencies, Set<ProjectOverride> projectOverrides) {
-				for (ResolvedDependency dependency : dependencies) {
-					Project dependentProject = projectsByGroupAndName.get(dependency.getModuleGroup() + ":" + dependency.getModuleName());
+			private void addTransitiveDependenciesIfNecessary(final Project project, final Configuration configuration, Collection<ResolvedDependency> transitiveDependencies) {
+				for (final ResolvedDependency transitiveDependency : transitiveDependencies) {
+					Project dependentProject = projectsByGroupAndName.get(transitiveDependency.getModuleGroup() + ":" + transitiveDependency.getModuleName());
 					if (dependentProject != null) {
-						// Sometimes we get stuff that point to non-existent configurations like "master",
-						// so we should skip those
-						Configuration configuration = dependentProject.getConfigurations().findByName(dependency.getConfiguration());
-						if (configuration != null) {
-							projectOverrides.add(new ProjectOverride(dependentProject, dependency.getConfiguration()));
+						Action<Project> action = new AddTransitiveProjectDependencyAction(project, configuration, transitiveDependency);
+						if (!((ProjectInternal) dependentProject).getState().getExecuted()) {
+							dependentProject.afterEvaluate(action);
+						} else {
+							action.execute(dependentProject);
 						}
 					} else {
 						// If a corresponding project is not found locally, traverse children of external dependency
-						collectTransitiveDependenciesToOverride(dependency.getChildren(), projectOverrides);
+						addTransitiveDependenciesIfNecessary(project, configuration, transitiveDependency.getChildren());
 					}
 				}
 			}
@@ -121,7 +106,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		configuration.getDependencies().add(resolvedDependency);
 	}
 
-	public Dependency localizeFirstLevelDynamicDependency(Dependency dependency) {
+	private Dependency localizeFirstLevelDynamicDependency(Dependency dependency) {
 		Dependency localizedDependency = dependency;
 		if (dependency instanceof ExternalDependency) {
 			logger.debug("Looking for " + dependency.getGroup() + ":" + dependency.getName());
@@ -164,5 +149,49 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		Dependency dependency = project.getDependencies().create(dependencyNotation, closure);
 		add(configuration, dependency);
 		return dependency;
+	}
+
+	private static class AddTransitiveProjectDependencyAction implements Action<Project> {
+		private final Project project;
+		private final Configuration configuration;
+		private final ResolvedDependency transitiveDependency;
+
+		public AddTransitiveProjectDependencyAction(Project project, Configuration configuration, ResolvedDependency transitiveDependency) {
+			this.project = project;
+			this.configuration = configuration;
+			this.transitiveDependency = transitiveDependency;
+		}
+
+		@Override
+		public void execute(Project dependentProject) {
+			// Sometimes we get stuff that point to non-existent configurations like "master",
+			// so we should skip those
+			Configuration dependentConfiguration = dependentProject.getConfigurations().findByName(transitiveDependency.getConfiguration());
+			if (dependentConfiguration != null) {
+				ProjectDependency projectDependency = (ProjectDependency) project.getDependencies().project(
+						ImmutableMap.of(
+								"path", dependentProject.getPath(),
+								"configuration", dependentConfiguration.getName()
+						)
+				);
+
+				// Check if we already have added this project dependency
+				// either as an override, or because it's also added directly
+				// as a dynamic dependency
+				boolean shouldAddOverride = true;
+				for (Dependency dependency : configuration.getDependencies()) {
+					if (projectDependency.equals(dependency)) {
+						shouldAddOverride = false;
+						break;
+					}
+				}
+				if (shouldAddOverride) {
+					logger.debug("Adding override project dependency: {}", dependentConfiguration);
+					// This overrides the external dependency because project
+					// versions are set to Short.MAX_VALUE in generated build.gradle
+					configuration.getDependencies().add(projectDependency);
+				}
+			}
+		}
 	}
 }
