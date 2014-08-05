@@ -64,6 +64,7 @@ compile - Compile classpath for source set 'main'.
 
 check {
 	dependsOn clean
+	dependsOn project(":gradle-pride-plugin").install
 	dependsOn project(":pride").installApp
 }
 
