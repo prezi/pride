@@ -1,0 +1,122 @@
+task testPrideInit { task ->
+	def dir = copyTest(task, "01-pride-init")
+	doLast {
+		exec {
+			workingDir file("$dir/git-module")
+			commandLine "git", "init"
+		}
+		exec {
+			workingDir file("$dir/git-module")
+			commandLine "git", "remote", "add", "origin", "git@github.com:prezi/test"
+		}
+		pride(dir, "init", "--gradle-version", "2.0")
+
+		assert file("$dir/build.gradle").exists()
+		assert file("$dir/gradlew").exists()
+		assert file("$dir/gradlew.bat").exists()
+		assert file("$dir/gradle").isDirectory()
+
+		assert rawContents("$dir/settings.gradle", "//") == """
+include 'file-module'
+project(':file-module').projectDir = file('file-module')
+include 'git-module'
+project(':git-module').projectDir = file('git-module')
+"""
+		assert rawContents("$dir/.pride/version", "#") == """
+0
+"""
+		assert rawContents("$dir/.pride/config", "#") == """
+gradle.version = 2.0
+modules.0.name = file-module
+modules.0.remote = /Users/lptr/Workspace/pride/pride-test/build/at/01-pride-init/file-module
+modules.0.vcs = file
+modules.1.name = git-module
+modules.1.remote = git@github.com:prezi/test
+modules.1.vcs = git
+"""
+		assert rawContents("$dir/.pride/projects", "#") == """
+:file-module::file-module
+:git-module::git-module
+"""
+	}
+}
+
+task testTransitiveResolution { task ->
+	def repoDir = file("$buildDir/repo")
+	def prideDir = copyTest(task, "02-transitive-resolution/pride", [ repo: "file:///" + repoDir ])
+	def moduleADir = file("$prideDir/module-a")
+	def moduleBDir = copyTest(task, "02-transitive-resolution/module-b", [ repo: "file:///" + repoDir ])
+	doLast {
+		mkdir repoDir
+		gradlew moduleADir, "uploadArchives"
+		gradlew moduleBDir, "uploadArchives"
+		pride prideDir, "init", "-v"
+		checkGradleOutput(prideDir, ["module-c:dependencies", "--configuration", "compile"]) { output ->
+			assert output.contains("""
+compile - Compile classpath for source set 'main'.
++--- com.prezi.example.transitive:module-b:1.0
+|    \\--- com.prezi.example.transitive:module-a:1.0 -> project :module-a
+\\--- project :module-a
+""")
+		}
+	}
+}
+
+check.dependsOn clean
+
+tasks.findAll { it.name.startsWith("test") }.each {
+	check.dependsOn it
+}
+
+def pride(File dir, Object... arguments) {
+	println "Running Pride with ${arguments.join(" ")}"
+	exec {
+		workingDir dir
+		executable file("${project(':pride').projectDir}/build/install/pride/bin/pride")
+		args arguments
+	}
+}
+
+def checkGradleOutput(File dir, List<?> args1, Closure check) {
+	def output = new ByteArrayOutputStream()
+	def arguments = new ArrayList<Object>(args1)
+	arguments.add "--stacktrace"
+	println "Running Gradle with ${arguments.join(" ")}"
+	exec {
+		workingDir dir
+		executable file("$rootDir/gradlew")
+		args arguments.toArray()
+		standardOutput = output
+	}
+	check(new String(output.toByteArray()))
+}
+
+def gradlew(File dir, Object... args1) {
+	def arguments = new ArrayList<Object>(Arrays.asList(args1))
+	arguments.add "--stacktrace"
+	println "Running Gradle with ${arguments.join(" ")}"
+	exec {
+		workingDir dir
+		executable file("$rootDir/gradlew")
+		args arguments.toArray()
+	}
+}
+
+def copyTest(Task task, String name, Map filters = [:]) {
+	File source = file("src/at/$name")
+	File target = file("$buildDir/at/$name")
+	task.doLast {
+		delete target
+		copy {
+			from source
+			into target
+			filters.put("version", version)
+			filter org.apache.tools.ant.filters.ReplaceTokens, tokens: filters
+		}
+	}
+	return target
+}
+
+def rawContents(Object f, String comment) {
+	"\n" + file(f).text.split("\n").findAll { !it.isEmpty() && !it.startsWith(comment) }.join("\n") + "\n"
+}
