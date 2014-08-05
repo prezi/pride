@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.vcs;
 
 import com.prezi.gradle.pride.PrideException;
+import com.prezi.gradle.pride.vcs.file.FileVcsSupportFactory;
 import org.apache.commons.configuration.Configuration;
 
 import java.io.File;
@@ -18,6 +19,8 @@ public final class VcsManager {
 		for (VcsSupportFactory factory : ServiceLoader.load(VcsSupportFactory.class)) {
 			vcss.put(factory.getType(), factory);
 		}
+		VcsSupportFactory fileSupport = new FileVcsSupportFactory();
+		vcss.put(fileSupport.getType(), fileSupport);
 	}
 
 	public Vcs getVcs(final String type, Configuration configuration) {
