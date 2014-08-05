@@ -10,3 +10,16 @@ buildscript {
 }
 
 apply plugin: "pride"
+
+configurations {
+	compile
+}
+
+dynamicDependencies {
+	// Test if we can init a module with a missing dependency
+	compile "some.missing:module:1.0"
+}
+
+dependencies {
+	compile "some.other.missing:module:1.0"
+}
