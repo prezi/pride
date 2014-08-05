@@ -28,7 +28,7 @@ project(':git-module').projectDir = file('git-module')
 		assert rawContents("$dir/.pride/config", "#") == """
 gradle.version = 2.0
 modules.0.name = file-module
-modules.0.remote = /Users/lptr/Workspace/pride/pride-test/build/at/01-pride-init/file-module
+modules.0.remote = ${dir}/file-module
 modules.0.vcs = file
 modules.1.name = git-module
 modules.1.remote = git@github.com:prezi/test
