@@ -35,6 +35,8 @@ public class TransitiveOverrideAction implements Action<Project> {
 		SetMultimap<String, Dependency> dynamicDependencies = extension.getDynamicDependencies();
 		for (Map.Entry<String, Collection<Dependency>> entry : dynamicDependencies.asMap().entrySet()) {
 			Configuration configuration = project.getConfigurations().getByName(entry.getKey());
+			// Filter out already added overrides
+			// Projects are overridden to have version = 32767
 			Collection<Dependency> externalDependencies = Collections2.filter(entry.getValue(), new Predicate<Dependency>() {
 				@Override
 				public boolean apply(Dependency dependency) {
