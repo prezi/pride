@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.UnknownModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,6 +167,8 @@ public class PrideInitializer {
 						builder.withArguments("-q");
 					}
 					return builder.get();
+				} catch (UnknownModelException ex) {
+					throw new PrideException("Pride plugin must be applied on Gradle project in " + moduleDirectory);
 				} catch (Exception ex) {
 					throw new PrideException("Could not parse module in " + moduleDirectory + ": " + ex, ex);
 				}
