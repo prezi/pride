@@ -150,7 +150,7 @@ public class PrideInitializer {
 			projects.add(projectData);
 		}
 		for (PrideProjectModel child : projectModel.getChildren()) {
-			addProjectData(parentPath, child, projects);
+			addProjectData(path, child, projects);
 		}
 	}
 
