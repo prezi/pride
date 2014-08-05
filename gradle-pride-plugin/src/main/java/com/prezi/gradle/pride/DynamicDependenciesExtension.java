@@ -3,6 +3,7 @@ package com.prezi.gradle.pride;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
@@ -13,14 +14,12 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ExternalDependency;
 import org.gradle.api.artifacts.ProjectDependency;
-import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -29,46 +28,11 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 	private static final Logger logger = LoggerFactory.getLogger(DynamicDependenciesExtension.class);
 	private final Project project;
 	private final Map<String, Project> projectsByGroupAndName;
-	private final SetMultimap<Configuration, Dependency> dynamicDependencies = LinkedHashMultimap.create();
+	private final SetMultimap<String, Dependency> dynamicDependencies = LinkedHashMultimap.create();
 
-	public DynamicDependenciesExtension(Project project, final Map<String, Project> projectsByGroupAndName) throws IOException {
+	public DynamicDependenciesExtension(Project project, Map<String, Project> projectsByGroupAndName) throws IOException {
 		this.project = project;
 		this.projectsByGroupAndName = projectsByGroupAndName;
-
-		// Go through transitive dependencies and replace them with projects when applicable
-		// See https://github.com/prezi/pride/issues/40
-		project.afterEvaluate(new Action<Project>() {
-			@Override
-			public void execute(Project project) {
-				for (Map.Entry<Configuration, Collection<Dependency>> entry : dynamicDependencies.asMap().entrySet()) {
-					Configuration configuration = entry.getKey();
-					Collection<Dependency> dependencies = entry.getValue();
-					Configuration detachedConfiguration = project.getConfigurations().detachedConfiguration(
-							dependencies.toArray(new Dependency[dependencies.size()])
-					);
-					for (ResolvedDependency resolvedDependency : detachedConfiguration.getResolvedConfiguration().getFirstLevelModuleDependencies()) {
-						addTransitiveDependenciesIfNecessary(project, configuration, resolvedDependency.getChildren());
-					}
-				}
-			}
-
-			private void addTransitiveDependenciesIfNecessary(final Project project, final Configuration configuration, Collection<ResolvedDependency> transitiveDependencies) {
-				for (final ResolvedDependency transitiveDependency : transitiveDependencies) {
-					Project dependentProject = projectsByGroupAndName.get(transitiveDependency.getModuleGroup() + ":" + transitiveDependency.getModuleName());
-					if (dependentProject != null) {
-						Action<Project> action = new AddTransitiveProjectDependencyAction(project, configuration, transitiveDependency);
-						if (!((ProjectInternal) dependentProject).getState().getExecuted()) {
-							dependentProject.afterEvaluate(action);
-						} else {
-							action.execute(dependentProject);
-						}
-					} else {
-						// If a corresponding project is not found locally, traverse children of external dependency
-						addTransitiveDependenciesIfNecessary(project, configuration, transitiveDependency.getChildren());
-					}
-				}
-			}
-		});
 	}
 
 	// Copied over mostly intact from DefaultDependencyHandler (1.12)
@@ -93,17 +57,33 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		}
 	}
 
-	public void add(Configuration configuration, Dependency dependency) {
+	public void add(final Configuration configuration, Dependency dependency) {
 		project.getLogger().debug("Adding dynamic dependency " + dependency.getGroup() + ":" + dependency.getName() + ":" + dependency.getVersion() + " (" + dependency.getClass().getName() + ")");
-		Dependency resolvedDependency;
+		final Dependency localizedDependency;
 		if (project.hasProperty("pride.disable")) {
 			logger.info("Dynamic dependency resolution is disabled, all dynamic dependencies will be resolved to external dependencies");
-			resolvedDependency = dependency;
+			localizedDependency = dependency;
 		} else {
-			resolvedDependency = localizeFirstLevelDynamicDependency(dependency);
-			dynamicDependencies.put(configuration, dependency);
+			localizedDependency = localizeFirstLevelDynamicDependency(dependency);
+			dynamicDependencies.put(configuration.getName(), localizedDependency);
 		}
-		configuration.getDependencies().add(resolvedDependency);
+
+		// Defer adding project dependency until it is evaluated
+		Action<Project> addDependencyAction = new Action<Project>() {
+			@Override
+			public void execute(Project project) {
+				configuration.getDependencies().add(localizedDependency);
+			}
+		};
+		if (localizedDependency instanceof ProjectDependency) {
+			ProjectInternal dependencyProject = (ProjectInternal) ((ProjectDependency) localizedDependency).getDependencyProject();
+			if (!dependencyProject.getState().getExecuted()) {
+				dependencyProject.afterEvaluate(addDependencyAction);
+				return;
+			}
+		}
+		// If dependency project is evaluated, or it's not a project dependency, add it straight away
+		addDependencyAction.execute(null);
 	}
 
 	private Dependency localizeFirstLevelDynamicDependency(Dependency dependency) {
@@ -151,47 +131,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		return dependency;
 	}
 
-	private static class AddTransitiveProjectDependencyAction implements Action<Project> {
-		private final Project project;
-		private final Configuration configuration;
-		private final ResolvedDependency transitiveDependency;
-
-		public AddTransitiveProjectDependencyAction(Project project, Configuration configuration, ResolvedDependency transitiveDependency) {
-			this.project = project;
-			this.configuration = configuration;
-			this.transitiveDependency = transitiveDependency;
-		}
-
-		@Override
-		public void execute(Project dependentProject) {
-			// Sometimes we get stuff that point to non-existent configurations like "master",
-			// so we should skip those
-			Configuration dependentConfiguration = dependentProject.getConfigurations().findByName(transitiveDependency.getConfiguration());
-			if (dependentConfiguration != null) {
-				ProjectDependency projectDependency = (ProjectDependency) project.getDependencies().project(
-						ImmutableMap.of(
-								"path", dependentProject.getPath(),
-								"configuration", dependentConfiguration.getName()
-						)
-				);
-
-				// Check if we already have added this project dependency
-				// either as an override, or because it's also added directly
-				// as a dynamic dependency
-				boolean shouldAddOverride = true;
-				for (Dependency dependency : configuration.getDependencies()) {
-					if (projectDependency.equals(dependency)) {
-						shouldAddOverride = false;
-						break;
-					}
-				}
-				if (shouldAddOverride) {
-					logger.debug("Adding override project dependency: {}", dependentConfiguration);
-					// This overrides the external dependency because project
-					// versions are set to Short.MAX_VALUE in generated build.gradle
-					configuration.getDependencies().add(projectDependency);
-				}
-			}
-		}
+	public SetMultimap<String, Dependency> getDynamicDependencies() {
+		return Multimaps.unmodifiableSetMultimap(dynamicDependencies);
 	}
 }

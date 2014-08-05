@@ -3,8 +3,10 @@ package com.prezi.gradle.pride;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import com.prezi.gradle.pride.model.PrideProjectModelBuilder;
+import groovy.lang.Closure;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.invocation.Gradle;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,31 +29,53 @@ public class PridePlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		// Check if not running from the root of a Pride
-		try {
-			checkIfNotRunningFromRootOfPride(project);
-		} catch (IOException e) {
-			throw Throwables.propagate(e);
+		boolean prideDisabled = project.hasProperty("pride.disable");
+		if (!prideDisabled) {
+			// Check if not running from the root of a Pride
+			try {
+				checkIfNotRunningFromRootOfPride(project);
+			} catch (IOException e) {
+				throw Throwables.propagate(e);
+			}
 		}
 
 		// Register a builder for the pride tooling model
 		registry.register(new PrideProjectModelBuilder());
 
 		// Add our custom dependency declaration
-		SortedSet<PrideProjectData> allProjectData;
-		try {
-			allProjectData = Pride.loadProjects(Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(project.getRootDir())));
-		} catch (IOException e) {
-			throw Throwables.propagate(e);
-		}
-		Map<Comparable, Object> projectsByGroupAndName = Maps.newTreeMap();
-		for (PrideProjectData p : allProjectData) {
-			projectsByGroupAndName.put(p.getGroup() + ":" + p.getName(), project.getRootProject().findProject(p.getPath()));
+		final Map<String, Project> projectsByGroupAndName = Maps.newTreeMap();
+		if (!prideDisabled) {
+			SortedSet<PrideProjectData> allProjectData;
+			try {
+				allProjectData = Pride.loadProjects(Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(project.getRootDir())));
+			} catch (IOException e) {
+				throw Throwables.propagate(e);
+			}
+			for (PrideProjectData p : allProjectData) {
+				projectsByGroupAndName.put(p.getGroup() + ":" + p.getName(), project.getRootProject().project(p.getPath()));
+			}
 		}
 		project.getExtensions().create("dynamicDependencies", DynamicDependenciesExtension.class, project, projectsByGroupAndName);
 
 		// Apply Pride convention
 		project.getConvention().getPlugins().put("pride", new PrideConvention(project));
+
+		// Go through transitive dependencies and replace them with projects when applicable.
+		// See https://github.com/prezi/pride/issues/40
+		// See https://github.com/prezi/pride/issues/87
+		// Do this in the root project
+		if (!prideDisabled) {
+			if (!project.getRootProject().hasProperty("pride.init")) {
+				project.getRootProject().getConvention().getExtraProperties().set("pride.init", true);
+				final Gradle gradle = project.getGradle();
+				gradle.projectsEvaluated(new Closure(gradle) {
+					@SuppressWarnings("UnusedDeclaration")
+					public void doCall(Object args) {
+						gradle.allprojects(new TransitiveOverrideAction(projectsByGroupAndName));
+					}
+				});
+			}
+		}
 	}
 
 	private static boolean alreadyCheckedIfRunningFromRootOfPride;
