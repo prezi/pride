@@ -62,7 +62,10 @@ compile - Compile classpath for source set 'main'.
 	}
 }
 
-check.dependsOn clean
+check {
+	dependsOn clean
+	dependsOn project(":pride").installApp
+}
 
 tasks.findAll { it.name.startsWith("test") }.each {
 	check.dependsOn it
