@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -161,13 +162,21 @@ public class PrideInitializer {
 				try {
 					// Load the model for the build
 					ModelBuilder<PrideProjectModel> builder = connection.model(PrideProjectModel.class);
+					ImmutableList.Builder<String> arguments = ImmutableList.builder();
 					if (verbose) {
-						builder.withArguments("--info", "--stacktrace");
+						arguments.add("--info", "--stacktrace");
 					} else {
-						builder.withArguments("-q");
+						arguments.add("-q");
 					}
+
+					// See https://github.com/prezi/pride/issues/91
+					arguments.add("--no-search-upward");
+
 					// See https://github.com/prezi/pride/issues/57
-					builder.withArguments("-P", "pride.disable");
+					arguments.add("-P", "pride.disable");
+
+					//noinspection ToArrayCallWithZeroLengthArrayArgument
+					builder.withArguments(arguments.build().toArray(new String[0]));
 
 					return builder.get();
 				} catch (UnknownModelException ex) {
