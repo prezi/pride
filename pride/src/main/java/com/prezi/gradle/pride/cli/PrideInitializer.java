@@ -166,7 +166,9 @@ public class PrideInitializer {
 					} else {
 						builder.withArguments("-q");
 					}
+					// See https://github.com/prezi/pride/issues/57
 					builder.withArguments("-P", "pride.disable");
+
 					return builder.get();
 				} catch (UnknownModelException ex) {
 					throw new PrideException("Pride plugin must be applied on Gradle project in " + moduleDirectory);
