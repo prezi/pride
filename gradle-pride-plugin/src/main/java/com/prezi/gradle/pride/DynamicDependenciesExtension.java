@@ -2,7 +2,6 @@ package com.prezi.gradle.pride;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import groovy.lang.Closure;
@@ -113,18 +112,6 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 
 	@SuppressWarnings("unchecked")
 	private Dependency doAdd(Configuration configuration, Object dependencyNotation, Closure closure) {
-		// When not set, group and version should come from the current project
-		if (dependencyNotation instanceof Map) {
-			dependencyNotation = Maps.newLinkedHashMap((Map) dependencyNotation);
-			if (!((Map) dependencyNotation).containsKey("group")) {
-				((Map) dependencyNotation).put("group", project.getGroup());
-			}
-
-			if (!((Map) dependencyNotation).containsKey("version")) {
-				((Map) dependencyNotation).put("version", project.getVersion());
-			}
-		}
-
 		// Let the DependencyHandler parse our dependency definition
 		Dependency dependency = project.getDependencies().create(dependencyNotation, closure);
 		add(configuration, dependency);
