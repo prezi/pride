@@ -3,6 +3,7 @@ package com.prezi.gradle.pride;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
@@ -52,31 +53,36 @@ public class Pride {
 
 	private final SortedMap<String, Module> modules;
 
-	public static Pride lookupPride(File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
+	public static Pride getPride(final File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
+		File prideDirectory = findPrideDirectory(directory);
+		if (prideDirectory == null) {
+			throw new PrideException("No pride found in " + directory);
+		}
+		PropertiesConfiguration prideConfig = loadLocalConfiguration(getPrideConfigDirectory(directory));
+		return new Pride(directory, globalConfig, prideConfig, vcsManager);
+	}
+
+	public static File findPrideDirectory(File directory) throws IOException {
 		if (containsPride(directory)) {
-			PropertiesConfiguration prideConfig = loadLocalConfiguration(getPrideConfigDirectory(directory));
-			return new Pride(directory, globalConfig, prideConfig, vcsManager);
+			return directory;
 		} else {
 			File parent = directory.getParentFile();
 			if (parent != null) {
-				return lookupPride(parent, globalConfig, vcsManager);
+				return findPrideDirectory(parent);
 			} else {
 				return null;
 			}
 		}
 	}
 
-	public static Pride getPride(final File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
-		Pride pride = lookupPride(directory, globalConfig, vcsManager);
-		if (pride == null) {
-			throw new PrideException("No pride found in " + directory);
-		}
-		return pride;
-	}
-
-	public static boolean containsPride(File directory) throws IOException {
+	public static boolean containsPride(File directory) {
 		File versionFile = new File(new File(directory, PRIDE_CONFIG_DIRECTORY), PRIDE_VERSION_FILE);
-		boolean result = versionFile.exists() && FileUtils.readFileToString(versionFile).equals("0\n");
+		boolean result;
+		try {
+			result = versionFile.exists() && FileUtils.readFileToString(versionFile).equals("0\n");
+		} catch (IOException ex) {
+			throw Throwables.propagate(ex);
+		}
 		logger.debug("Directory " + directory + " contains a pride: " + result);
 		return result;
 	}

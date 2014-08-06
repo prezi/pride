@@ -44,7 +44,7 @@ public class PridePlugin implements Plugin<Project> {
 
 		// Add our custom dependency declaration
 		final Map<String, Project> projectsByGroupAndName = Maps.newTreeMap();
-		if (!prideDisabled) {
+		if (!prideDisabled && Pride.containsPride(project.getRootDir())) {
 			SortedSet<PrideProjectData> allProjectData;
 			try {
 				allProjectData = Pride.loadProjects(Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(project.getRootDir())));
