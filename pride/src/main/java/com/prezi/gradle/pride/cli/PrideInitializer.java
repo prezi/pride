@@ -166,6 +166,7 @@ public class PrideInitializer {
 			@Override
 			public PrideProjectModel execute(File moduleDirectory, ProjectConnection connection) {
 				try {
+					logger.info("Initializing module in {}", moduleDirectory);
 					// Load the model for the build
 					ModelBuilder<PrideProjectModel> builder = connection.model(PrideProjectModel.class);
 					ImmutableList.Builder<String> arguments = ImmutableList.builder();
