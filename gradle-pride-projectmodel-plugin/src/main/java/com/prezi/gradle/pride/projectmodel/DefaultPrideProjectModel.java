@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.model;
+package com.prezi.gradle.pride.projectmodel;
 
 import java.io.Serializable;
 import java.util.Set;

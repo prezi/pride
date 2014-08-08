@@ -13,7 +13,7 @@ import com.prezi.gradle.pride.PrideProjectData;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
-import com.prezi.gradle.pride.model.PrideProjectModel;
+import com.prezi.gradle.pride.projectmodel.PrideProjectModel;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -175,7 +175,7 @@ public class PrideInitializer {
 						arguments.add("-q");
 					}
 
-					// Add gradle-pride-model-plugin
+					// Add gradle-pride-projectmodel-plugin
 					// See https://github.com/prezi/pride/issues/94
 					arguments.add("--init-script", modelInitFile.getAbsolutePath());
 

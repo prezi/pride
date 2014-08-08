@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.model;
+package com.prezi.gradle.pride.projectmodel;
 
 import com.google.common.collect.ImmutableSet;
 import org.gradle.api.Project;

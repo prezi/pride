@@ -208,7 +208,7 @@ project("gradle-pride-plugin") {
 	}
 }
 
-project("gradle-pride-model-plugin") {
+project("gradle-pride-projectmodel-plugin") {
 	dependencies {
 		compile gradleApi()
 		compile project(":pride-core")

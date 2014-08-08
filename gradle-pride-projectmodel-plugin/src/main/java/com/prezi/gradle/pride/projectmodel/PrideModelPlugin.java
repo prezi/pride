@@ -1,4 +1,4 @@
-package com.prezi.gradle.pride.model;
+package com.prezi.gradle.pride.projectmodel;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
