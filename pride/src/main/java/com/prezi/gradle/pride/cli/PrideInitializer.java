@@ -129,6 +129,7 @@ public class PrideInitializer {
 	private void writeSettingsForChildren(File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
 		for (PrideProjectModel child : children) {
 			FileUtils.write(settingsFile, "include \'" + rootProjectName + child.getPath() + "\'\n", true);
+			FileUtils.write(settingsFile, "project(\':" + rootProjectName + child.getPath() + "\').projectDir = file(\'" + child.getProjectDir() + "\')\n", true);
 			writeSettingsForChildren(settingsFile, rootProjectName, child.getChildren());
 		}
 	}

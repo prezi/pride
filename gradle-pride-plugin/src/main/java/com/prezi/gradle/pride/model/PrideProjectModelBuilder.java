@@ -21,6 +21,12 @@ public class PrideProjectModelBuilder implements ToolingModelBuilder {
 			childModels.add(convertProject(childProject));
 		}
 		String group = project.getGroup() != null ? String.valueOf(project.getGroup()) : null;
-		return new DefaultPrideProjectModel(project.getPath(), group, project.getName(), childModels.build());
+		return new DefaultPrideProjectModel(
+			project.getPath(),
+			group,
+			project.getName(),
+			childModels.build(),
+			project.getProjectDir().getAbsolutePath()
+		);
 	}
 }
