@@ -4,27 +4,29 @@ import java.io.Serializable;
 import java.util.Set;
 
 public class DefaultPrideProjectModel implements Serializable, PrideProjectModel {
-    private final String path;
+	private final String path;
 	private final String group;
 	private final String name;
-    private final Set<PrideProjectModel> children;
+	private final Set<PrideProjectModel> children;
+	private final String projectDir;
 
-	public DefaultPrideProjectModel(String path, String group, String name, Set<PrideProjectModel> children) {
+	public DefaultPrideProjectModel(String path, String group, String name, Set<PrideProjectModel> children, String projectDir) {
 		this.path = path;
 		this.group = group;
 		this.name = name;
 		this.children = children;
+		this.projectDir = projectDir;
 	}
 
 	@Override
-    public String toString() {
-        return "PrideProject{path='" + path + "\'}";
-    }
+	public String toString() {
+		return "PrideProject{path='" + path + "\'}";
+	}
 
 	@Override
-    public String getPath() {
-        return path;
-    }
+	public String getPath() {
+		return path;
+	}
 
 	@Override
 	public String getGroup() {
@@ -32,14 +34,19 @@ public class DefaultPrideProjectModel implements Serializable, PrideProjectModel
 	}
 
 	@Override
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
 	@Override
-    public Set<PrideProjectModel> getChildren() {
-        return children;
-    }
+	public Set<PrideProjectModel> getChildren() {
+		return children;
+	}
+
+	@Override
+	public String getProjectDir() {
+		return projectDir;
+	}
 
 	@Override
 	@SuppressWarnings("RedundantIfStatement")

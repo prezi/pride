@@ -6,5 +6,6 @@ public interface PrideProjectModel {
 	String getName();
 	String getPath();
 	String getGroup();
+	String getProjectDir();
 	Set<PrideProjectModel> getChildren();
 }
