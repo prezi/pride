@@ -2,16 +2,13 @@ package com.prezi.gradle.pride;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import com.prezi.gradle.pride.model.PrideProjectModelBuilder;
 import groovy.lang.Closure;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.invocation.Gradle;
-import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -19,13 +16,6 @@ import java.util.SortedSet;
 
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
-
-	private final ToolingModelBuilderRegistry registry;
-
-	@Inject
-	public PridePlugin(ToolingModelBuilderRegistry registry) {
-		this.registry = registry;
-	}
 
 	@Override
 	public void apply(Project project) {
@@ -38,9 +28,6 @@ public class PridePlugin implements Plugin<Project> {
 				throw Throwables.propagate(e);
 			}
 		}
-
-		// Register a builder for the pride tooling model
-		registry.register(new PrideProjectModelBuilder());
 
 		// Add our custom dependency declaration
 		final Map<String, Project> projectsByGroupAndName = Maps.newTreeMap();

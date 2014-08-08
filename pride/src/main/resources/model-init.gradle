@@ -1,0 +1,15 @@
+// This should be "buildscript", but:
+// http://forums.gradle.org/gradle/topics/any_work_around_in_1_11_for_http_issues_gradle_org_browse_gradle_2407#reply_13990339
+initscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+	dependencies {
+		classpath "com.prezi.gradle.pride:gradle-pride-model-plugin:@version@"
+	}
+}
+
+allprojects {
+	apply plugin: com.prezi.gradle.pride.model.PrideModelPlugin
+}

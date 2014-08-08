@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -20,7 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.gradle.tooling.ModelBuilder;
 import org.gradle.tooling.ProjectConnection;
-import org.gradle.tooling.UnknownModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,11 +94,13 @@ public class PrideInitializer {
 				buildOut.close();
 			}
 
+			File modelInitFile = File.createTempFile("model-init-", ".gradle");
+			Resources.asByteSource(Resources.getResource("model-init.gradle")).copyTo(Files.asByteSink(modelInitFile));
 			Map<File, PrideProjectModel> rootProjects = Maps.newLinkedHashMap();
 			for (Module module : pride.getModules()) {
 				File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
 				if (Pride.isValidModuleDirectory(moduleDirectory)) {
-					PrideProjectModel rootProject = getRootProjectModel(moduleDirectory);
+					PrideProjectModel rootProject = getRootProjectModel(moduleDirectory, modelInitFile);
 					rootProjects.put(moduleDirectory, rootProject);
 				}
 			}
@@ -158,7 +161,7 @@ public class PrideInitializer {
 		}
 	}
 
-	private PrideProjectModel getRootProjectModel(File moduleDirectory) {
+	private PrideProjectModel getRootProjectModel(File moduleDirectory, final File modelInitFile) {
 		return gradleConnectorManager.executeInProject(moduleDirectory, new GradleProjectExecution<PrideProjectModel, RuntimeException>() {
 			@Override
 			public PrideProjectModel execute(File moduleDirectory, ProjectConnection connection) {
@@ -172,6 +175,10 @@ public class PrideInitializer {
 						arguments.add("-q");
 					}
 
+					// Add gradle-pride-model-plugin
+					// See https://github.com/prezi/pride/issues/94
+					arguments.add("--init-script", modelInitFile.getAbsolutePath());
+
 					// See https://github.com/prezi/pride/issues/91
 					arguments.add("--no-search-upward");
 
@@ -182,8 +189,6 @@ public class PrideInitializer {
 					builder.withArguments(arguments.build().toArray(new String[0]));
 
 					return builder.get();
-				} catch (UnknownModelException ex) {
-					throw new PrideException("Pride plugin must be applied on Gradle project in " + moduleDirectory);
 				} catch (Exception ex) {
 					throw new PrideException("Could not parse module in " + moduleDirectory + ": " + ex, ex);
 				}

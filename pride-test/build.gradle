@@ -66,6 +66,7 @@ tasks.findAll { it.name.startsWith("test") }.each {
 	it.dependsOn clean
 	it.dependsOn project(":pride-core").install
 	it.dependsOn project(":gradle-pride-plugin").install
+	it.dependsOn project(":gradle-pride-model-plugin").install
 	it.dependsOn project(":pride").installApp
 	check.dependsOn it
 }
