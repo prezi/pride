@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -122,15 +123,16 @@ public class PrideInitializer {
 			// Write the root project
 			FileUtils.write(settingsFile, "include \'" + rootProject.getName() + "\'\n", true);
 			FileUtils.write(settingsFile, "project(\':" + rootProject.getName() + "\').projectDir = file(\'" + moduleDirectory.getName() + "\')\n", true);
-			writeSettingsForChildren(settingsFile, rootProject.getName(), rootProject.getChildren());
+			writeSettingsForChildren(pride, settingsFile, rootProject.getName(), rootProject.getChildren());
 		}
 	}
 
-	private void writeSettingsForChildren(File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
+	private void writeSettingsForChildren(Pride pride, File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
 		for (PrideProjectModel child : children) {
 			FileUtils.write(settingsFile, "include \'" + rootProjectName + child.getPath() + "\'\n", true);
-			FileUtils.write(settingsFile, "project(\':" + rootProjectName + child.getPath() + "\').projectDir = file(\'" + child.getProjectDir() + "\')\n", true);
-			writeSettingsForChildren(settingsFile, rootProjectName, child.getChildren());
+			String childProjectRelativePath = URI.create(pride.getRootDirectory().getCanonicalPath()).relativize(URI.create(child.getProjectDir())).toString();
+			FileUtils.write(settingsFile, "project(\':" + rootProjectName + child.getPath() + "\').projectDir = file(\'" + childProjectRelativePath + "\')\n", true);
+			writeSettingsForChildren(pride, settingsFile, rootProjectName, child.getChildren());
 		}
 	}
 
