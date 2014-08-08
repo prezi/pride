@@ -1,7 +1,6 @@
 package com.prezi.gradle.pride;
 
 import groovy.lang.Closure;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.gradle.api.Project;
 import org.gradle.api.UnknownProjectException;
 import org.gradle.api.artifacts.ProjectDependency;
@@ -33,7 +32,7 @@ public class PrideConvention {
 		String path = (String) notation.get("path");
 		Map<String, Object> absoluteNotation = new LinkedHashMap<String, Object>(notation);
 		Project resolvedProject = findRelativeProjectInternal(project, path);
-		if (!DefaultGroovyMethods.asBoolean(resolvedProject)) {
+		if (resolvedProject == null) {
 			throw new UnknownProjectException("Could not find relative project at path \"" + path + "\"");
 		}
 		absoluteNotation.put("path", resolvedProject.getPath());
