@@ -1,13 +1,13 @@
 Pride
 =====
 
-Pride is a tool to help you manage the local development of large modular applications built with Gradle. It consists of a command-line tool to manage your prides of modules, and a Gradle plugin to add some extra functionality to the Gradle projects.
+Pride is a tool to help you manage the local development of large modular applications built with Gradle. It consists of a command-line tool to manage your prides of modules, and a Gradle plugin to add some extra functionality to the Gradle projects that resolves your modules to local projects.
 
 [![Build Status](https://travis-ci.org/prezi/pride.svg?branch=master)](https://travis-ci.org/prezi/pride)
 
 ## How does it work?
 
-Pride works with the concept of modules: Git repositories that contain individual Gradle projects that depend on each other. You can build large applications of such modules, but while working on the application in your local development environment, you rarely need to work on all of the modules at the same time.
+Pride works with the concept of modules: Git or Subversion repositories that contain individual Gradle projects that depend on each other. You can build large applications of such modules, but while working on the application in your local development environment, you rarely need to work on all of the modules at the same time.
 
 If you only want to work on one module at a time, it's no problem, as Gradle will load the module's dependencies from whatever artifact repository you are deploying your built modules into. But things get more complicated when you want to change multiple interdependent modules at the same time. You will end up having to combine your modules into a single Gradle project, or relying on installing your modules in a local Ivy or Maven repository so that dependent modules can get to them.
 
@@ -46,7 +46,7 @@ pride add network-component backend-api
 pride add https://github.com/myself/myproject
 
 # Once you changed stuff, you probably want to run "check" on all your projects:
-gradle check
+./gradlew check
 
 # If you are happy with your changes, you want to see what's changed
 pride do -- git status --short
@@ -58,7 +58,7 @@ pride do -- git status --short
 
 ### Prerequisites
 
-You need [Gradle](http://gradle.org/) and [Git](http://git-scm.org/) installed.
+You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed.
 
 ### Installing Pride
 
@@ -81,7 +81,7 @@ If you want to experiment with Pride:
 ```shell
 git clone git@github.com:prezi/pride.git
 cd pride
-gradle installApp
+./gradlew installApp
 export PATH=$PATH:`pwd`/pride/build/install/pride/bin
 ```
 
@@ -120,7 +120,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.6.3"
+        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.9.3"
     }
 }
 
@@ -168,11 +168,11 @@ If you want your project to work in a pride as well as in stand-alone mode, you 
 
 Craft your modules so that they are buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*). It's not hard at all.
 
-* Only use `include(...)` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
+* Only use `include(...)`, `rootProject.name` and `project(...).name` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
 * Do not rely on `project.rootDir` or `rootProject` either. These properties change depending on whether your project is part of a pride or not. Instead always refer to the parent project with `relativeProject(":")` and take the `projectDir` from that.
 
-## Repo caching
+## Git repo caching
 
 To quickly create (and discard) prides, Git repos of modules are cached locally. Here's what Pride does when you `add` a module with cache enabled:
 
@@ -185,6 +185,8 @@ To quickly create (and discard) prides, Git repos of modules are cached locally.
 You can disable caching on a per-repo basis by using `pride add --no-repo-cache repo-name`. Or you can disable it by setting this in `~/.prideconfig`:
 
     repo.cache.always=false
+
+There is no similar functionality for Subversion, obviously.
 
 ## Contribution
 
