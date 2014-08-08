@@ -114,6 +114,13 @@ subprojects { subproject ->
 		}
 	}
 
+	processResources {
+		inputs.property "version", version
+		filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+				version: version
+		]
+	}
+
 	task javadocJar(type: Jar) {
 		dependsOn javadoc
 		classifier = "javadoc"
@@ -146,13 +153,6 @@ project("pride-core") {
 		compile "commons-io:commons-io:2.4"
 		compile "com.google.guava:guava:17.0"
 		compile "org.slf4j:jcl-over-slf4j:1.7.7"
-	}
-
-	processResources {
-		inputs.property "version", version
-		filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-				version: version
-		]
 	}
 }
 
@@ -205,6 +205,13 @@ project("gradle-pride-plugin") {
 		compile gradleApi()
 		compile project(":pride-core")
 		compile "com.google.guava:guava:17.0"
+	}
+}
+
+project("gradle-pride-model-plugin") {
+	dependencies {
+		compile gradleApi()
+		compile project(":pride-core")
 	}
 }
 
