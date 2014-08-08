@@ -123,16 +123,16 @@ public class PrideInitializer {
 			// Write the root project
 			FileUtils.write(settingsFile, "include \'" + rootProject.getName() + "\'\n", true);
 			FileUtils.write(settingsFile, "project(\':" + rootProject.getName() + "\').projectDir = file(\'" + moduleDirectory.getName() + "\')\n", true);
-			writeSettingsForChildren(pride, settingsFile, rootProject.getName(), rootProject.getChildren());
+			writeSettingsForChildren(pride.getRootDirectory(), settingsFile, rootProject.getName(), rootProject.getChildren());
 		}
 	}
 
-	private void writeSettingsForChildren(Pride pride, File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
+	private void writeSettingsForChildren(File prideRootDir, File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
 		for (PrideProjectModel child : children) {
 			FileUtils.write(settingsFile, "include \'" + rootProjectName + child.getPath() + "\'\n", true);
-			String childProjectRelativePath = URI.create(pride.getRootDirectory().getCanonicalPath()).relativize(URI.create(child.getProjectDir())).toString();
+			String childProjectRelativePath = URI.create(prideRootDir.getCanonicalPath()).relativize(URI.create(child.getProjectDir())).toString();
 			FileUtils.write(settingsFile, "project(\':" + rootProjectName + child.getPath() + "\').projectDir = file(\'" + childProjectRelativePath + "\')\n", true);
-			writeSettingsForChildren(pride, settingsFile, rootProjectName, child.getChildren());
+			writeSettingsForChildren(prideRootDir, settingsFile, rootProjectName, child.getChildren());
 		}
 	}
 
