@@ -11,7 +11,7 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.api.specs.Spec;
+import org.gradle.api.specs.Specs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +49,7 @@ public class TransitiveOverrideAction implements Action<Project> {
 			// instead of a normal detached configuration so that caching rules (and other things)
 			// are inherited from the target configuration
 			// See https://github.com/prezi/pride/issues/95
-			Configuration detachedConfiguration = configuration.copy(new Spec<Dependency>() {
-				@Override
-				public boolean isSatisfiedBy(Dependency dependency) {
-					return false;
-				}
-			});
+			Configuration detachedConfiguration = configuration.copy(Specs.SATISFIES_NONE);
 			detachedConfiguration.getDependencies().addAll(externalDependencies);
 
 			for (ResolvedDependency resolvedDependency : detachedConfiguration.getResolvedConfiguration().getFirstLevelModuleDependencies()) {
