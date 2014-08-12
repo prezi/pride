@@ -8,6 +8,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -52,7 +53,11 @@ public class TransitiveOverrideAction implements Action<Project> {
 			Configuration detachedConfiguration = configuration.copy(Specs.SATISFIES_NONE);
 			detachedConfiguration.getDependencies().addAll(externalDependencies);
 
-			for (ResolvedDependency resolvedDependency : detachedConfiguration.getResolvedConfiguration().getFirstLevelModuleDependencies()) {
+			// We need a lenient configuration here because some previously overridden dependencies
+			// might refer to version 32767, and won't be found -- but that's okay
+			// TODO Add a check to see if all unresolved dependencies are of version 32767
+			LenientConfiguration resolvedDependencies = detachedConfiguration.getResolvedConfiguration().getLenientConfiguration();
+			for (ResolvedDependency resolvedDependency : resolvedDependencies.getFirstLevelModuleDependencies(Specs.SATISFIES_ALL)) {
 				addTransitiveDependenciesIfNecessary(project, configuration, resolvedDependency.getChildren());
 			}
 		}
