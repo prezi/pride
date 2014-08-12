@@ -17,6 +17,10 @@ import java.util.SortedSet;
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
 
+	// All local projects have their version set to a high value in the generated build.gradle
+	// in order to override external dependencies
+	public static final String LOCAL_PROJECT_VERSION = String.valueOf(Short.MAX_VALUE);
+
 	@Override
 	public void apply(Project project) {
 		boolean prideDisabled = project.hasProperty("pride.disable");

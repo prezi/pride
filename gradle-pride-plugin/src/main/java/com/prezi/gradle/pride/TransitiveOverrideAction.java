@@ -38,11 +38,10 @@ public class TransitiveOverrideAction implements Action<Project> {
 		for (Map.Entry<String, Collection<Dependency>> entry : dynamicDependencies.asMap().entrySet()) {
 			Configuration configuration = project.getConfigurations().getByName(entry.getKey());
 			// Filter out already added overrides
-			// Projects are overridden to have version = 32767
 			Collection<Dependency> externalDependencies = Collections2.filter(entry.getValue(), new Predicate<Dependency>() {
 				@Override
 				public boolean apply(Dependency dependency) {
-					return !dependency.getVersion().equals(String.valueOf(Short.MAX_VALUE));
+					return !dependency.getVersion().equals(PridePlugin.LOCAL_PROJECT_VERSION);
 				}
 			});
 
@@ -54,8 +53,7 @@ public class TransitiveOverrideAction implements Action<Project> {
 			detachedConfiguration.getDependencies().addAll(externalDependencies);
 
 			// We need a lenient configuration here because some previously overridden dependencies
-			// might refer to version 32767, and won't be found -- but that's okay
-			// TODO Add a check to see if all unresolved dependencies are of version 32767
+			// might refer to the locally overridden version, and won't be found -- but that's okay
 			LenientConfiguration resolvedDependencies = detachedConfiguration.getResolvedConfiguration().getLenientConfiguration();
 			for (ResolvedDependency resolvedDependency : resolvedDependencies.getFirstLevelModuleDependencies(Specs.SATISFIES_ALL)) {
 				addTransitiveDependenciesIfNecessary(project, configuration, resolvedDependency.getChildren());
