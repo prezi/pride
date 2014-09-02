@@ -3,6 +3,8 @@ Pride
 
 Pride is a tool to help you manage the local development of large modular applications built with Gradle. It consists of a command-line tool to manage your prides of modules, and a Gradle plugin to add some extra functionality to the Gradle projects that resolves your modules to local projects.
 
+You can read about Pride on [Prezi's engineering blog](http://engineering.prezi.com/blog/2014/05/13/pride-simpler-management-of-modular-app-development/) or watch Lorant's presentation about it at the [Gradle Summit 2014](https://www.youtube.com/watch?v=koaVWEXVRno).
+
 [![Build Status](https://travis-ci.org/prezi/pride.svg?branch=master)](https://travis-ci.org/prezi/pride)
 
 ## How does it work?
