@@ -3,12 +3,10 @@ package com.prezi.gradle.pride.cli.commands;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.RuntimeConfiguration;
-import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
-import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
+import com.prezi.gradle.pride.cli.commands.actions.RefreshDependenciesAction;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
-import org.gradle.tooling.ProjectConnection;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,17 +49,7 @@ public class UpdateCommand extends AbstractPrideCommand {
 		}
 
 		if (refreshDependencies) {
-			logger.info("Refreshing dependencies");
-			new GradleConnectorManager(config).executeInProject(pride.getRootDirectory(), new GradleProjectExecution<Void, RuntimeException>() {
-				@Override
-				public Void execute(File projectDirectory, ProjectConnection connection) {
-					connection.newBuild()
-							.forTasks("doNothing")
-							.withArguments("--refresh-dependencies")
-							.run();
-					return null;
-				}
-			});
+			new RefreshDependenciesAction().refreshDependencies(pride);
 		}
 	}
 }
