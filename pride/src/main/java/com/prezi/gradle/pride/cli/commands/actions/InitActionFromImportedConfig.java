@@ -48,13 +48,13 @@ public class InitActionFromImportedConfig extends InitActionBase {
 			return 0;
 		}
 
-		Collection<String> moduleNames = Collections2.transform(modulesFromConfiguration, new Function<Module, String>() {
+		Collection<String> modules = Collections2.transform(modulesFromConfiguration, new Function<Module, String>() {
 			@Override
 			public String apply(Module module) {
 				return module.getRemote();
 			}
 		});
-		List<String> failedModules = ModuleAdder.addModules(pride, moduleNames, vcsManager);
+		List<String> failedModules = ModuleAdder.addModules(pride, modules, vcsManager);
 		saveAndReinitializePride(prideInitializer, pride);
 		return failedModules.isEmpty() ? 0 : 1;
 	}
