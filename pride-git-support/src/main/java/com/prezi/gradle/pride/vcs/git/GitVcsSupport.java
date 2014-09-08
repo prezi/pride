@@ -86,7 +86,9 @@ public class GitVcsSupport implements VcsSupport {
 
 	@Override
 	public boolean hasChanges(File targetDirectory) throws IOException {
-		VcsStatus status = getStatus(targetDirectory);
+		VcsStatus.Builder builder = VcsStatus.builder("");
+		getStatusInternal(targetDirectory, builder);
+		VcsStatus status = builder.build();
 		return status.hasUncommittedChanges() || status.hasUnpublishedChanges();
 	}
 
@@ -94,12 +96,16 @@ public class GitVcsSupport implements VcsSupport {
 	public VcsStatus getStatus(File targetDirectory) throws IOException {
 		final VcsStatus.Builder status = VcsStatus.builder(getRevision(targetDirectory));
 		status.withBranch(getBranch(targetDirectory));
-		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "status", "--branch", "--porcelain"), false, false);
+		getStatusInternal(targetDirectory, status);
+		return status.build();
+	}
 
+	private void getStatusInternal(File targetDirectory, final VcsStatus.Builder status) throws IOException {
 		// ## master...origin/master [ahead 1]
 		//  M non-added-modification.txt
 		// M  added-modification.txt
 		// ?? non-added-file.txt
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "status", "--branch", "--porcelain"), false, false);
 
 		CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8), new LineProcessor<Void>() {
 			@Override
@@ -123,8 +129,6 @@ public class GitVcsSupport implements VcsSupport {
 				return null;
 			}
 		});
-
-		return status.build();
 	}
 
 	private String getRevision(File targetDirectory) throws IOException {
