@@ -74,7 +74,7 @@ public class PridePlugin implements Plugin<Project> {
 			@Override
 			public void execute(Project project) {
 				if (project.getGroup() == null || String.valueOf(project.getGroup()).isEmpty()) {
-					throw new IllegalStateException("Group is not specified for project " + project.getPath());
+					throw new IllegalStateException("Group is not specified for project in " + project.getProjectDir());
 				}
 			}
 		});
