@@ -58,8 +58,8 @@ public class Pride {
 		if (prideDirectory == null) {
 			throw new PrideException("No pride found in " + directory);
 		}
-		PropertiesConfiguration prideConfig = loadLocalConfiguration(getPrideConfigDirectory(directory));
-		return new Pride(directory, globalConfig, prideConfig, vcsManager);
+		PropertiesConfiguration prideConfig = loadLocalConfiguration(getPrideConfigDirectory(prideDirectory));
+		return new Pride(prideDirectory, globalConfig, prideConfig, vcsManager);
 	}
 
 	public static File findPrideDirectory(File directory) throws IOException {
