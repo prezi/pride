@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-@Command(name = "do", description = "Execute a command on a set of the modules")
+@Command(name = "do", description = "Execute a command on a set of modules")
 public class DoCommand extends AbstractPrideCommand {
 
 	@Option(name = {"-I", "--include"},

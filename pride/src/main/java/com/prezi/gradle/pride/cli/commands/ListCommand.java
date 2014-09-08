@@ -8,7 +8,7 @@ import io.airlift.command.Option;
 import java.io.File;
 import java.io.FileFilter;
 
-@Command(name = "list", description = "Lists modules in a pride")
+@Command(name = "list", description = "List modules in a pride")
 public class ListCommand extends AbstractPrideCommand {
 
 	@Option(name = {"-m", "--modules"},
