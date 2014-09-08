@@ -15,7 +15,7 @@ import java.util.List;
 import static com.prezi.gradle.pride.cli.Configurations.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 
-@Command(name = "update", description = "Updates a pride")
+@Command(name = "update", description = "Update modules a pride")
 public class UpdateCommand extends AbstractPrideCommand {
 
 	@Option(name = "--exclude",
