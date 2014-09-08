@@ -35,8 +35,8 @@ modules.1.remote = git@github.com:prezi/test
 modules.1.vcs = git
 """
 		assert rawContents("$dir/.pride/projects", "#") == """
-:file-module::file-module
-:git-module::git-module
+com.example.test.file:file-module::file-module
+com.example.test.git:git-module::git-module
 """
 	}
 }

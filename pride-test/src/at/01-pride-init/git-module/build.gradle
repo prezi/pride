@@ -9,6 +9,8 @@ buildscript {
 	}
 }
 
+group "com.example.test.git"
+
 apply plugin: "pride"
 
 configurations {

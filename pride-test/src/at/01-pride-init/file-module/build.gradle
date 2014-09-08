@@ -10,3 +10,5 @@ buildscript {
 }
 
 apply plugin: "pride"
+
+group "com.example.test.file"

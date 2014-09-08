@@ -3,6 +3,7 @@ package com.prezi.gradle.pride;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import groovy.lang.Closure;
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.invocation.Gradle;
@@ -67,6 +68,16 @@ public class PridePlugin implements Plugin<Project> {
 				});
 			}
 		}
+
+		// See https://github.com/prezi/pride/issues/100
+		project.afterEvaluate(new Action<Project>() {
+			@Override
+			public void execute(Project project) {
+				if (project.getGroup() == null || String.valueOf(project.getGroup()).isEmpty()) {
+					throw new IllegalStateException("Group is not specified for project " + project.getPath());
+				}
+			}
+		});
 	}
 
 	private static boolean alreadyCheckedIfRunningFromRootOfPride;
