@@ -1,11 +1,15 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.prezi.gradle.pride.Pride;
+import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.commands.actions.InitAction;
 import com.prezi.gradle.pride.cli.commands.actions.InitActionBase;
 import com.prezi.gradle.pride.cli.commands.actions.InitActionFromImportedConfig;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
+
+import java.io.File;
 
 import static com.prezi.gradle.pride.cli.Configurations.GRADLE_WRAPPER;
 
@@ -39,6 +43,12 @@ public class InitCommand extends AbstractConfiguredCommand {
 
 	@Override
 	protected int executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
+		if (!explicitForce) {
+			File parentPrideDirectory = Pride.findPrideDirectory(getPrideDirectory());
+			if (parentPrideDirectory != null) {
+				throw new PrideException("An existing pride has been found in " + parentPrideDirectory);
+			}
+		}
 		boolean addWrapper = globalConfig.override(GRADLE_WRAPPER, explicitWithWrapper, explicitNoWrapper);
 
 		InitActionBase initAction;
