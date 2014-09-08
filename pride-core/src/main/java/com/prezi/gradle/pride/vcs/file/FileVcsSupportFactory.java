@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.vcs.file;
 
+import com.prezi.gradle.pride.vcs.VcsStatus;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import com.prezi.gradle.pride.vcs.VcsSupportFactory;
 import org.apache.commons.configuration.Configuration;
@@ -43,6 +44,11 @@ public class FileVcsSupportFactory implements VcsSupportFactory {
 		@Override
 		public boolean hasChanges(File targetDirectory) throws IOException {
 			return false;
+		}
+
+		@Override
+		public VcsStatus getStatus(File targetDirectory) throws IOException {
+			return VcsStatus.builder("none").build();
 		}
 
 		@Override

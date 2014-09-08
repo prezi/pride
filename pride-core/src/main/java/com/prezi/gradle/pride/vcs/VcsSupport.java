@@ -28,13 +28,22 @@ public interface VcsSupport {
 	void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException;
 
 	/**
-	 * Returns true if the working copy / local repository has uncommitted changes.
+	 * Returns true if the working copy / local repository has uncommitted or unpublished changes.
 	 *
 	 * @param targetDirectory The directory where the local clone resides.
 	 * @return {@code true} if there are changes in the local clone.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
 	boolean hasChanges(File targetDirectory) throws IOException;
+
+	/**
+	 * Returns the status of the given directory.
+	 *
+	 * @param targetDirectory The directory where the local clone resides.
+	 * @return the status of <code>targetDirectory</code>.
+	 * @throws java.io.IOException If an I/O error occurs.
+	 */
+	VcsStatus getStatus(File targetDirectory) throws IOException;
 
 	/**
 	 * Activates a clone just cloned form a cache to work as if it was cloned from

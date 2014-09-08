@@ -4,9 +4,11 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.LineProcessor;
 import com.prezi.gradle.pride.ProcessUtils;
+import com.prezi.gradle.pride.vcs.VcsStatus;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.FileUtils;
@@ -83,8 +85,15 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	@SuppressWarnings("UnnecessaryLocalVariable")
 	public boolean hasChanges(File targetDirectory) throws IOException {
+		VcsStatus status = getStatus(targetDirectory);
+		return status.hasUncommittedChanges() || status.hasUnpublishedChanges();
+	}
+
+	@Override
+	public VcsStatus getStatus(File targetDirectory) throws IOException {
+		final VcsStatus.Builder status = VcsStatus.builder(getRevision(targetDirectory));
+		status.withBranch(getBranch(targetDirectory));
 		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "status", "--branch", "--porcelain"), false, false);
 
 		// ## master...origin/master [ahead 1]
@@ -92,28 +101,61 @@ public class GitVcsSupport implements VcsSupport {
 		// M  added-modification.txt
 		// ?? non-added-file.txt
 
-		boolean hasChanges = CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8), new LineProcessor<Boolean>() {
-			boolean hasChanges = false;
-
+		CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8), new LineProcessor<Void>() {
 			@Override
 			@SuppressWarnings("NullableProblems")
 			public boolean processLine(String line) throws IOException {
 				if (line.startsWith("#")) {
 					// Check if we have commits to be pushed
-					hasChanges = STATUS_AHEAD.matcher(line).matches();
+					if (STATUS_AHEAD.matcher(line).matches()) {
+						status.withUnpublishedChanges(true);
+					}
 				} else if (!line.isEmpty()) {
 					// Check if we have uncommitted files
-					hasChanges = true;
+					status.withUncommittedChanges(true);
+					return false;
 				}
-				return !hasChanges;
+				return true;
 			}
 
 			@Override
-			public Boolean getResult() {
-				return hasChanges;
+			public Void getResult() {
+				return null;
 			}
 		});
-		return hasChanges;
+
+		return status.build();
+	}
+
+	private String getRevision(File targetDirectory) throws IOException {
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "rev-parse", "HEAD"), false, false);
+		String result = new String(ByteStreams.toByteArray(process.getInputStream()), Charsets.UTF_8);
+		return result.trim().substring(0, 7);
+	}
+
+	private String getBranch(File targetDirectory) throws IOException {
+		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "branch", "--list"), false, false);
+		return CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8), new LineProcessor<String>() {
+			private String branch;
+
+			@Override
+			@SuppressWarnings("NullableProblems")
+			public boolean processLine(String line) throws IOException {
+				if (line.startsWith("* ")) {
+					String branchCandidate = line.substring(2);
+					if (!branchCandidate.startsWith("(detached from ")) {
+						this.branch = branchCandidate;
+						return false;
+					}
+				}
+				return true;
+			}
+
+			@Override
+			public String getResult() {
+				return branch;
+			}
+		});
 	}
 
 	@Override

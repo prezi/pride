@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.prezi.gradle.pride.ProcessUtils;
+import com.prezi.gradle.pride.vcs.VcsStatus;
 import com.prezi.gradle.pride.vcs.VcsSupport;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class SvnVcsSupport implements VcsSupport {
 				+ "(?:\\.git)?"								// optional .git suffix
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
+	private static final Pattern REVISION = Pattern.compile("Revision: (.*)");
 	private static final Pattern ROOT_URL = Pattern.compile("Repository Root: (.*)");
 
 	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport.class);
@@ -68,6 +70,17 @@ public class SvnVcsSupport implements VcsSupport {
 	}
 
 	@Override
+	public VcsStatus getStatus(File targetDirectory) throws IOException {
+		VcsStatus.Builder status = VcsStatus.builder(getRevision(targetDirectory));
+		status.withUncommittedChanges(hasChanges(targetDirectory));
+		return status.build();
+	}
+
+	private String getRevision(File targetDirectory) throws IOException {
+		return getInfoValue(targetDirectory, REVISION);
+	}
+
+	@Override
 	public void activate(String repositoryUrl, File targetDirectory) throws IOException {
 		throw new AssertionError("Cannot activate an SVN repository");
 	}
@@ -79,10 +92,14 @@ public class SvnVcsSupport implements VcsSupport {
 
 	@Override
 	public String getRepositoryUrl(File targetDirectory) throws IOException {
+		return getInfoValue(targetDirectory, ROOT_URL);
+	}
+
+	private String getInfoValue(File targetDirectory, Pattern pattern) throws IOException {
 		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("svn", "info"), false, false);
 		List<String> infoLines = CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8));
 		for (String remoteLine : infoLines) {
-			Matcher matcher = ROOT_URL.matcher(remoteLine);
+			Matcher matcher = pattern.matcher(remoteLine);
 			if (!matcher.matches()) {
 				continue;
 			}
