@@ -20,13 +20,15 @@ public class PrideProjectModelBuilder implements ToolingModelBuilder {
 		for (Project childProject : project.getChildProjects().values()) {
 			childModels.add(convertProject(childProject));
 		}
-		String group = project.getGroup() != null ? String.valueOf(project.getGroup()) : null;
+		if (project.getGroup() == null || String.valueOf(project.getGroup()).isEmpty()) {
+			throw new IllegalStateException("Group is not specified for project in " + project.getProjectDir());
+		}
 		return new DefaultPrideProjectModel(
-			project.getPath(),
-			group,
-			project.getName(),
-			childModels.build(),
-			project.getProjectDir().getAbsolutePath()
+				project.getPath(),
+				String.valueOf(project.getGroup()),
+				project.getName(),
+				childModels.build(),
+				project.getProjectDir().getAbsolutePath()
 		);
 	}
 }
