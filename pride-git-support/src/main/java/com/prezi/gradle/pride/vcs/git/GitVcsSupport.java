@@ -175,6 +175,11 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
+	public String getDefaultBranch() throws IOException {
+		return "master";
+	}
+
+	@Override
 	public void activate(String repositoryUrl, File targetDirectory) throws IOException {
 		ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "set-url", "origin", repositoryUrl));
 	}

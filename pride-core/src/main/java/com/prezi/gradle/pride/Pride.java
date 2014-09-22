@@ -1,13 +1,13 @@
 package com.prezi.gradle.pride;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import com.prezi.gradle.pride.filters.Filter;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
@@ -205,27 +205,17 @@ public class Pride {
 		return modules.get(name);
 	}
 
-	public Collection<Module> filterModules(Collection<String> includes, final Collection<String> excludes) {
-		Collection<Module> modules;
-		if (includes != null && !includes.isEmpty()) {
-			modules = Collections2.transform(includes, new Function<String, Module>() {
-				@Override
-				public Module apply(String module) {
-					return getModule(module);
+	public Collection<Module> getModules(final Filter filter) {
+		return Collections2.filter(getModules(), new Predicate<Module>() {
+			@Override
+			public boolean apply(Module module) {
+				try {
+					return filter == null || filter.matches(Pride.this, module);
+				} catch (IOException ex) {
+					throw Throwables.propagate(ex);
 				}
-			});
-		} else {
-			modules = getModules();
-		}
-		if (excludes != null && !excludes.isEmpty()) {
-			modules = Collections2.filter(modules, new Predicate<Module>() {
-				@Override
-				public boolean apply(Module module) {
-					return !excludes.contains(module.getName());
-				}
-			});
-		}
-		return modules;
+			}
+		});
 	}
 
 	public File getModuleDirectory(String name) {

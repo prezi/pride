@@ -72,6 +72,11 @@ public class FileVcsSupportFactory implements VcsSupportFactory {
 		}
 
 		@Override
+		public String getDefaultBranch() throws IOException {
+			return "";
+		}
+
+		@Override
 		public String normalizeRepositoryUrl(String repositoryUrl) {
 			return repositoryUrl;
 		}

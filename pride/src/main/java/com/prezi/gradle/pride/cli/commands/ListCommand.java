@@ -8,95 +8,69 @@ import io.airlift.command.Command;
 import io.airlift.command.Option;
 
 import java.io.File;
-import java.io.FileFilter;
+import java.util.Collection;
+import java.util.List;
 
 @Command(name = "list", description = "List modules in a pride")
-public class ListCommand extends AbstractPrideCommand {
+public class ListCommand extends AbstractFilteredPrideCommand {
 
-	@Option(name = {"-m", "--modules"},
-			description = "Show only the modules in the pride")
-	private boolean explicitModules;
+	@Option(name = {"-I", "--include"},
+			title = "regex",
+			description = "Execute the command on module (can be specified multiple times)")
+	private List<String> includeModules;
 
 	@Option(name = {"-s", "--short"},
 			description = "Show only module names")
 	private boolean explicitShort;
 
 	@Override
-	public void executeInPride(Pride pride) throws Exception {
-		AbstractLineFormatter formatter;
+	protected void executeInModules(Pride pride, Collection<Module> modules) throws Exception {
+		LineFormatter formatter;
 		if (explicitShort) {
-			formatter = new NamesOnlyFormatter(pride, explicitModules);
+			formatter = new NamesOnlyFormatter();
 		} else {
-			formatter = new StatusFormatter(pride, explicitModules);
+			formatter = new StatusFormatter(pride);
 		}
-		for (File dir : pride.getRootDirectory().listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File path) {
-				return path.isDirectory();
-			}
-		})) {
-			if (!Pride.isValidModuleDirectory(dir)) {
-				continue;
-			}
-			String line = formatter.formatDirectory(dir.getName());
-			if (line != null) {
-				logger.info("{}", line);
-			}
+		for (Module module : modules) {
+			logger.info("{}", formatter.formatModule(module));
 		}
 	}
 
-	private static abstract class AbstractLineFormatter {
-		protected final Pride pride;
-		private final boolean onlyModules;
+	@Override
+	protected Collection<String> getIncludeModules() {
+		return includeModules;
+	}
 
-		protected AbstractLineFormatter(Pride pride, boolean onlyModules) {
+	private interface LineFormatter {
+		String formatModule(Module module) throws Exception;
+	}
+
+	private static class NamesOnlyFormatter implements LineFormatter {
+
+		@Override
+		public String formatModule(Module module) {
+			return module.getName();
+		}
+	}
+
+	private static class StatusFormatter implements LineFormatter {
+
+		private final Pride pride;
+
+		private StatusFormatter(Pride pride) {
 			this.pride = pride;
-			this.onlyModules = onlyModules;
-		}
-
-		public String formatDirectory(String name) throws Exception {
-			if (!pride.hasModule(name)) {
-				if (onlyModules) {
-					return null;
-				}
-				return "? " + name;
-			} else {
-				return formatModule(name);
-			}
-		}
-
-		protected abstract String formatModule(String name) throws Exception;
-	}
-
-	private static class NamesOnlyFormatter extends AbstractLineFormatter {
-
-		protected NamesOnlyFormatter(Pride pride, boolean onlyModules) {
-			super(pride, onlyModules);
 		}
 
 		@Override
-		protected String formatModule(String name) {
-			return name;
-		}
-	}
-
-	private static class StatusFormatter extends AbstractLineFormatter {
-
-		protected StatusFormatter(Pride pride, boolean onlyModules) {
-			super(pride, onlyModules);
-		}
-
-		@Override
-		protected String formatModule(String name) throws Exception {
-			Module module = pride.getModule(name);
-			File moduleDirectory = pride.getModuleDirectory(name);
+		public String formatModule(Module module) throws Exception {
+			File moduleDirectory = pride.getModuleDirectory(module.getName());
 			// MM module-name (git)
 			VcsStatus status = module.getVcs().getSupport().getStatus(moduleDirectory);
 			String branch = status.getBranch();
 			StringBuilder line = new StringBuilder();
 			line.append(status.hasUnpublishedChanges() ? 'M' : ' ');
 			line.append(status.hasUncommittedChanges() ? 'M' : ' ');
-			line.append(' ').append(name);
+			line.append(' ').append(module.getName());
 			line.append(' ');
 			if (!Strings.isNullOrEmpty(branch)) {
 				line.append(branch).append('@');

@@ -77,10 +77,17 @@ public interface VcsSupport {
 
 	/**
 	 * Returns the branch name of the current working copy.
-	 * @return the branch name of {@code null} if not on a branch.
+	 * @return the branch name or {@code null} if not on a branch.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
 	String getBranch(File targetDirectory) throws IOException;
+
+	/**
+	 * Returns the default branch name of the repository.
+	 * @return the default branch name.
+	 * @throws java.io.IOException If an I/O error occurs.
+	 */
+	String getDefaultBranch() throws IOException;
 
 	/**
 	 * Normalizes the repository URL, e.g. removes trailing slashes etc.

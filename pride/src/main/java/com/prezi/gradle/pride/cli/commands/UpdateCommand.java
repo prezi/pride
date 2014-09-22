@@ -10,20 +10,14 @@ import io.airlift.command.Command;
 import io.airlift.command.Option;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import static com.prezi.gradle.pride.cli.Configurations.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
-import static com.prezi.gradle.pride.cli.Configurations.REPO_BRANCH;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 
 @Command(name = "update", description = "Update modules a pride")
-public class UpdateCommand extends AbstractPrideCommand {
-
-	@Option(name = "--exclude",
-			title = "module",
-			description = "Do not execute command on module (can be specified multiple times)")
-	private List<String> excludeModules;
+public class UpdateCommand extends AbstractFilteredPrideCommand {
 
 	@Option(name = {"-D", "--refresh-dependencies"},
 			description = "Refresh Gradle dependencies after update completed")
@@ -33,10 +27,10 @@ public class UpdateCommand extends AbstractPrideCommand {
 			description = "Update sub-modules recursively")
 	private Boolean explicitRecursive;
 
-	@Option(name = {"-b", "--branch"},
+	@Option(name = {"--switch"},
 			title = "branch",
-			description = "Branch to use")
-	private String explicitBranch;
+			description = "Switch to branch")
+	private String explicitSwitchToBranch;
 
 	@Arguments(required = false,
 			title = "modules",
@@ -44,24 +38,28 @@ public class UpdateCommand extends AbstractPrideCommand {
 	private List<String> includeModules;
 
 	@Override
-	public void executeInPride(Pride pride) throws IOException {
+	protected void executeInModules(Pride pride, Collection<Module> modules) throws Exception {
 		RuntimeConfiguration config = pride.getConfiguration();
-		String branch = config.override(REPO_BRANCH, explicitBranch);
-		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
 		boolean refreshDependencies = config.override(COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
+		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
 
-		for (Module module : pride.filterModules(includeModules, excludeModules)) {
+		for (Module module : modules) {
 			logger.info("Updating " + module.getName());
 			File moduleDir = pride.getModuleDirectory(module.getName());
-			String moduleBranch = branch;
+			String moduleBranch = explicitSwitchToBranch;
 			if (Strings.isNullOrEmpty(moduleBranch)) {
 				moduleBranch = module.getBranch();
 			}
-			module.getVcs().getSupport().update(moduleDir, branch, recursive, false);
+			module.getVcs().getSupport().update(moduleDir, explicitSwitchToBranch, recursive, false);
 		}
 
 		if (refreshDependencies) {
 			new RefreshDependenciesAction().refreshDependencies(pride);
 		}
+	}
+
+	@Override
+	protected Collection<String> getIncludeModules() {
+		return includeModules;
 	}
 }

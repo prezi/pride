@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
@@ -11,41 +12,28 @@ import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
 @Command(name = "remove", description = "Remove modules from a pride")
-public class RemoveCommand extends AbstractPrideCommand {
+public class RemoveCommand extends AbstractFilteredPrideCommand {
 
 	@Option(name = {"-f", "--force"},
 			description = "Remove modules even if there are local changes")
 	private boolean force;
 
-	@Arguments(required = true,
-			description = "Modules to remove from the pride")
-	private List<String> modulesNames;
+	@Arguments(description = "Modules to remove from the pride")
+	private List<String> includeModules;
 
 	@Override
-	public void executeInPride(final Pride pride) throws Exception {
+	protected void executeInModules(final Pride pride, Collection<Module> modules) throws Exception {
 		// Check if anything exists already
 		if (!force) {
-			Collection<String> missingModules = Collections2.filter(modulesNames, new Predicate<String>() {
+			Collection<Module> changedModules = Collections2.filter(modules, new Predicate<Module>() {
 				@Override
-				public boolean apply(String it) {
-					return !pride.hasModule(it);
-				}
-			});
-			if (!missingModules.isEmpty()) {
-				throw new PrideException("These modules are missing: " + StringUtils.join(missingModules, ", "));
-			}
-
-			Collection<String> changedModules = Collections2.filter(modulesNames, new Predicate<String>() {
-				@Override
-				public boolean apply(String moduleName) {
-					Module module = pride.getModule(moduleName);
+				public boolean apply(Module module) {
 					File moduleDir = pride.getModuleDirectory(module.getName());
 					try {
 						return module.getVcs().getSupport().hasChanges(moduleDir);
@@ -56,17 +44,32 @@ public class RemoveCommand extends AbstractPrideCommand {
 			});
 
 			if (!changedModules.isEmpty()) {
-				throw new PrideException("These modules have uncommitted changes: " + StringUtils.join(changedModules, ", "));
+				throw new PrideException("These modules have uncommitted changes: " + Joiner.on(", ").join(changedModules));
 			}
 		}
 
 		// Remove modules
-		for (String moduleName : modulesNames) {
-			pride.removeModule(moduleName);
+		for (Module module : modules) {
+			pride.removeModule(module.getName());
 		}
 		pride.save();
 
 		// Re-initialize pride
 		new PrideInitializer(new GradleConnectorManager(pride.getConfiguration()), isVerbose()).reinitialize(pride);
+	}
+
+	@Override
+	protected Collection<String> getIncludeModules() {
+		return includeModules;
+	}
+
+	@Override
+	protected void handleNoFilterSpecified() {
+		throw new PrideException("No modules to remove have been specified");
+	}
+
+	@Override
+	protected void handleNoMatchingModulesFound() {
+		logger.warn("No matching modules found");
 	}
 }

@@ -103,6 +103,11 @@ public class SvnVcsSupport implements VcsSupport {
 		return getRepositoryUrlInternal(targetDirectory).branch;
 	}
 
+	@Override
+	public String getDefaultBranch() throws IOException {
+		return "trunk";
+	}
+
 	private RepositoryUrl getRepositoryUrlInternal(File targetDirectory) throws IOException {
 		String fullUrl = getInfoValue(targetDirectory, ROOT_URL);
 		return RepositoryUrl.fromString(fullUrl);
