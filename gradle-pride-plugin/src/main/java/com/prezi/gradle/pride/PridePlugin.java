@@ -83,6 +83,10 @@ public class PridePlugin implements Plugin<Project> {
 	private static boolean alreadyCheckedIfRunningFromRootOfPride;
 
 	private static void checkIfNotRunningFromRootOfPride(final Project project) throws IOException {
+		// Don't check for a pride when not searching upward
+		if (!project.getGradle().getStartParameter().isSearchUpwards()) {
+			return;
+		}
 		if (!alreadyCheckedIfRunningFromRootOfPride) {
 			if (!Pride.containsPride(project.getRootDir())) {
 				logger.debug("No pride found in " + String.valueOf(project.getRootDir()));
