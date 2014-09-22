@@ -50,7 +50,7 @@ public class UpdateCommand extends AbstractFilteredPrideCommand {
 			if (Strings.isNullOrEmpty(moduleBranch)) {
 				moduleBranch = module.getBranch();
 			}
-			module.getVcs().getSupport().update(moduleDir, explicitSwitchToBranch, recursive, false);
+			module.getVcs().getSupport().update(moduleDir, moduleBranch, recursive, false);
 		}
 
 		if (refreshDependencies) {
