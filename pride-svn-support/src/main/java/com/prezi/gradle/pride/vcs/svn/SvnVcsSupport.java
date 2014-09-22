@@ -22,11 +22,10 @@ import java.util.regex.Pattern;
 
 public class SvnVcsSupport implements VcsSupport {
 
-	private static final Pattern REPOSITORY_URL_PATTERN = Pattern.compile("^"
+	private static final Pattern REPOSITORY_NAME_PATTERN = Pattern.compile("^"
 				+ "(?:svn|https?)://"						// Protocol prefix
 				+ ".+/"										// path to repo
 				+ "(.+?)" 									// repo name
-				+ "(?:\\.git)?"								// optional .git suffix
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
 	private static final Pattern REVISION = Pattern.compile("Revision: (.*)");
@@ -39,29 +38,25 @@ public class SvnVcsSupport implements VcsSupport {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
-		String trunkUrl = repositoryUrl;
-		if (!trunkUrl.endsWith("/")) {
-			trunkUrl += "/";
-		}
+		String branchUrl = new RepositoryUrl(repositoryUrl, branch).toUrl();
 
-		if (!Strings.isNullOrEmpty(branch)) {
-			trunkUrl += branch;
-		} else {
-			trunkUrl += "trunk";
-		}
-
-		log.debug("Checking out {} into {}", trunkUrl, targetDirectory);
+		log.debug("Checking out {} into {}", branchUrl, targetDirectory);
 		ImmutableList.Builder<String> checkoutCommand = ImmutableList.<String> builder().add("svn").add("checkout");
 		if (!recursive) {
 			checkoutCommand.add("--depth=files");
 		}
-		checkoutCommand.add(trunkUrl).add(targetDirectory.getPath());
+		checkoutCommand.add(branchUrl).add(targetDirectory.getPath());
 		ProcessUtils.executeIn(null, checkoutCommand.build());
 	}
 
 	@Override
-	public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
-		ImmutableList.Builder<String> updateCommand = ImmutableList.<String> builder().add("svn").add("update");
+	public void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+		ImmutableList.Builder<String> updateCommand = ImmutableList.builder();
+		if (!Strings.isNullOrEmpty(branch) && !branch.equals(getBranch(targetDirectory))) {
+			updateCommand.add("svn", "switch", getRepositoryUrl(targetDirectory) + "/" + branch, ".");
+		} else {
+			updateCommand.add("svn", "update");
+		}
 		if (!recursive) {
 			updateCommand.add("--depth=files");
 		}
@@ -88,12 +83,6 @@ public class SvnVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public String getBranch(File targetDirectory) throws IOException {
-		String repositoryUrl = getRepositoryUrl(targetDirectory);
-		return repositoryUrl.substring(repositoryUrl.lastIndexOf('/') + 1);
-	}
-
-	@Override
 	public void activate(String repositoryUrl, File targetDirectory) throws IOException {
 		throw new AssertionError("Cannot activate an SVN repository");
 	}
@@ -105,7 +94,17 @@ public class SvnVcsSupport implements VcsSupport {
 
 	@Override
 	public String getRepositoryUrl(File targetDirectory) throws IOException {
-		return getInfoValue(targetDirectory, ROOT_URL);
+		return getRepositoryUrlInternal(targetDirectory).root;
+	}
+
+	@Override
+	public String getBranch(File targetDirectory) throws IOException {
+		return getRepositoryUrlInternal(targetDirectory).branch;
+	}
+
+	private RepositoryUrl getRepositoryUrlInternal(File targetDirectory) throws IOException {
+		String fullUrl = getInfoValue(targetDirectory, ROOT_URL);
+		return RepositoryUrl.fromString(fullUrl);
 	}
 
 	private String getInfoValue(File targetDirectory, Pattern pattern) throws IOException {
@@ -128,11 +127,40 @@ public class SvnVcsSupport implements VcsSupport {
 
 	@Override
 	public String resolveRepositoryName(String repository) {
-		Matcher matcher = REPOSITORY_URL_PATTERN.matcher(repository);
+		Matcher matcher = REPOSITORY_NAME_PATTERN.matcher(repository);
 		if (matcher.matches()) {
 			return matcher.group(1);
 		} else {
 			return null;
+		}
+	}
+
+	private static class RepositoryUrl {
+		public static final String TRUNK = "trunk";
+		private static Pattern URL_PATTERN = Pattern.compile("(.*)/(?:trunk|branches/([^/]+))/?");
+
+		public final String root;
+		public final String branch;
+
+		private RepositoryUrl(String root, String branch) {
+			this.root = root;
+			this.branch = Strings.isNullOrEmpty(branch) ? TRUNK : branch;
+		}
+
+		public static RepositoryUrl fromString(String url) {
+			Matcher matcher = URL_PATTERN.matcher(url);
+			if (matcher.matches()) {
+				return new RepositoryUrl(matcher.group(1), matcher.group(2));
+			}
+			throw new IllegalArgumentException("Unable to parse URL: " + url);
+		}
+
+		public String toUrl() {
+			if (TRUNK.equals(branch)) {
+				return root + "/" + TRUNK;
+			} else {
+				return root + "/branches/" + branch;
+			}
 		}
 	}
 }

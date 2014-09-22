@@ -71,15 +71,19 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
+	public void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
 		// Cached repositories need to update all branches
 		if (!mirrored) {
 			// Fetch changes
-			ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "fetch"));
+			ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "update"));
 
-			// Update working copy
-			String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
-			ProcessUtils.executeIn(targetDirectory, Arrays.asList((String[]) updateCommand.split(" ")));
+			if (!Strings.isNullOrEmpty(branch) && !branch.equals(getBranch(targetDirectory))) {
+				ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "checkout", branch));
+			} else {
+				// Update working copy
+				String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
+				ProcessUtils.executeIn(targetDirectory, Arrays.asList((String[]) updateCommand.split(" ")));
+			}
 
 			// Update submodules if necessary
 			if (recursive) {

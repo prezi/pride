@@ -22,11 +22,12 @@ public interface VcsSupport {
 	 * and local changes should not be expected.
 	 *
 	 * @param targetDirectory The directory where the local clone resides.
+	 * @param branch          The branch to check out.
 	 * @param recursive       Update sub-repositories as well.
 	 * @param mirrored        Whether to update a real clone or a cached repository.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
-	void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException;
+	void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException;
 
 	/**
 	 * Returns true if the working copy / local repository has uncommitted or unpublished changes.

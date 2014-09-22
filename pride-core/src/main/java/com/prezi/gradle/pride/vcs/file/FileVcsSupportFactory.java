@@ -37,7 +37,7 @@ public class FileVcsSupportFactory implements VcsSupportFactory {
 		}
 
 		@Override
-		public void update(File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
+		public void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
 			// Do nothing
 		}
 

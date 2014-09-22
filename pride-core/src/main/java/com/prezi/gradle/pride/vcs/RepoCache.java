@@ -42,7 +42,7 @@ public class RepoCache {
 			vcsSupport.checkout(repositoryUrl, moduleInCache, null, false, true);
 		} else {
 			log.info("Updating cached repository in " + moduleInCacheName);
-			vcsSupport.update(moduleInCache, false, true);
+			vcsSupport.update(moduleInCache, null, false, true);
 		}
 
 		vcsSupport.checkout(moduleInCache.getAbsolutePath(), targetDirectory, branch, recursive, false);

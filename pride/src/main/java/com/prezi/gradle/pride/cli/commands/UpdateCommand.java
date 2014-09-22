@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.google.common.base.Strings;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.RuntimeConfiguration;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.prezi.gradle.pride.cli.Configurations.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_BRANCH;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 
 @Command(name = "update", description = "Update modules a pride")
@@ -31,6 +33,11 @@ public class UpdateCommand extends AbstractPrideCommand {
 			description = "Update sub-modules recursively")
 	private Boolean explicitRecursive;
 
+	@Option(name = {"-b", "--branch"},
+			title = "branch",
+			description = "Branch to use")
+	private String explicitBranch;
+
 	@Arguments(required = false,
 			title = "modules",
 			description = "The modules to update (updates all modules if none specified)")
@@ -39,13 +46,18 @@ public class UpdateCommand extends AbstractPrideCommand {
 	@Override
 	public void executeInPride(Pride pride) throws IOException {
 		RuntimeConfiguration config = pride.getConfiguration();
+		String branch = config.override(REPO_BRANCH, explicitBranch);
 		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
 		boolean refreshDependencies = config.override(COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
 
 		for (Module module : pride.filterModules(includeModules, excludeModules)) {
 			logger.info("Updating " + module.getName());
 			File moduleDir = pride.getModuleDirectory(module.getName());
-			module.getVcs().getSupport().update(moduleDir, recursive, false);
+			String moduleBranch = branch;
+			if (Strings.isNullOrEmpty(moduleBranch)) {
+				moduleBranch = module.getBranch();
+			}
+			module.getVcs().getSupport().update(moduleDir, branch, recursive, false);
 		}
 
 		if (refreshDependencies) {
