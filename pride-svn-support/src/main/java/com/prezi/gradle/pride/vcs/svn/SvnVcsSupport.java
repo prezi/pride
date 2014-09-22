@@ -26,6 +26,7 @@ public class SvnVcsSupport implements VcsSupport {
 				+ "(?:svn|https?)://"						// Protocol prefix
 				+ ".+/"										// path to repo
 				+ "(.+?)" 									// repo name
+				+ "(?:\\.git)?"								// optional .git suffix
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
 	private static final Pattern REVISION = Pattern.compile("Revision: (.*)");
