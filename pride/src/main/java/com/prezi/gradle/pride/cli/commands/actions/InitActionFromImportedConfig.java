@@ -48,10 +48,10 @@ public class InitActionFromImportedConfig extends InitActionBase {
 			return 0;
 		}
 
-		Collection<String> modules = Collections2.transform(modulesFromConfiguration, new Function<Module, String>() {
+		Collection<ModuleAdder.ModuleToAdd> modules = Collections2.transform(modulesFromConfiguration, new Function<Module, ModuleAdder.ModuleToAdd>() {
 			@Override
-			public String apply(Module module) {
-				return module.getRemote();
+			public ModuleAdder.ModuleToAdd apply(Module module) {
+				return new ModuleAdder.ModuleToAdd(module.getRemote(), module.getBranch());
 			}
 		});
 		List<String> failedModules = ModuleAdder.addModules(pride, modules, vcsManager);

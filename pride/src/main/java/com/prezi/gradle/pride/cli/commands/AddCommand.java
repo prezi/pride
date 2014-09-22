@@ -1,6 +1,8 @@
 package com.prezi.gradle.pride.cli.commands;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
@@ -68,7 +70,7 @@ public class AddCommand extends AbstractPrideCommand {
 		config.override(REPO_TYPE_DEFAULT, explicitRepoType);
 		config.override(REPO_CACHE_ALWAYS, explicitUseRepoCache, explicitNoRepoCache);
 		config.override(REPO_RECURSIVE, explicitRecursive);
-		config.override(REPO_BRANCH, explicitBranch);
+		final String branch = config.override(REPO_BRANCH, explicitBranch);
 
 		// Check if anything exists already
 		if (!overwrite) {
@@ -92,8 +94,15 @@ public class AddCommand extends AbstractPrideCommand {
 			}
 		}
 
+		Collection<ModuleAdder.ModuleToAdd> modulesToAdd = Collections2.transform(modules, new Function<String, ModuleAdder.ModuleToAdd>() {
+			@Override
+			public ModuleAdder.ModuleToAdd apply(String module) {
+				return new ModuleAdder.ModuleToAdd(module, branch);
+			}
+		});
+
 		// Clone repositories
-		ModuleAdder.addModules(pride, modules, getVcsManager());
+		ModuleAdder.addModules(pride, modulesToAdd, getVcsManager());
 
 		pride.save();
 		new PrideInitializer(new GradleConnectorManager(config), isVerbose()).reinitialize(pride);

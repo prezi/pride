@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.cli;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -28,12 +29,12 @@ import static com.prezi.gradle.pride.cli.Configurations.REPO_TYPE_DEFAULT;
 public class ModuleAdder {
 	private static final Logger logger = LoggerFactory.getLogger(ModuleAdder.class);
 
-	public static List<String> addModules(Pride pride, Collection<String> modules, VcsManager vcsManager) throws ConfigurationException {
+	public static List<String> addModules(Pride pride, Collection<ModuleToAdd> modules, VcsManager vcsManager) throws ConfigurationException {
 		RuntimeConfiguration config = pride.getConfiguration();
 		boolean useRepoCache = config.getBoolean(REPO_CACHE_ALWAYS);
 		String repoBaseUrl = config.getString(REPO_BASE_URL);
 		boolean recursive = config.getBoolean(REPO_RECURSIVE);
-		String branch = config.getString(REPO_BRANCH);
+		String defaultBranch = config.getString(REPO_BRANCH);
 		String repoType = config.getString(REPO_TYPE_DEFAULT);
 
 		// Get some support for our VCS
@@ -48,7 +49,13 @@ public class ModuleAdder {
 
 		List<String> failedModules = Lists.newArrayList();
 		RepoCache repoCache = null;
-		for (String module : modules) {
+		for (ModuleToAdd moduleEntry : modules) {
+			String module = moduleEntry.getModule();
+			String branch = moduleEntry.getBranch();
+			if (Strings.isNullOrEmpty(branch)) {
+				branch = defaultBranch;
+			}
+
 			try {
 				String moduleName = vcsSupport.resolveRepositoryName(module);
 				String repoUrl;
@@ -98,5 +105,23 @@ public class ModuleAdder {
 		}
 
 		return repoBaseUrl + moduleName;
+	}
+
+	public static class ModuleToAdd {
+		private final String module;
+		private final String branch;
+
+		public ModuleToAdd(String module, String branch) {
+			this.module = module;
+			this.branch = branch;
+		}
+
+		public String getModule() {
+			return module;
+		}
+
+		public String getBranch() {
+			return branch;
+		}
 	}
 }
