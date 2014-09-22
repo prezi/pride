@@ -18,6 +18,7 @@ import java.util.List;
 
 import static com.google.common.collect.Collections2.filter;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_BASE_URL;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_BRANCH;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_CACHE_ALWAYS;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_TYPE_DEFAULT;
@@ -51,6 +52,11 @@ public class AddCommand extends AbstractPrideCommand {
 			description = "Repository type")
 	private String explicitRepoType;
 
+	@Option(name = {"-b", "--branch"},
+			title = "branch",
+			description = "Branch to use")
+	private String explicitBranch;
+
 	@Arguments(required = true,
 			description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
 	private List<String> modules;
@@ -62,6 +68,7 @@ public class AddCommand extends AbstractPrideCommand {
 		config.override(REPO_TYPE_DEFAULT, explicitRepoType);
 		config.override(REPO_CACHE_ALWAYS, explicitUseRepoCache, explicitNoRepoCache);
 		config.override(REPO_RECURSIVE, explicitRecursive);
+		config.override(REPO_BRANCH, explicitBranch);
 
 		// Check if anything exists already
 		if (!overwrite) {

@@ -20,6 +20,7 @@ import java.util.List;
 
 import static com.prezi.gradle.pride.cli.Configurations.PRIDE_HOME;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_BASE_URL;
+import static com.prezi.gradle.pride.cli.Configurations.REPO_BRANCH;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_CACHE_ALWAYS;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_TYPE_DEFAULT;
@@ -32,6 +33,7 @@ public class ModuleAdder {
 		boolean useRepoCache = config.getBoolean(REPO_CACHE_ALWAYS);
 		String repoBaseUrl = config.getString(REPO_BASE_URL);
 		boolean recursive = config.getBoolean(REPO_RECURSIVE);
+		String branch = config.getString(REPO_BRANCH);
 		String repoType = config.getString(REPO_TYPE_DEFAULT);
 
 		// Get some support for our VCS
@@ -65,11 +67,11 @@ public class ModuleAdder {
 						File cachePath = new File(config.getString(PRIDE_HOME) + "/cache");
 						repoCache = new RepoCache(cachePath);
 					}
-					repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, recursive);
+					repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, branch, recursive);
 				} else {
-					vcsSupport.checkout(repoUrl, moduleInPride, recursive, false);
+					vcsSupport.checkout(repoUrl, moduleInPride, branch, recursive, false);
 				}
-				pride.addModule(moduleName, repoUrl, vcs);
+				pride.addModule(moduleName, repoUrl, branch, vcs);
 			} catch (Exception ex) {
 				logger.debug("Could not add {}", module, ex);
 				failedModules.add(module);

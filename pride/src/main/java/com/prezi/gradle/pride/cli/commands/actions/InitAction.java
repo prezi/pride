@@ -74,12 +74,14 @@ public class InitAction extends InitActionBase {
 			})) {
 				String moduleName = dir.getName();
 				String repositoryUrl;
+				String branch;
 				Vcs vcs;
 
 				Module existingModule = modulesFromExistingPrideConfig.get(moduleName);
 				if (existingModule != null) {
 					logger.info("Found existing module from previous configuration: {}", moduleName);
 					repositoryUrl = existingModule.getRemote();
+					branch = existingModule.getBranch();
 					vcs = existingModule.getVcs();
 				} else if (Pride.isValidModuleDirectory(dir)) {
 					vcs = vcsManager.findSupportingVcs(dir, globalConfig);
@@ -87,11 +89,12 @@ public class InitAction extends InitActionBase {
 					if (repositoryUrl == null) {
 						throw new PrideException("Could not detect remote URL for " + dir);
 					}
+					branch = vcs.getSupport().getBranch(dir);
 				} else {
 					continue;
 				}
 				logger.info("Adding existing {} module in {}", vcs.getType(), dir);
-				pride.addModule(moduleName, repositoryUrl, vcs);
+				pride.addModule(moduleName, repositoryUrl, branch, vcs);
 				prideModified = true;
 			}
 		}

@@ -1,8 +1,9 @@
 package com.prezi.gradle.pride.vcs.git;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -49,18 +50,24 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public void checkout(String repositoryUrl, File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
+	public void checkout(String repositoryUrl, File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
 		log.debug("Cloning {} into {}", repositoryUrl, targetDirectory);
-		List<String> commandLine = Lists.newArrayList("git", "clone", repositoryUrl, targetDirectory.getPath());
+		ImmutableList.Builder<String> commandLine = ImmutableList.builder();
+		commandLine.add("git", "clone", repositoryUrl, targetDirectory.getPath());
+
+		if (!Strings.isNullOrEmpty(branch)) {
+			commandLine.add("--branch", branch);
+		}
+
 		if (mirrored) {
 			commandLine.add("--mirror");
 		} else if (recursive) {
 			commandLine.add("--recursive");
 		}
-		ProcessUtils.executeIn(null, commandLine);
+		ProcessUtils.executeIn(null, commandLine.build());
 	}
 
 	@Override
@@ -137,7 +144,8 @@ public class GitVcsSupport implements VcsSupport {
 		return result.trim().substring(0, 7);
 	}
 
-	private String getBranch(File targetDirectory) throws IOException {
+	@Override
+	public String getBranch(File targetDirectory) throws IOException {
 		Process process = ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "branch", "--list"), false, false);
 		return CharStreams.readLines(new InputStreamReader(process.getInputStream(), Charsets.UTF_8), new LineProcessor<String>() {
 			private String branch;

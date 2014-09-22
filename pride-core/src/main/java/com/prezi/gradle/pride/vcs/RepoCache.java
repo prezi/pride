@@ -26,7 +26,7 @@ public class RepoCache {
 		this.cacheMapping = loadCacheMapping(mappingFile);
 	}
 
-	public void checkoutThroughCache(VcsSupport vcsSupport, final String repositoryUrl, File targetDirectory, boolean recursive) throws IOException {
+	public void checkoutThroughCache(VcsSupport vcsSupport, final String repositoryUrl, File targetDirectory, String branch, boolean recursive) throws IOException {
 		String normalizedUrl = vcsSupport.normalizeRepositoryUrl(repositoryUrl);
 
 		String moduleInCacheName = cacheMapping.getProperty(normalizedUrl);
@@ -39,20 +39,19 @@ public class RepoCache {
 		File moduleInCache = new File(cacheDirectory, moduleInCacheName);
 		if (!moduleInCache.exists()) {
 			log.info("Caching repository " + repositoryUrl + " as " + moduleInCacheName);
-			vcsSupport.checkout(repositoryUrl, moduleInCache, false, true);
+			vcsSupport.checkout(repositoryUrl, moduleInCache, null, false, true);
 		} else {
 			log.info("Updating cached repository in " + moduleInCacheName);
 			vcsSupport.update(moduleInCache, false, true);
 		}
 
-		vcsSupport.checkout(moduleInCache.getAbsolutePath(), targetDirectory, recursive, false);
+		vcsSupport.checkout(moduleInCache.getAbsolutePath(), targetDirectory, branch, recursive, false);
 		vcsSupport.activate(repositoryUrl, targetDirectory);
 
 		if (newName) {
 			cacheMapping.put(normalizedUrl, moduleInCacheName);
 			saveCacheMapping();
 		}
-
 	}
 
 	private static String sanitize(String repositoryUrl) {

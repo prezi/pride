@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.vcs.svn;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -34,7 +35,7 @@ public class SvnVcsSupport implements VcsSupport {
 	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport.class);
 
 	@Override
-	public void checkout(String repositoryUrl, File targetDirectory, boolean recursive, boolean mirrored) throws IOException {
+	public void checkout(String repositoryUrl, File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
@@ -42,7 +43,12 @@ public class SvnVcsSupport implements VcsSupport {
 		if (!trunkUrl.endsWith("/")) {
 			trunkUrl += "/";
 		}
-		trunkUrl += "trunk";
+
+		if (!Strings.isNullOrEmpty(branch)) {
+			trunkUrl += branch;
+		} else {
+			trunkUrl += "trunk";
+		}
 
 		log.debug("Checking out {} into {}", trunkUrl, targetDirectory);
 		ImmutableList.Builder<String> checkoutCommand = ImmutableList.<String> builder().add("svn").add("checkout");
@@ -73,11 +79,18 @@ public class SvnVcsSupport implements VcsSupport {
 	public VcsStatus getStatus(File targetDirectory) throws IOException {
 		VcsStatus.Builder status = VcsStatus.builder(getRevision(targetDirectory));
 		status.withUncommittedChanges(hasChanges(targetDirectory));
+		status.withBranch(getBranch(targetDirectory));
 		return status.build();
 	}
 
 	private String getRevision(File targetDirectory) throws IOException {
 		return getInfoValue(targetDirectory, REVISION);
+	}
+
+	@Override
+	public String getBranch(File targetDirectory) throws IOException {
+		String repositoryUrl = getRepositoryUrl(targetDirectory);
+		return repositoryUrl.substring(repositoryUrl.lastIndexOf('/') + 1);
 	}
 
 	@Override

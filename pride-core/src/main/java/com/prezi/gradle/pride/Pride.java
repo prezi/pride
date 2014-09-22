@@ -162,8 +162,8 @@ public class Pride {
 		return Collections.unmodifiableCollection(modules.values());
 	}
 
-	public Module addModule(String name, String remote, Vcs vcs) {
-		Module module = new Module(name, remote, vcs);
+	public Module addModule(String name, String remote, String branch, Vcs vcs) {
+		Module module = new Module(name, remote, branch, vcs);
 		modules.put(name, module);
 		updateModulesConfiguration();
 		return module;
@@ -187,6 +187,7 @@ public class Pride {
 			String moduleId = MODULES_KEY + "." + id;
 			localConfiguration.setProperty(moduleId + ".name", module.getName());
 			localConfiguration.setProperty(moduleId + ".remote", module.getRemote());
+			localConfiguration.setProperty(moduleId + ".branch", module.getBranch());
 			localConfiguration.setProperty(moduleId + ".vcs", module.getVcs().getType());
 			id++;
 		}
@@ -273,8 +274,9 @@ public class Pride {
 			String moduleKeyPrefix = MODULES_KEY + "." + moduleId;
 			String moduleName = config.getString(moduleKeyPrefix + ".name");
 			String moduleRemote = config.getString(moduleKeyPrefix + ".remote");
+			String moduleBranch = config.getString(moduleKeyPrefix + ".branch");
 			String vcsType = config.getString(moduleKeyPrefix + ".vcs");
-			Module module = new Module(moduleName, moduleRemote, vcsManager.getVcs(vcsType, config));
+			Module module = new Module(moduleName, moduleRemote, moduleBranch, vcsManager.getVcs(vcsType, config));
 			modules.add(module);
 		}
 		return modules;
