@@ -31,7 +31,7 @@ public abstract class AbstractFilteredPrideCommand extends AbstractPrideCommand 
 			description = "Execute only on modules that are on a matching branch (can be specified multiple times)")
 	private List<String> branches;
 
-	@Option(name = {"-c", "--changes"},
+	@Option(name = {"-c", "--changed"},
 			description = "Execute only on modules that have changes (uncommitted or unpublished)")
 	private boolean changes;
 
