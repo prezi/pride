@@ -11,6 +11,7 @@ import io.airlift.command.Option;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.prezi.gradle.pride.cli.Configurations.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
@@ -43,7 +44,8 @@ public class UpdateCommand extends AbstractFilteredPrideCommand {
 		boolean refreshDependencies = config.override(COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
 		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
 
-		for (Module module : modules) {
+		for (Iterator<Module> iModule = modules.iterator(); iModule.hasNext();) {
+			Module module = iModule.next();
 			logger.info("Updating " + module.getName());
 			File moduleDir = pride.getModuleDirectory(module.getName());
 			String moduleBranch = explicitSwitchToBranch;
@@ -51,6 +53,9 @@ public class UpdateCommand extends AbstractFilteredPrideCommand {
 				moduleBranch = module.getBranch();
 			}
 			module.getVcs().getSupport().update(moduleDir, moduleBranch, recursive, false);
+			if (iModule.hasNext()) {
+				logger.info("");
+			}
 		}
 
 		if (refreshDependencies) {

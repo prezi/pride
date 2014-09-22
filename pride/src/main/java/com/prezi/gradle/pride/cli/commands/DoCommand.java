@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 @Command(name = "do", description = "Execute a command on a set of modules")
@@ -30,12 +31,16 @@ public class DoCommand extends AbstractFilteredPrideCommand {
 
 	@Override
 	protected void executeInModules(Pride pride, Collection<Module> modules) throws Exception {
-		for (Module module : modules) {
+		for (Iterator<Module> iModule = modules.iterator(); iModule.hasNext();) {
+			Module module = iModule.next();
 			File moduleDirectory = pride.getModuleDirectory(module.getName());
 			if (!explicitBare) {
 				logger.info("\n{} $ {}", moduleDirectory, StringUtils.join(commandLine, " "));
 			}
 			ProcessUtils.executeIn(moduleDirectory, commandLine);
+			if (!explicitBare && iModule.hasNext()) {
+				logger.info("");
+			}
 		}
 	}
 
