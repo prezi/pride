@@ -1,10 +1,10 @@
 package com.prezi.gradle.pride;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.prezi.gradle.pride.filters.Filter;
@@ -19,14 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -159,7 +156,7 @@ public class Pride {
 	}
 
 	public Collection<Module> getModules() {
-		return Collections.unmodifiableCollection(modules.values());
+		return Sets.newTreeSet(modules.values());
 	}
 
 	public Module addModule(String name, String remote, String branch, Vcs vcs) {
@@ -205,17 +202,14 @@ public class Pride {
 		return modules.get(name);
 	}
 
-	public Collection<Module> getModules(final Filter filter) {
-		return Collections2.filter(getModules(), new Predicate<Module>() {
-			@Override
-			public boolean apply(Module module) {
-				try {
-					return filter == null || filter.matches(Pride.this, module);
-				} catch (IOException ex) {
-					throw Throwables.propagate(ex);
-				}
+	public Collection<Module> getModules(final Filter filter) throws IOException {
+		SortedSet<Module> filteredModules = Sets.newTreeSet();
+		for (Module module : modules.values()) {
+			if (filter.matches(this, module)) {
+				filteredModules.add(module);
 			}
-		});
+		}
+		return filteredModules;
 	}
 
 	public File getModuleDirectory(String name) {
@@ -229,7 +223,7 @@ public class Pride {
 	}
 
 	private static SortedMap<String, Module> loadModules(File rootDirectory, Configuration configuration, VcsManager vcsManager) throws IOException {
-		TreeMap<String, Module> modulesMap = new TreeMap<String, Module>();
+		SortedMap<String, Module> modulesMap = Maps.newTreeMap();
 		Collection<Module> modules = getModulesFromConfiguration(configuration, vcsManager);
 		for (Module module : modules) {
 			String moduleName = module.getName();
@@ -250,7 +244,7 @@ public class Pride {
 	}
 
 	public static List<Module> getModulesFromConfiguration(Configuration config, VcsManager vcsManager) {
-		List<Module> modules = new ArrayList<Module>();
+		List<Module> modules = Lists.newArrayList();
 		Set<String> moduleIds = Sets.newLinkedHashSet();
 		for (String moduleKey : Iterators.toArray(config.getKeys(MODULES_KEY), String.class)) {
 			Matcher matcher = MODULE_ID_MATCHER.matcher(moduleKey);
