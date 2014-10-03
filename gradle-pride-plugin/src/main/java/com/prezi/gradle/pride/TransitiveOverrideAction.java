@@ -3,7 +3,6 @@ package com.prezi.gradle.pride;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.SetMultimap;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -34,8 +33,8 @@ public class TransitiveOverrideAction implements Action<Project> {
 			return;
 		}
 		DynamicDependenciesExtension extension = project.getExtensions().getByType(DynamicDependenciesExtension.class);
-		SetMultimap<String, Dependency> dynamicDependencies = extension.getDynamicDependencies();
-		for (Map.Entry<String, Collection<Dependency>> entry : dynamicDependencies.asMap().entrySet()) {
+		Map<String, Collection<Dependency>> dynamicDependencies = extension.getDynamicDependencies();
+		for (Map.Entry<String, Collection<Dependency>> entry : dynamicDependencies.entrySet()) {
 			Configuration configuration = project.getConfigurations().getByName(entry.getKey());
 			// Filter out already added overrides
 			Collection<Dependency> externalDependencies = Collections2.filter(entry.getValue(), new Predicate<Dependency>() {

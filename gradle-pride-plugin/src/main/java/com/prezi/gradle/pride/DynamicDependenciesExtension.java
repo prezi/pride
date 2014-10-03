@@ -118,7 +118,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		return dependency;
 	}
 
-	public SetMultimap<String, Dependency> getDynamicDependencies() {
-		return Multimaps.unmodifiableSetMultimap(dynamicDependencies);
+	public Map<String, Collection<Dependency>> getDynamicDependencies() {
+		return Collections.unmodifiableMap(dynamicDependencies.asMap());
 	}
 }
