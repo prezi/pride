@@ -2,7 +2,6 @@ package com.prezi.gradle.pride;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
@@ -19,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 	private final Project project;
 	private final Map<String, Project> projectsByGroupAndName;
 	private final SetMultimap<String, Dependency> dynamicDependencies = LinkedHashMultimap.create();
+	private final SetMultimap<String, Dependency> requestedDynamicDependencies = LinkedHashMultimap.create();
 
 	public DynamicDependenciesExtension(Project project, Map<String, Project> projectsByGroupAndName) throws IOException {
 		this.project = project;
@@ -58,8 +60,9 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 
 	public void add(final Configuration configuration, Dependency dependency) {
 		project.getLogger().debug("Adding dynamic dependency " + dependency.getGroup() + ":" + dependency.getName() + ":" + dependency.getVersion() + " (" + dependency.getClass().getName() + ")");
+		requestedDynamicDependencies.put(configuration.getName(), dependency);
 		final Dependency localizedDependency;
-		if (project.hasProperty("pride.disable")) {
+		if (PridePlugin.isDisabled(project)) {
 			logger.info("Dynamic dependency resolution is disabled, all dynamic dependencies will be resolved to external dependencies");
 			localizedDependency = dependency;
 		} else {
@@ -88,13 +91,13 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 	private Dependency localizeFirstLevelDynamicDependency(Dependency dependency) {
 		Dependency localizedDependency = dependency;
 		if (dependency instanceof ExternalDependency) {
-			logger.debug("Looking for " + dependency.getGroup() + ":" + dependency.getName());
+			logger.debug("Looking for {}:{}", dependency.getGroup(), dependency.getName());
 			ExternalDependency externalDependency = (ExternalDependency) dependency;
 			// See if we can localize this external dependency to a project dependency
 			Project dependentProject = projectsByGroupAndName.get(dependency.getGroup() + ":" + dependency.getName());
 			if (dependentProject != null) {
 				final String targetConfiguration = externalDependency.getConfiguration();
-				logger.debug("Localizing " + dependency.getGroup() + ":" + dependency.getName() + " to " + dependentProject + ", configuration: " + targetConfiguration);
+				logger.debug("Localizing {}:{} to {}, configuration: {}", dependency.getGroup(), dependency.getName(), dependentProject, targetConfiguration);
 				ProjectDependency projectDependency = (ProjectDependency) project.getDependencies().project(
 						ImmutableMap.of(
 								"path", dependentProject.getPath(),
@@ -120,5 +123,9 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 
 	public Map<String, Collection<Dependency>> getDynamicDependencies() {
 		return Collections.unmodifiableMap(dynamicDependencies.asMap());
+	}
+
+	public Map<String, Collection<Dependency>> getRequestedDynamicDependencies() {
+		return Collections.unmodifiableMap(requestedDynamicDependencies.asMap());
 	}
 }
