@@ -24,7 +24,7 @@ public class PridePlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		boolean prideDisabled = project.hasProperty("pride.disable");
+		boolean prideDisabled = isDisabled(project);
 		if (!prideDisabled) {
 			// Check if not running from the root of a Pride
 			try {
@@ -103,5 +103,9 @@ public class PridePlugin implements Plugin<Project> {
 			}
 			alreadyCheckedIfRunningFromRootOfPride = true;
 		}
+	}
+
+	public static boolean isDisabled(Project project) {
+		return project.hasProperty("pride.disable");
 	}
 }

@@ -30,7 +30,7 @@ public class TransitiveOverrideAction implements Action<Project> {
 
 	@Override
 	public void execute(Project project) {
-		if (!project.getPlugins().hasPlugin(PridePlugin.class)) {
+		if (!project.getPlugins().hasPlugin(PridePlugin.class) || PridePlugin.isDisabled(project)) {
 			return;
 		}
 		DynamicDependenciesExtension extension = project.getExtensions().getByType(DynamicDependenciesExtension.class);
