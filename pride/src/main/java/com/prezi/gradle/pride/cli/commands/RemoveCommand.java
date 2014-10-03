@@ -9,11 +9,14 @@ import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.PrideInitializer;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
+import com.prezi.gradle.pride.internal.LoggedNamedProgressAction;
+import com.prezi.gradle.pride.internal.ProgressUtils;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -49,9 +52,12 @@ public class RemoveCommand extends AbstractFilteredPrideCommand {
 		}
 
 		// Remove modules
-		for (Module module : modules) {
-			pride.removeModule(module.getName());
-		}
+		ProgressUtils.execute(pride, modules, new LoggedNamedProgressAction<Module>("Removing") {
+			@Override
+			protected void execute(Pride pride, Module module) throws IOException {
+				pride.removeModule(module.getName());
+			}
+		});
 		pride.save();
 
 		// Re-initialize pride

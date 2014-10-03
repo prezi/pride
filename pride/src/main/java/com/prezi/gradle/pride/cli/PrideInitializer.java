@@ -13,6 +13,8 @@ import com.prezi.gradle.pride.PrideProjectData;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.cli.gradle.GradleProjectExecution;
+import com.prezi.gradle.pride.internal.LoggedNamedProgressAction;
+import com.prezi.gradle.pride.internal.ProgressUtils;
 import com.prezi.gradle.pride.projectmodel.PrideProjectModel;
 import com.prezi.gradle.pride.vcs.VcsManager;
 import org.apache.commons.configuration.Configuration;
@@ -94,16 +96,27 @@ public class PrideInitializer {
 				buildOut.close();
 			}
 
-			File modelInitFile = File.createTempFile("model-init-", ".gradle");
+			final File modelInitFile = File.createTempFile("model-init-", ".gradle");
 			Resources.asByteSource(Resources.getResource("model-init.gradle")).copyTo(Files.asByteSink(modelInitFile));
-			Map<File, PrideProjectModel> rootProjects = Maps.newLinkedHashMap();
-			for (Module module : pride.getModules()) {
-				File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
-				if (Pride.isValidModuleDirectory(moduleDirectory)) {
-					PrideProjectModel rootProject = getRootProjectModel(moduleDirectory, modelInitFile);
-					rootProjects.put(moduleDirectory, rootProject);
+			final Map<File, PrideProjectModel> rootProjects = Maps.newLinkedHashMap();
+			ProgressUtils.execute(pride, pride.getModules(), new LoggedNamedProgressAction<Module>("Initializing module") {
+				@Override
+				public void execute(Pride pride, Module module) {
+					File moduleDirectory = new File(pride.getRootDirectory(), module.getName());
+					if (Pride.isValidModuleDirectory(moduleDirectory)) {
+						PrideProjectModel rootProject = getRootProjectModel(moduleDirectory, modelInitFile);
+						rootProjects.put(moduleDirectory, rootProject);
+					}
 				}
-			}
+
+				@Override
+				public void execute(Pride pride, Module item, int index, int count) throws IOException {
+					super.execute(pride, item, index, count);
+					if (index < count - 1) {
+						logger.info("");
+					}
+				}
+			});
 
 			createSettingsFile(pride, rootProjects);
 			createProjectsFile(pride, rootProjects);

@@ -3,9 +3,12 @@ package com.prezi.gradle.pride.cli;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.prezi.gradle.pride.Named;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
+import com.prezi.gradle.pride.internal.LoggedNamedProgressAction;
+import com.prezi.gradle.pride.internal.ProgressUtils;
 import com.prezi.gradle.pride.vcs.RepoCache;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
@@ -16,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,61 +33,66 @@ import static com.prezi.gradle.pride.cli.Configurations.REPO_TYPE_DEFAULT;
 public class ModuleAdder {
 	private static final Logger logger = LoggerFactory.getLogger(ModuleAdder.class);
 
-	public static List<String> addModules(Pride pride, Collection<ModuleToAdd> modules, VcsManager vcsManager) throws ConfigurationException {
-		RuntimeConfiguration config = pride.getConfiguration();
-		boolean useRepoCache = config.getBoolean(REPO_CACHE_ALWAYS);
-		String repoBaseUrl = config.getString(REPO_BASE_URL);
-		boolean recursive = config.getBoolean(REPO_RECURSIVE);
-		String defaultBranch = config.getString(REPO_BRANCH);
+	public static List<String> addModules(Pride pride, Collection<ModuleToAdd> modules, VcsManager vcsManager) throws ConfigurationException, IOException {
+		final RuntimeConfiguration config = pride.getConfiguration();
+		boolean alwaysUseRepoCache = config.getBoolean(REPO_CACHE_ALWAYS);
+		final String repoBaseUrl = config.getString(REPO_BASE_URL);
+		final boolean recursive = config.getBoolean(REPO_RECURSIVE);
+		final String defaultBranch = config.getString(REPO_BRANCH);
 		String repoType = config.getString(REPO_TYPE_DEFAULT);
 
 		// Get some support for our VCS
-		Vcs vcs = vcsManager.getVcs(repoType, config);
-		VcsSupport vcsSupport = vcs.getSupport();
+		final Vcs vcs = vcsManager.getVcs(repoType, config);
+		final VcsSupport vcsSupport = vcs.getSupport();
 
 		// Determine if we can use a repo cache
-		if (useRepoCache && !vcsSupport.isMirroringSupported()) {
+		final boolean useRepoCache;
+		if (alwaysUseRepoCache && !vcsSupport.isMirroringSupported()) {
 			logger.warn("Trying to use cache with a repository type that does not support local repository mirrors. Caching will be disabled.");
 			useRepoCache = false;
+		} else {
+			useRepoCache = alwaysUseRepoCache;
 		}
 
-		List<String> failedModules = Lists.newArrayList();
-		RepoCache repoCache = null;
-		for (ModuleToAdd moduleEntry : modules) {
-			String module = moduleEntry.getModule();
-			String branch = moduleEntry.getBranch();
-			if (Strings.isNullOrEmpty(branch)) {
-				branch = defaultBranch;
-			}
+		final List<String> failedModules = Lists.newArrayList();
+		ProgressUtils.execute(pride, modules, new LoggedNamedProgressAction<ModuleToAdd>("Adding") {
+			private RepoCache repoCache = null;
 
-			try {
-				String moduleName = vcsSupport.resolveRepositoryName(module);
-				String repoUrl;
-				if (!StringUtils.isEmpty(moduleName)) {
-					repoUrl = module;
-				} else {
-					moduleName = module;
-					repoUrl = getRepoUrl(repoBaseUrl, moduleName);
+			@Override
+			public void execute(Pride pride, ModuleToAdd moduleEntry) throws IOException {
+				String module = moduleEntry.getModule();
+				String branch = moduleEntry.getBranch();
+				if (Strings.isNullOrEmpty(branch)) {
+					branch = defaultBranch;
 				}
 
-				logger.info("Adding {} from {}", moduleName, repoUrl);
-
-				File moduleInPride = new File(pride.getRootDirectory(), moduleName);
-				if (useRepoCache) {
-					if (repoCache == null) {
-						File cachePath = new File(config.getString(PRIDE_HOME) + "/cache");
-						repoCache = new RepoCache(cachePath);
+				try {
+					String moduleName = vcsSupport.resolveRepositoryName(module);
+					String repoUrl;
+					if (!StringUtils.isEmpty(moduleName)) {
+						repoUrl = module;
+					} else {
+						moduleName = module;
+						repoUrl = getRepoUrl(repoBaseUrl, moduleName);
 					}
-					repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, branch, recursive);
-				} else {
-					vcsSupport.checkout(repoUrl, moduleInPride, branch, recursive, false);
+
+					File moduleInPride = new File(pride.getRootDirectory(), moduleName);
+					if (useRepoCache) {
+						if (repoCache == null) {
+							File cachePath = new File(config.getString(PRIDE_HOME) + "/cache");
+							repoCache = new RepoCache(cachePath);
+						}
+						repoCache.checkoutThroughCache(vcsSupport, repoUrl, moduleInPride, branch, recursive);
+					} else {
+						vcsSupport.checkout(repoUrl, moduleInPride, branch, recursive, false);
+					}
+					pride.addModule(moduleName, repoUrl, branch, vcs);
+				} catch (Exception ex) {
+					logger.debug("Could not add {}", module, ex);
+					failedModules.add(module);
 				}
-				pride.addModule(moduleName, repoUrl, branch, vcs);
-			} catch (Exception ex) {
-				logger.debug("Could not add {}", module, ex);
-				failedModules.add(module);
 			}
-		}
+		});
 
 		if (!failedModules.isEmpty()) {
 			logger.error("Could not add the following modules:\n\n\t* {}", Joiner.on("\n\t* ").join(failedModules));
@@ -107,13 +116,18 @@ public class ModuleAdder {
 		return repoBaseUrl + moduleName;
 	}
 
-	public static class ModuleToAdd {
+	public static class ModuleToAdd implements Named {
 		private final String module;
 		private final String branch;
 
 		public ModuleToAdd(String module, String branch) {
 			this.module = module;
 			this.branch = branch;
+		}
+
+		@Override
+		public String getName() {
+			return module;
 		}
 
 		public String getModule() {

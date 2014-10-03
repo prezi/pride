@@ -5,13 +5,15 @@ import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.commands.actions.RefreshDependenciesAction;
+import com.prezi.gradle.pride.internal.LoggedNamedProgressAction;
+import com.prezi.gradle.pride.internal.ProgressUtils;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.prezi.gradle.pride.cli.Configurations.COMMAND_UPDATE_REFRESH_DEPENDENCIES;
@@ -42,22 +44,27 @@ public class UpdateCommand extends AbstractFilteredPrideCommand {
 	protected void executeInModules(Pride pride, Collection<Module> modules) throws Exception {
 		RuntimeConfiguration config = pride.getConfiguration();
 		boolean refreshDependencies = config.override(COMMAND_UPDATE_REFRESH_DEPENDENCIES, explicitRefreshDependencies);
-		boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
+		final boolean recursive = config.override(REPO_RECURSIVE, explicitRecursive);
 
-		for (Iterator<Module> iModule = modules.iterator(); iModule.hasNext();) {
-			Module module = iModule.next();
-			logger.info("Updating " + module.getName());
-			File moduleDir = pride.getModuleDirectory(module.getName());
-			String moduleBranch = explicitSwitchToBranch;
-			if (Strings.isNullOrEmpty(moduleBranch)) {
-				moduleBranch = module.getBranch();
+		ProgressUtils.execute(pride, modules, new LoggedNamedProgressAction<Module>("Updating") {
+			@Override
+			protected void execute(Pride pride, Module module) throws IOException {
+				File moduleDir = pride.getModuleDirectory(module.getName());
+				String moduleBranch = explicitSwitchToBranch;
+				if (Strings.isNullOrEmpty(moduleBranch)) {
+					moduleBranch = module.getBranch();
+				}
+				module.getVcs().getSupport().update(moduleDir, moduleBranch, recursive, false);
 			}
-			module.getVcs().getSupport().update(moduleDir, moduleBranch, recursive, false);
-			if (iModule.hasNext()) {
-				logger.info("");
-			}
-		}
 
+			@Override
+			public void execute(Pride pride, Module item, int index, int count) throws IOException {
+				super.execute(pride, item, index, count);
+				if (index < count - 1) {
+					logger.info("");
+				}
+			}
+		});
 		if (refreshDependencies) {
 			new RefreshDependenciesAction().refreshDependencies(pride);
 		}

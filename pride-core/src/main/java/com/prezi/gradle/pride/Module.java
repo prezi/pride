@@ -2,7 +2,7 @@ package com.prezi.gradle.pride;
 
 import com.prezi.gradle.pride.vcs.Vcs;
 
-public class Module implements Comparable<Module> {
+public class Module implements Named, Comparable<Module> {
 	private final String name;
 	private final String remote;
 	private final String branch;
@@ -20,6 +20,7 @@ public class Module implements Comparable<Module> {
 		return name.compareTo(o.name);
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
