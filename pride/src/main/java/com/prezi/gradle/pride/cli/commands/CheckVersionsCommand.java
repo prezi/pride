@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
+import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.gradle.pride.cli.model.ProjectModelAccessor;
@@ -44,6 +45,7 @@ public class CheckVersionsCommand extends AbstractFilteredPrideCommand {
 		for (PrideProjectModel model : models) {
 			projectsByGroupAndName.put(getId(model), model);
 		}
+		boolean problem = false;
 		for (PrideProjectModel model : models) {
 			for (Set<DynamicDependency> dependencies : model.getDynamicDependencies().values()) {
 				for (DynamicDependency dependency : dependencies) {
@@ -51,10 +53,14 @@ public class CheckVersionsCommand extends AbstractFilteredPrideCommand {
 					if (dependencyModel != null) {
 						if (!matchVersion(dependency.getVersion(), dependencyModel.getVersion())) {
 							logger.warn("Project \"{}\" requests version {} of project \"{}\", but its current version ({}) does not fulfill that request", getId(model), dependency.getVersion(), getId(dependencyModel), dependencyModel.getVersion());
+							problem = true;
 						}
 					}
 				}
 			}
+		}
+		if (problem) {
+			throw new PrideException("There are modules that refer to dependency versions that wouldn't work outside this pride. See warnings above.");
 		}
 	}
 
