@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.cli.commands.AbstractCommand;
 import com.prezi.gradle.pride.cli.commands.AddCommand;
+import com.prezi.gradle.pride.cli.commands.CheckVersionsCommand;
 import com.prezi.gradle.pride.cli.commands.ConfigCommand;
 import com.prezi.gradle.pride.cli.commands.DoCommand;
 import com.prezi.gradle.pride.cli.commands.GradleCommand;
@@ -35,6 +36,7 @@ public class PrideCli {
 				.withDefaultCommand(Help.class)
 				.withCommands(
 						AddCommand.class,
+						CheckVersionsCommand.class,
 						ConfigCommand.class,
 						DoCommand.class,
 						GradleCommand.class,
