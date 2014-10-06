@@ -1,6 +1,10 @@
-allprojects {
-	// HACK This is so that local projects will always override external projects
-	version = String.valueOf(Short.MAX_VALUE)
+group "pride"
+
+if (!hasProperty("pride.disable")) {
+	allprojects {
+		// HACK This is so that local projects will always override external projects
+		version = String.valueOf(Short.MAX_VALUE)
+	}
 }
 
 // Load gradle.properties for each project
