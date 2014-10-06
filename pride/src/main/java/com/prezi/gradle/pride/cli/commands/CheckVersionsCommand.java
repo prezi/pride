@@ -48,7 +48,7 @@ public class CheckVersionsCommand extends AbstractPrideCommand {
 			for (String conflict : versionConflicts) {
 				logger.warn(conflict);
 			}
-			throw new PrideException("There are modules that refer to dependency versions that wouldn't work outside this pride. See warnings above.");
+			throw new PrideException("There are projects that refer to dependency versions that wouldn't work outside this pride. See warnings above.");
 		} else {
 			logger.info("All projects refer to dependency versions that will resolve to the ones in the pride");
 		}
