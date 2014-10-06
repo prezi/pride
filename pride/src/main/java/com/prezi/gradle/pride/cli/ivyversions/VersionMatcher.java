@@ -4,7 +4,6 @@ import java.util.Comparator;
 
 /**
  * Compares version selectors against candidate versions, indicating whether they match or not.
- * <p/>
  * <p>This interface was initially derived from {@code org.apache.ivy.plugins.version.VersionMatcher}.
  */
 public interface VersionMatcher extends Comparator<String> {
