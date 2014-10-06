@@ -6,6 +6,7 @@ import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
 import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
+import com.prezi.gradle.pride.cli.ivyversions.ResolverStrategy;
 import com.prezi.gradle.pride.cli.model.ProjectModelAccessor;
 import com.prezi.gradle.pride.projectmodel.DynamicDependency;
 import com.prezi.gradle.pride.projectmodel.PrideProjectModel;
@@ -13,9 +14,8 @@ import io.airlift.command.Command;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
-@Command(name = "check-versions", description = "Check if dependency and module versions match")
+@Command(name = "check-versions", description = "Check if dependency and project versions match")
 public class CheckVersionsCommand extends AbstractPrideCommand {
 
 	@Override
@@ -55,10 +55,7 @@ public class CheckVersionsCommand extends AbstractPrideCommand {
 	}
 
 	static boolean matchVersion(String requested, String actual) {
-		// TODO Make this a little safer
-		String regex = requested.replaceAll("\\.", "\\\\.").replaceAll("\\+", ".*");
-		Pattern requestedPattern = Pattern.compile(regex);
-		return requestedPattern.matcher(actual).matches();
+		return new ResolverStrategy().accept(requested, actual);
 	}
 
 	private static void addChildModels(PrideProjectModel model, Set<PrideProjectModel> models) {

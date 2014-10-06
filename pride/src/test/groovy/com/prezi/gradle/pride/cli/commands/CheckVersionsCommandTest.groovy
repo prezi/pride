@@ -10,13 +10,16 @@ class CheckVersionsCommandTest extends Specification {
 		CheckVersionsCommand.matchVersion(requested, actual) == expected
 
 		where:
-		requested | actual  | expected
-		"1.0"     | "1.0"   | true
-		"1.0"     | "100"   | false
-		"1.0"     | "2.0"   | false
-		"1.0"     | "1.0.1" | false
-		"1.+"     | "1.0"   | true
-		"1.+"     | "1.0.1" | true
-		"1.+"     | "2.0"   | false
+		requested   | actual  | expected
+		"1.0"       | "1.0"   | true
+		"1.0"       | "100"   | false
+		"1.0"       | "2.0"   | false
+		"1.0"       | "1.0.1" | false
+		"1.+"       | "1.0"   | true
+		"1.+"       | "1.0.1" | true
+		"1.+"       | "2.0"   | false
+		"{1}.+"     | "{1}.0" | true
+		"[1.0,2.0)" | "1.0.1" | true
+		"[1.0,2.0)" | "2.0.1" | false
 	}
 }
