@@ -23,10 +23,15 @@ allprojects {
 subprojects { subproject ->
 	apply plugin: "maven"
 	apply plugin: "groovy"
+
+	description = "Pride manages multiple Gradle modules as a single Gradle project"
+
 	sourceCompatibility = 1.6
 	targetCompatibility = 1.6
 
-	description = "Pride manages Gradle-built modules as a single Gradle project"
+	tasks.withType(AbstractCompile) {
+		options.encoding = "UTF-8"
+	}
 
 	repositories {
 		mavenLocal()
