@@ -5,10 +5,9 @@ import com.prezi.gradle.pride.RuntimeConfiguration;
 
 public abstract class AbstractPrideCommand extends AbstractConfiguredCommand {
 	@Override
-	final protected int executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
+	final protected void executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
 		Pride pride = Pride.getPride(getPrideDirectory(), globalConfig, getVcsManager());
 		executeInPride(pride);
-		return 0;
 	}
 
 	public abstract void executeInPride(Pride pride) throws Exception;

@@ -62,7 +62,7 @@ public class InitAction extends InitActionBase {
 	}
 
 	@Override
-	protected int initPride(PrideInitializer prideInitializer, Pride pride) throws Exception {
+	protected void initPride(PrideInitializer prideInitializer, Pride pride) throws Exception {
 		boolean prideModified = false;
 		if (addExisting) {
 			logger.debug("Adding existing modules");
@@ -101,6 +101,5 @@ public class InitAction extends InitActionBase {
 		if (prideModified) {
 			saveAndReinitializePride(prideInitializer, pride);
 		}
-		return 0;
 	}
 }

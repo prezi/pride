@@ -1,6 +1,5 @@
 package com.prezi.gradle.pride.cli;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.prezi.gradle.pride.Named;
@@ -88,15 +87,12 @@ public class ModuleAdder {
 					}
 					pride.addModule(moduleName, repoUrl, branch, vcs);
 				} catch (Exception ex) {
-					logger.debug("Could not add {}", module, ex);
+					logger.warn("Could not add module {}", module);
+					logger.debug("Exception while adding module {}", module, ex);
 					failedModules.add(module);
 				}
 			}
 		});
-
-		if (!failedModules.isEmpty()) {
-			logger.error("Could not add the following modules:\n\n\t* {}", Joiner.on("\n\t* ").join(failedModules));
-		}
 
 		return failedModules;
 	}

@@ -26,7 +26,7 @@ public class ReinitCommand extends AbstractConfiguredCommand {
 	private Boolean explicitRefreshDependencies;
 
 	@Override
-	protected int executeWithConfiguration(RuntimeConfiguration config) throws Exception {
+	protected void executeWithConfiguration(RuntimeConfiguration config) throws Exception {
 		Pride pride = Pride.getPride(getPrideDirectory(), config, getVcsManager());
 		boolean addWrapper = pride.getConfiguration().override(GRADLE_WRAPPER, explicitWithWrapper, explicitNoWrapper);
 		InitAction.create(pride.getRootDirectory(), config, getVcsManager(), true, true, false).createPride(addWrapper, isVerbose());
@@ -35,7 +35,5 @@ public class ReinitCommand extends AbstractConfiguredCommand {
 		if (refreshDependencies) {
 			new RefreshDependenciesAction().refreshDependencies(pride);
 		}
-
-		return 0;
 	}
 }

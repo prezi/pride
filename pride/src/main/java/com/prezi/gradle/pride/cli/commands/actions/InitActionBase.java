@@ -28,7 +28,7 @@ public abstract class InitActionBase {
 		this.vcsManager = vcsManager;
 	}
 
-	public final int createPride(boolean addWrapper, boolean verbose) throws Exception {
+	public final void createPride(boolean addWrapper, boolean verbose) throws Exception {
 		// Make sure we take the local config into account when choosing the Gradle installation
 		RuntimeConfiguration configForGradle = globalConfig.withConfiguration(prideConfig);
 		GradleConnectorManager gradleConnectorManager = new GradleConnectorManager(configForGradle);
@@ -50,7 +50,7 @@ public abstract class InitActionBase {
 			});
 		}
 
-		return initPride(prideInitializer, pride);
+		initPride(prideInitializer, pride);
 	}
 
 	protected static void saveAndReinitializePride(PrideInitializer prideInitializer, Pride pride) throws Exception {
@@ -58,5 +58,5 @@ public abstract class InitActionBase {
 		prideInitializer.reinitialize(pride);
 	}
 
-	abstract protected int initPride(PrideInitializer prideInitializer, Pride pride) throws Exception;
+	abstract protected void initPride(PrideInitializer prideInitializer, Pride pride) throws Exception;
 }

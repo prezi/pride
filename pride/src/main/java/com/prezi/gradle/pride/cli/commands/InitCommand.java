@@ -42,7 +42,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 	private String explicitFromConfig;
 
 	@Override
-	protected int executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
+	protected void executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
 		if (!explicitForce) {
 			File parentPrideDirectory = Pride.findPrideDirectory(getPrideDirectory());
 			if (parentPrideDirectory != null) {
@@ -57,6 +57,6 @@ public class InitCommand extends AbstractConfiguredCommand {
 		} else {
 			initAction = InitActionFromImportedConfig.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitFromConfig);
 		}
-		return initAction.createPride(addWrapper, isVerbose());
+		initAction.createPride(addWrapper, isVerbose());
 	}
 }

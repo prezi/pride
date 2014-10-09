@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.cli.commands.actions;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
@@ -41,11 +42,11 @@ public class InitActionFromImportedConfig extends InitActionBase {
 	}
 
 	@Override
-	protected int initPride(PrideInitializer prideInitializer, Pride pride) throws Exception {
+	protected void initPride(PrideInitializer prideInitializer, Pride pride) throws Exception {
 		// Add modules from imported config
 		List<Module> modulesFromConfiguration = Pride.getModulesFromConfiguration(prideConfig, vcsManager);
 		if (modulesFromConfiguration.isEmpty()) {
-			return 0;
+			return;
 		}
 
 		Collection<ModuleAdder.ModuleToAdd> modules = Collections2.transform(modulesFromConfiguration, new Function<Module, ModuleAdder.ModuleToAdd>() {
@@ -56,6 +57,9 @@ public class InitActionFromImportedConfig extends InitActionBase {
 		});
 		List<String> failedModules = ModuleAdder.addModules(pride, modules, vcsManager);
 		saveAndReinitializePride(prideInitializer, pride);
-		return failedModules.isEmpty() ? 0 : 1;
+
+		if (!failedModules.isEmpty()) {
+			throw new PrideException("Could not add the following modules:\n\n\t* " + Joiner.on("\n\t* ").join(failedModules));
+		}
 	}
 }

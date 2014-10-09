@@ -1,6 +1,7 @@
 package com.prezi.gradle.pride.cli.commands;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.Pride;
@@ -102,9 +103,13 @@ public class AddCommand extends AbstractPrideCommand {
 		});
 
 		// Clone repositories
-		ModuleAdder.addModules(pride, modulesToAdd, getVcsManager());
+		List<String> failedModules = ModuleAdder.addModules(pride, modulesToAdd, getVcsManager());
 
 		pride.save();
 		new PrideInitializer(new GradleConnectorManager(config), isVerbose()).reinitialize(pride);
+
+		if (!failedModules.isEmpty()) {
+			throw new PrideException("Could not add the following modules:\n\n\t* " + Joiner.on("\n\t* ").join(failedModules));
+		}
 	}
 }

@@ -27,8 +27,9 @@ public abstract class AbstractConfiguredCommand extends AbstractCommand {
 		config.override(GRADLE_VERSION, explicitGradleVersion);
 		config.override(GRADLE_HOME, explicitGradleHome);
 
-		return executeWithConfiguration(config);
+		executeWithConfiguration(config);
+		return 0;
 	}
 
-	abstract protected int executeWithConfiguration(RuntimeConfiguration config) throws Exception;
+	abstract protected void executeWithConfiguration(RuntimeConfiguration config) throws Exception;
 }
