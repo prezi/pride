@@ -16,7 +16,7 @@ public class BranchFilter implements Filter {
 
 	@Override
 	public boolean matches(Pride pride, Module module) throws IOException {
-		String branch = module.getBranch();
+		String branch = module.getVcs().getSupport().getBranch(pride.getModuleDirectory(module.getName()));
 		if (Strings.isNullOrEmpty(branch)) {
 			branch = module.getVcs().getSupport().getDefaultBranch();
 		}
