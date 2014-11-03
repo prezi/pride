@@ -52,7 +52,7 @@ public class UpdateCommand extends AbstractFilteredPrideCommand {
 				File moduleDir = pride.getModuleDirectory(module.getName());
 				String moduleBranch = explicitSwitchToBranch;
 				if (Strings.isNullOrEmpty(moduleBranch)) {
-					moduleBranch = module.getBranch();
+					moduleBranch = module.getVcs().getSupport().getBranch(pride.getModuleDirectory(module.getName()));
 				}
 				module.getVcs().getSupport().update(moduleDir, moduleBranch, recursive, false);
 			}
