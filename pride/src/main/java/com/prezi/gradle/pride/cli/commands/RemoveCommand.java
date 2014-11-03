@@ -47,7 +47,7 @@ public class RemoveCommand extends AbstractFilteredPrideCommand {
 			});
 
 			if (!changedModules.isEmpty()) {
-				throw new PrideException("These modules have uncommitted changes: " + Joiner.on(", ").join(changedModules));
+				throw new PrideException("These modules have changes: " + Joiner.on(", ").join(changedModules));
 			}
 		}
 
