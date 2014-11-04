@@ -50,13 +50,8 @@ public abstract class InitActionBase {
 			});
 		}
 
-		initPride(prideInitializer, pride);
+		initPride(prideInitializer, pride, verbose);
 	}
 
-	protected static void saveAndReinitializePride(PrideInitializer prideInitializer, Pride pride) throws Exception {
-		pride.save();
-		prideInitializer.reinitialize(pride);
-	}
-
-	abstract protected void initPride(PrideInitializer prideInitializer, Pride pride) throws Exception;
+	abstract protected void initPride(PrideInitializer prideInitializer, Pride pride, boolean verbose) throws Exception;
 }

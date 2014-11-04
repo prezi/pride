@@ -62,7 +62,7 @@ public class InitAction extends InitActionBase {
 	}
 
 	@Override
-	protected void initPride(PrideInitializer prideInitializer, Pride pride) throws Exception {
+	protected void initPride(PrideInitializer prideInitializer, Pride pride, boolean verbose) throws Exception {
 		boolean prideModified = false;
 		if (addExisting) {
 			logger.debug("Adding existing modules");
@@ -73,33 +73,25 @@ public class InitAction extends InitActionBase {
 				}
 			})) {
 				String moduleName = dir.getName();
-				String repositoryUrl;
-				String branch;
 				Vcs vcs;
 
 				Module existingModule = modulesFromExistingPrideConfig.get(moduleName);
 				if (existingModule != null) {
 					logger.info("Found existing module from previous configuration: {}", moduleName);
-					repositoryUrl = existingModule.getRemote();
-					branch = existingModule.getBranch();
 					vcs = existingModule.getVcs();
 				} else if (Pride.isValidModuleDirectory(dir)) {
 					vcs = vcsManager.findSupportingVcs(dir, globalConfig);
-					repositoryUrl = vcs.getSupport().getRepositoryUrl(dir);
-					if (repositoryUrl == null) {
-						throw new PrideException("Could not detect remote URL for " + dir);
-					}
-					branch = vcs.getSupport().getBranch(dir);
 				} else {
 					continue;
 				}
 				logger.info("Adding existing {} module in {}", vcs.getType(), dir);
-				pride.addModule(moduleName, repositoryUrl, branch, vcs);
+				pride.addModule(moduleName, vcs);
 				prideModified = true;
 			}
 		}
 		if (prideModified) {
-			saveAndReinitializePride(prideInitializer, pride);
+			pride.save();
+			prideInitializer.reinitialize(pride);
 		}
 	}
 }

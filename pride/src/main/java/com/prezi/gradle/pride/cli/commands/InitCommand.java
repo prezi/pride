@@ -41,6 +41,18 @@ public class InitCommand extends AbstractConfiguredCommand {
 			description = "Load configuration and modules from existing configuration")
 	private String explicitFromConfig;
 
+	@Option(name = {"-c", "--use-repo-cache"},
+			description = "Use local repo cache (when adding modules from existing configuration)")
+	private boolean explicitUseRepoCache;
+
+	@Option(name = {"--no-repo-cache"},
+			description = "Do not use local repo cache (when adding modules from existing configuration)")
+	private boolean explicitNoRepoCache;
+
+	@Option(name = {"-r", "--recursive"},
+			description = "Update sub-modules recursively (when adding modules from existing configuration)")
+	private Boolean explicitRecursive;
+
 	@Override
 	protected void executeWithConfiguration(RuntimeConfiguration globalConfig) throws Exception {
 		if (!explicitForce) {
@@ -55,7 +67,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 		if (explicitFromConfig == null) {
 			initAction = InitAction.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitForce, !explicitNoAddExisting, explicitIgnoreConfig);
 		} else {
-			initAction = InitActionFromImportedConfig.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitFromConfig);
+			initAction = InitActionFromImportedConfig.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitFromConfig, explicitUseRepoCache, explicitNoRepoCache, explicitRecursive);
 		}
 		initAction.createPride(addWrapper, isVerbose());
 	}

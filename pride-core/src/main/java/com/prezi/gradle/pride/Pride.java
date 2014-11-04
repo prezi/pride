@@ -2,15 +2,14 @@ package com.prezi.gradle.pride;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import com.prezi.gradle.pride.config.ConfigurationData;
+import com.prezi.gradle.pride.config.PrideConfigurationHandler;
 import com.prezi.gradle.pride.filters.Filter;
 import com.prezi.gradle.pride.vcs.Vcs;
 import com.prezi.gradle.pride.vcs.VcsManager;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -20,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.regex.Matcher;
@@ -30,14 +27,10 @@ import java.util.regex.Pattern;
 public class Pride {
 	private static final Logger logger = LoggerFactory.getLogger(Pride.class);
 
-	private static final Pattern MODULE_ID_MATCHER = Pattern.compile("modules\\.(\\d+)\\..*");
-
 	public static final String PRIDE_CONFIG_DIRECTORY = ".pride";
 	public static final String PRIDE_VERSION_FILE = "version";
 	public static final String PRIDE_CONFIG_FILE = "config";
 	public static final String PRIDE_PROJECTS_FILE = "projects";
-
-	public static final String MODULES_KEY = "modules";
 
 	public static final String GRADLE_SETTINGS_FILE = "settings.gradle";
 	public static final String GRADLE_BUILD_FILE = "build.gradle";
@@ -49,6 +42,7 @@ public class Pride {
 	private final RuntimeConfiguration configuration;
 
 	private final SortedMap<String, Module> modules;
+	private final PrideConfigurationHandler configurationHandler;
 
 	public static Pride getPride(final File directory, RuntimeConfiguration globalConfig, VcsManager vcsManager) throws IOException {
 		File prideDirectory = findPrideDirectory(directory);
@@ -89,8 +83,10 @@ public class Pride {
 		this.gradleSettingsFile = new File(rootDirectory, GRADLE_SETTINGS_FILE);
 		this.gradleBuildFile = new File(rootDirectory, GRADLE_BUILD_FILE);
 		this.localConfiguration = prideConfiguration;
-		this.configuration = globalConfiguration.withConfiguration(prideConfiguration);
-		this.modules = loadModules(rootDirectory, this.configuration, vcsManager);
+		this.configurationHandler = new PrideConfigurationHandler(vcsManager);
+		ConfigurationData<Module> configurationData = configurationHandler.loadConfiguration(prideConfiguration);
+		this.configuration = globalConfiguration.withConfiguration(configurationData.getConfiguration());
+		this.modules = loadModules(rootDirectory, configurationData.getModules());
 	}
 
 	private static PropertiesConfiguration loadLocalConfiguration(File configDirectory) {
@@ -159,10 +155,9 @@ public class Pride {
 		return Sets.newTreeSet(modules.values());
 	}
 
-	public Module addModule(String name, String remote, String branch, Vcs vcs) {
-		Module module = new Module(name, remote, branch, vcs);
+	public Module addModule(String name, Vcs vcs) {
+		Module module = new Module(name, vcs);
 		modules.put(name, module);
-		updateModulesConfiguration();
 		return module;
 	}
 
@@ -171,23 +166,6 @@ public class Pride {
 		logger.info("Removing " + name + " from " + moduleDir);
 		modules.remove(name);
 		FileUtils.deleteDirectory(moduleDir);
-		updateModulesConfiguration();
-	}
-
-	private void updateModulesConfiguration() {
-		// Remove all module configurations
-		for (String moduleKey : Iterators.toArray(localConfiguration.getKeys(MODULES_KEY), String.class)) {
-			localConfiguration.clearProperty(moduleKey);
-		}
-		int id = 0;
-		for (Module module : modules.values()) {
-			String moduleId = MODULES_KEY + "." + id;
-			localConfiguration.setProperty(moduleId + ".name", module.getName());
-			localConfiguration.setProperty(moduleId + ".remote", module.getRemote());
-			localConfiguration.setProperty(moduleId + ".branch", module.getBranch());
-			localConfiguration.setProperty(moduleId + ".vcs", module.getVcs().getType());
-			id++;
-		}
 	}
 
 	public boolean hasModule(String name) {
@@ -219,12 +197,12 @@ public class Pride {
 	}
 
 	public void save() throws ConfigurationException {
+		configurationHandler.saveConfiguration(localConfiguration, modules.values());
 		localConfiguration.save();
 	}
 
-	private static SortedMap<String, Module> loadModules(File rootDirectory, Configuration configuration, VcsManager vcsManager) throws IOException {
+	private static SortedMap<String, Module> loadModules(File rootDirectory, Collection<Module> modules) throws IOException {
 		SortedMap<String, Module> modulesMap = Maps.newTreeMap();
-		Collection<Module> modules = getModulesFromConfiguration(configuration, vcsManager);
 		for (Module module : modules) {
 			String moduleName = module.getName();
 			File moduleDir = new File(rootDirectory, moduleName);
@@ -241,29 +219,6 @@ public class Pride {
 			modulesMap.put(module.getName(), module);
 		}
 		return modulesMap;
-	}
-
-	public static List<Module> getModulesFromConfiguration(Configuration config, VcsManager vcsManager) {
-		List<Module> modules = Lists.newArrayList();
-		Set<String> moduleIds = Sets.newLinkedHashSet();
-		for (String moduleKey : Iterators.toArray(config.getKeys(MODULES_KEY), String.class)) {
-			Matcher matcher = MODULE_ID_MATCHER.matcher(moduleKey);
-			if (!matcher.matches()) {
-				throw new PrideException("Invalid module setting: " + moduleKey);
-			}
-			String moduleId = matcher.group(1);
-			moduleIds.add(moduleId);
-		}
-		for (String moduleId : moduleIds) {
-			String moduleKeyPrefix = MODULES_KEY + "." + moduleId;
-			String moduleName = config.getString(moduleKeyPrefix + ".name");
-			String moduleRemote = config.getString(moduleKeyPrefix + ".remote");
-			String moduleBranch = config.getString(moduleKeyPrefix + ".branch");
-			String vcsType = config.getString(moduleKeyPrefix + ".vcs");
-			Module module = new Module(moduleName, moduleRemote, moduleBranch, vcsManager.getVcs(vcsType, config));
-			modules.add(module);
-		}
-		return modules;
 	}
 
 	public static boolean isValidModuleDirectory(File dir) {

@@ -1,35 +1,30 @@
 package com.prezi.gradle.pride.cli.commands;
 
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
-import com.prezi.gradle.pride.cli.ModuleAdder;
-import com.prezi.gradle.pride.cli.PrideInitializer;
-import com.prezi.gradle.pride.cli.gradle.GradleConnectorManager;
+import com.prezi.gradle.pride.cli.ExportedModule;
+import com.prezi.gradle.pride.cli.commands.actions.AddAction;
+import com.prezi.gradle.pride.vcs.Vcs;
+import com.prezi.gradle.pride.vcs.VcsSupport;
 import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.collect.Collections2.filter;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_BASE_URL;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_BRANCH;
-import static com.prezi.gradle.pride.cli.Configurations.REPO_CACHE_ALWAYS;
-import static com.prezi.gradle.pride.cli.Configurations.REPO_RECURSIVE;
 import static com.prezi.gradle.pride.cli.Configurations.REPO_TYPE_DEFAULT;
 
 @Command(name = "add", description = "Add modules to a pride")
 public class AddCommand extends AbstractPrideCommand {
 
-	@Option(name = {"-o", "--overwrite"},
+	@Option(name = {"-O", "--overwrite"},
 			description = "Overwrite existing modules in the pride")
 	private boolean overwrite;
 
@@ -65,51 +60,47 @@ public class AddCommand extends AbstractPrideCommand {
 	private List<String> modules;
 
 	@Override
-	public void executeInPride(final Pride pride) throws Exception {
-		RuntimeConfiguration config = pride.getConfiguration();
-		config.override(REPO_BASE_URL, explicitRepoBaseUrl);
-		config.override(REPO_TYPE_DEFAULT, explicitRepoType);
-		config.override(REPO_CACHE_ALWAYS, explicitUseRepoCache, explicitNoRepoCache);
-		config.override(REPO_RECURSIVE, explicitRecursive);
+	public void executeInPride(Pride pride) throws Exception {
+		AddAction addAction = new AddAction(pride, overwrite, explicitUseRepoCache, explicitNoRepoCache, explicitRecursive, isVerbose());
+		addAction.addModules(getModulesToAdd(pride.getConfiguration()));
+	}
+
+	private Collection<ExportedModule> getModulesToAdd(RuntimeConfiguration config) {
+		String repoType = config.override(REPO_TYPE_DEFAULT, explicitRepoType);
+		final String repoBaseUrl = config.override(REPO_BASE_URL, explicitRepoBaseUrl);
 		final String branch = config.override(REPO_BRANCH, explicitBranch);
 
-		// Check if anything exists already
-		if (!overwrite) {
-			Collection<String> existingModules = filter(modules, new Predicate<String>() {
-				@Override
-				public boolean apply(String it) {
-					return pride.hasModule(it);
-				}
-			});
-			if (!existingModules.isEmpty()) {
-				throw new PrideException("These modules already exist in pride: " + StringUtils.join(existingModules, ", "));
-			}
-			Collection<String> existingRepos = filter(modules, new Predicate<String>() {
-				@Override
-				public boolean apply(String it) {
-					return new File(pride.getRootDirectory(), it).exists();
-				}
-			});
-			if (!existingRepos.isEmpty()) {
-				throw new PrideException("These directories already exist: " + StringUtils.join(existingRepos, ", "));
-			}
-		}
+		final Vcs vcs = getVcsManager().getVcs(repoType, config);
+		final VcsSupport vcsSupport = vcs.getSupport();
 
-		Collection<ModuleAdder.ModuleToAdd> modulesToAdd = Collections2.transform(modules, new Function<String, ModuleAdder.ModuleToAdd>() {
+		return Collections2.transform(modules, new Function<String, ExportedModule>() {
 			@Override
-			public ModuleAdder.ModuleToAdd apply(String module) {
-				return new ModuleAdder.ModuleToAdd(module, branch);
+			public ExportedModule apply(String module) {
+				String moduleName = vcsSupport.resolveRepositoryName(module);
+				String repoUrl;
+				if (!StringUtils.isEmpty(moduleName)) {
+					repoUrl = module;
+				} else {
+					moduleName = module;
+					repoUrl = getRepoUrl(repoBaseUrl, moduleName);
+				}
+				return new ExportedModule(module, repoUrl, branch, vcs);
 			}
 		});
+	}
 
-		// Clone repositories
-		List<String> failedModules = ModuleAdder.addModules(pride, modulesToAdd, getVcsManager());
-
-		pride.save();
-		new PrideInitializer(new GradleConnectorManager(config), isVerbose()).reinitialize(pride);
-
-		if (!failedModules.isEmpty()) {
-			throw new PrideException("Could not add the following modules:\n\n\t* " + Joiner.on("\n\t* ").join(failedModules));
+	private static String getRepoUrl(String repoBaseUrl, String moduleName) {
+		if (repoBaseUrl == null) {
+			throw new PrideException("You have specified a module name, but base URL for repositories is not set. " +
+					"Either use a full repository URL, specify the base URL via --repo-base-url, " +
+					"or set it in the global configuration (~/.prideconfig) as \"" + REPO_BASE_URL + "\". " +
+					"See \'pride help config\' for more information.");
 		}
+
+		if (!repoBaseUrl.endsWith("/")) {
+			repoBaseUrl += "/";
+		}
+
+		return repoBaseUrl + moduleName;
 	}
 }

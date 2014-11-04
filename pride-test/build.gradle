@@ -7,6 +7,14 @@ task testPrideInit { task ->
 		}
 		exec {
 			workingDir file("$dir/git-module")
+			commandLine "git", "add", "-A"
+		}
+		exec {
+			workingDir file("$dir/git-module")
+			commandLine "git", "commit", "-m", "Initial"
+		}
+		exec {
+			workingDir file("$dir/git-module")
 			commandLine "git", "remote", "add", "origin", "git@github.com:prezi/test"
 		}
 		pride(dir, "init", "--gradle-version", "2.0")
@@ -28,15 +36,28 @@ project(':git-module').projectDir = file('git-module')
 		assert rawContents("$dir/.pride/config", "#") == """
 gradle.version = 2.0
 modules.0.name = file-module
-modules.0.remote = ${dir}/file-module
 modules.0.vcs = file
 modules.1.name = git-module
-modules.1.remote = git@github.com:prezi/test
 modules.1.vcs = git
 """
 		assert rawContents("$dir/.pride/projects", "#") == """
 com.example.test.file:file-module::file-module
 com.example.test.git:git-module::git-module
+"""
+
+		def exportFile = file("$temporaryDir/export.pride")
+		pride(dir, "export", "--output", exportFile, "-O")
+
+		assert rawContents(exportFile, "#") == """
+gradle.version = 2.0
+modules.0.name = file-module
+modules.0.vcs = file
+modules.1.name = git-module
+modules.1.vcs = git
+modules.0.remote = ${dir}/file-module
+modules.0.revision = none
+modules.1.remote = git@github.com:prezi/test
+modules.1.revision = master
 """
 	}
 }
