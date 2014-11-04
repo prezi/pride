@@ -7,11 +7,19 @@ task testPrideInit { task ->
 		}
 		exec {
 			workingDir file("$dir/git-module")
+			commandLine "git", "config", "user.email", "test@example.com"
+		}
+		exec {
+			workingDir file("$dir/git-module")
+			commandLine "git", "config", "user.name", "Test User"
+		}
+		exec {
+			workingDir file("$dir/git-module")
 			commandLine "git", "add", "-A"
 		}
 		exec {
 			workingDir file("$dir/git-module")
-			commandLine "git", "commit", "--message", "Initial", "--author=\"Test <test@example.com>\""
+			commandLine "git", "commit", "--message", "Initial"
 		}
 		exec {
 			workingDir file("$dir/git-module")
