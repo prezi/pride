@@ -1,5 +1,6 @@
 package com.prezi.gradle.pride.cli.commands.actions;
 
+import com.google.common.base.Strings;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.RuntimeConfiguration;
@@ -46,6 +47,11 @@ public class InitActionFromImportedConfig extends InitActionBase {
 		}
 
 		ConfigurationData<ExportedModule> configurationData = new ExportedConfigurationHandler(vcsManager).loadConfiguration(importedConfig);
+		for (ExportedModule exportedModule : configurationData.getModules()) {
+			if (Strings.isNullOrEmpty(exportedModule.getRemote())) {
+				throw new PrideException("No remote URL specified for module " + exportedModule.getName() + ". Please use `pride export` to generate a configuration that can be imported.");
+			}
+		}
 		return new InitActionFromImportedConfig(prideDirectory, globalConfig, configurationData.getConfiguration(), configurationData.getModules(), vcsManager, useRepoCache, noRepoCache, recursive);
 	}
 
