@@ -35,11 +35,11 @@ public class SvnVcsSupport implements VcsSupport {
 	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport.class);
 
 	@Override
-	public void checkout(String repositoryUrl, File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+	public void checkout(String repositoryUrl, File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
-		String branchUrl = new RepositoryUrl(repositoryUrl, branch).toUrl();
+		String branchUrl = new RepositoryUrl(repositoryUrl, revision).toUrl();
 
 		log.debug("Checking out {} into {}", branchUrl, targetDirectory);
 		ImmutableList.Builder<String> checkoutCommand = ImmutableList.<String> builder().add("svn").add("checkout");
@@ -51,10 +51,10 @@ public class SvnVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+	public void update(File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException {
 		ImmutableList.Builder<String> updateCommand = ImmutableList.builder();
-		if (!Strings.isNullOrEmpty(branch) && !branch.equals(getBranch(targetDirectory))) {
-			updateCommand.add("svn", "switch", getRepositoryUrl(targetDirectory) + "/" + branch, ".");
+		if (!Strings.isNullOrEmpty(revision) && !revision.equals(getBranch(targetDirectory))) {
+			updateCommand.add("svn", "switch", getRepositoryUrl(targetDirectory) + "/" + revision, ".");
 		} else {
 			updateCommand.add("svn", "update");
 		}

@@ -9,12 +9,12 @@ public interface VcsSupport {
 	 *
 	 * @param repositoryUrl   The URL of the remote repository.
 	 * @param targetDirectory The directory where the local clone will reside.
-	 * @param branch          The branch to check out.
+	 * @param revision        The revision to check out, can be a branch name.
 	 * @param recursive       Clone sub-repositories as well.
 	 * @param mirrored        Whether to create a mirror (to be used as a cache).
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
-	void checkout(String repositoryUrl, File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException;
+	void checkout(String repositoryUrl, File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException;
 
 	/**
 	 * Updates a local clone of a repository. If there are local changes, they should be
@@ -22,12 +22,12 @@ public interface VcsSupport {
 	 * and local changes should not be expected.
 	 *
 	 * @param targetDirectory The directory where the local clone resides.
-	 * @param branch          The branch to check out.
+	 * @param revision        The revision to check out, can be a branch name.
 	 * @param recursive       Update sub-repositories as well.
 	 * @param mirrored        Whether to update a real clone or a cached repository.
 	 * @throws java.io.IOException If an I/O error occurs.
 	 */
-	void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException;
+	void update(File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException;
 
 	/**
 	 * Returns true if the working copy / local repository has uncommitted or unpublished changes.

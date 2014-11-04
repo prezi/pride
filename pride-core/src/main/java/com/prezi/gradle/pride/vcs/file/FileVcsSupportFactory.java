@@ -28,7 +28,7 @@ public class FileVcsSupportFactory implements VcsSupportFactory {
 
 	private static class FileVcsSupport implements VcsSupport {
 		@Override
-		public void checkout(String repositoryUrl, File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+		public void checkout(String repositoryUrl, File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException {
 			File sourceDirectory = new File(repositoryUrl);
 			if (!sourceDirectory.exists()) {
 				throw new FileNotFoundException("Cannot find " + sourceDirectory);
@@ -37,7 +37,7 @@ public class FileVcsSupportFactory implements VcsSupportFactory {
 		}
 
 		@Override
-		public void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+		public void update(File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException {
 			// Do nothing
 		}
 

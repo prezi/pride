@@ -50,35 +50,37 @@ public class GitVcsSupport implements VcsSupport {
 	}
 
 	@Override
-	public void checkout(String repositoryUrl, File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+	public void checkout(String repositoryUrl, File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException {
 		FileUtils.forceMkdir(targetDirectory.getParentFile());
 		FileUtils.deleteQuietly(targetDirectory);
 
 		log.debug("Cloning {} into {}", repositoryUrl, targetDirectory);
-		ImmutableList.Builder<String> commandLine = ImmutableList.builder();
-		commandLine.add("git", "clone", repositoryUrl, targetDirectory.getPath());
-
-		if (!Strings.isNullOrEmpty(branch)) {
-			commandLine.add("--branch", branch);
-		}
+		ImmutableList.Builder<String> cloneCommandLine = ImmutableList.builder();
+		cloneCommandLine.add("git", "clone", repositoryUrl, targetDirectory.getPath());
 
 		if (mirrored) {
-			commandLine.add("--mirror");
+			cloneCommandLine.add("--mirror");
 		} else if (recursive) {
-			commandLine.add("--recursive");
+			cloneCommandLine.add("--recursive");
 		}
-		ProcessUtils.executeIn(null, commandLine.build());
+		ProcessUtils.executeIn(null, cloneCommandLine.build());
+
+		if (!Strings.isNullOrEmpty(revision)) {
+			ImmutableList.Builder<String> checkoutCommandLine = ImmutableList.builder();
+			checkoutCommandLine.add("git", "checkout", revision);
+			ProcessUtils.executeIn(targetDirectory, checkoutCommandLine.build());
+		}
 	}
 
 	@Override
-	public void update(File targetDirectory, String branch, boolean recursive, boolean mirrored) throws IOException {
+	public void update(File targetDirectory, String revision, boolean recursive, boolean mirrored) throws IOException {
 		// Cached repositories need to update all branches
 		if (!mirrored) {
 			// Fetch changes
 			ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "remote", "update"));
 
-			if (!Strings.isNullOrEmpty(branch) && !branch.equals(getBranch(targetDirectory))) {
-				ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "checkout", branch));
+			if (!Strings.isNullOrEmpty(revision) && !revision.equals(getBranch(targetDirectory))) {
+				ProcessUtils.executeIn(targetDirectory, Arrays.asList("git", "checkout", revision));
 			} else {
 				// Update working copy
 				String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
