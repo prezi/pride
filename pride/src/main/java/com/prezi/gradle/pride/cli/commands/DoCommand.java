@@ -6,6 +6,7 @@ import com.google.common.collect.Collections2;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Named;
 import com.prezi.gradle.pride.Pride;
+import com.prezi.gradle.pride.PrideException;
 import com.prezi.gradle.pride.ProcessUtils;
 import com.prezi.gradle.pride.internal.LoggedProgressAction;
 import com.prezi.gradle.pride.internal.ProgressAction;
@@ -30,6 +31,10 @@ public class DoCommand extends AbstractFilteredPrideCommand {
 	@Option(name = {"-B", "--bare"},
 			description = "Only print the result of the executed commands")
 	private boolean explicitBare;
+
+	@Option(name = {"--ignore-errors"},
+			description = "Do not stop if command returns an error")
+	private boolean explicitIgnoreErrors;
 
 	@Arguments(required = true,
 			description = "The command to execute")
@@ -72,7 +77,16 @@ public class DoCommand extends AbstractFilteredPrideCommand {
 	}
 
 	private void executeInDirectory(File directory) throws IOException {
-		ProcessUtils.executeIn(directory, commandLine);
+		try {
+			ProcessUtils.executeIn(directory, commandLine);
+		} catch (PrideException ex) {
+			if (!explicitIgnoreErrors) {
+				throw ex;
+			} else {
+				logger.warn("{}", ex.getMessage());
+				logger.debug("Exception", ex);
+			}
+		}
 	}
 
 	@Override
