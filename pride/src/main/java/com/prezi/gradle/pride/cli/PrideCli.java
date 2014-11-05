@@ -20,6 +20,7 @@ import com.prezi.gradle.pride.cli.commands.VersionCommand;
 import io.airlift.command.Cli;
 import io.airlift.command.Help;
 import io.airlift.command.ParseException;
+import io.airlift.command.SuggestCommand;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,8 @@ public class PrideCli {
 						RmCommandAlias.class,
 						UpdateCommand.class,
 						VersionCommand.class,
-						Help.class
+						Help.class,
+						SuggestCommand.class
 				);
 
 		Cli<Callable<?>> parser = builder.build();
