@@ -26,6 +26,11 @@ public abstract class AbstractCommand implements Callable<Integer> {
 			title = "directory",
 			description = "Initializes the pride in the given directory instead of the current directory")
 	private File explicitPrideDirectory;
+
+	@Option(name = {"--help"},
+			description = "Show help for the command")
+	private boolean help;
+
 	private VcsManager vcsManager;
 
 	static PropertiesConfiguration loadGlobalConfiguration() {
@@ -61,5 +66,9 @@ public abstract class AbstractCommand implements Callable<Integer> {
 
 	public boolean isQuiet() {
 		return quiet;
+	}
+
+	public boolean isHelp() {
+		return help;
 	}
 }

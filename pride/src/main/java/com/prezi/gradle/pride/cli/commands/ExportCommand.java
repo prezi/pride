@@ -23,7 +23,6 @@ import java.util.Collection;
 @Command(name = "export", description = "Exports a pride")
 public class ExportCommand extends AbstractPrideCommand {
 	@Option(name = {"-o", "--output"},
-			required = true,
 			title = "file",
 			description = "Output file")
 	private File output;
@@ -38,6 +37,9 @@ public class ExportCommand extends AbstractPrideCommand {
 
 	@Override
 	public void executeInPride(final Pride pride) throws Exception {
+		if (output == null) {
+			throw new PrideException("No output is specified");
+		}
 		if (!overwrite && output.exists()) {
 			throw new PrideException("Output file already exists: " + output);
 		}

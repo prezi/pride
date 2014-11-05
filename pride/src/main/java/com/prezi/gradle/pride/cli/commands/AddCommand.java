@@ -55,12 +55,14 @@ public class AddCommand extends AbstractPrideCommand {
 			description = "Branch to use")
 	private String explicitBranch;
 
-	@Arguments(required = true,
-			description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
+	@Arguments(description = "Modules to add to the pride -- either module names to be resolved against the base URL, or full repository URLs")
 	private List<String> modules;
 
 	@Override
 	public void executeInPride(Pride pride) throws Exception {
+		if (modules == null || modules.isEmpty()) {
+			throw new PrideException("No modules specified");
+		}
 		AddAction addAction = new AddAction(pride, overwrite, explicitUseRepoCache, explicitNoRepoCache, explicitRecursive, isVerbose());
 		addAction.addModules(getModulesToAdd(pride.getConfiguration()));
 	}

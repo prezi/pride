@@ -33,14 +33,13 @@ public class ConfigCommand extends AbstractCommand {
 	private boolean explicitUnset;
 
 	@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-	@Arguments(required = true,
-			title = "key [<value>]",
+	@Arguments(title = "key [<value>]",
 			description = "Configuration name to read, name and value to set")
 	private List<String> args;
 
 	@Override
 	public Integer call() throws Exception {
-		if (args.size() < 1 || args.size() > 2) {
+		if (args == null || args.size() < 1 || args.size() > 2) {
 			throw new PrideException("Invalid number of arguments: either specify a configuration property name to read the value of the property, or a name and a value to set it.");
 		}
 		if (explicitUnset && args.size() != 1) {

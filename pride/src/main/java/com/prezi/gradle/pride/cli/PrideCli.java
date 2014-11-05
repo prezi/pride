@@ -21,9 +21,13 @@ import io.airlift.command.Cli;
 import io.airlift.command.Help;
 import io.airlift.command.ParseException;
 import io.airlift.command.SuggestCommand;
+import io.airlift.command.model.CommandGroupMetadata;
+import io.airlift.command.model.CommandMetadata;
+import io.airlift.command.model.GlobalMetadata;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class PrideCli {
@@ -73,6 +77,11 @@ public class PrideCli {
 			try {
 				if (callable instanceof AbstractCommand) {
 					AbstractCommand command = (AbstractCommand) callable;
+					if (command.isHelp()) {
+						CommandMetadata commandMetadata = findCommandMetadata(parser.getMetadata(), command.getClass());
+						Help.help(commandMetadata);
+						System.exit(0);
+					}
 					Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 					if (command.isVerbose()) {
 						rootLogger.setLevel(Level.DEBUG);
@@ -100,6 +109,33 @@ public class PrideCli {
 			exitValue = -1;
 		}
 		System.exit(exitValue);
+	}
+
+	private static CommandMetadata findCommandMetadata(GlobalMetadata global, Class<? extends AbstractCommand> type) {
+		CommandMetadata result = findCommandMetadata(null, global.getDefaultGroupCommands(), type);
+		result = findCommandMetadata(result, global.getDefaultCommand(), type);
+		for (CommandGroupMetadata group : global.getCommandGroups()) {
+			result = findCommandMetadata(result, group.getCommands(), type);
+			result = findCommandMetadata(result, group.getDefaultCommand(), type);
+		}
+		return result;
+	}
+
+	private static CommandMetadata findCommandMetadata(CommandMetadata result, List<CommandMetadata> commands, Class<? extends AbstractCommand> type) {
+		for (CommandMetadata command : commands) {
+			result = findCommandMetadata(result, command, type);
+		}
+		return result;
+	}
+
+	private static CommandMetadata findCommandMetadata(CommandMetadata result, CommandMetadata command, Class<? extends AbstractCommand> type) {
+		if (result != null) {
+			return result;
+		}
+		if (command.getType().equals(type)) {
+			return command;
+		}
+		return null;
 	}
 
 	private static void logPrideExceptions(Throwable t) {

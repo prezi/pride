@@ -36,12 +36,14 @@ public class DoCommand extends AbstractFilteredPrideCommand {
 			description = "Do not stop if command returns an error")
 	private boolean explicitIgnoreErrors;
 
-	@Arguments(required = true,
-			description = "The command to execute")
+	@Arguments(description = "The command to execute")
 	private List<String> commandLine;
 
 	@Override
 	protected void executeInModules(final Pride pride, Collection<Module> modules) throws Exception {
+		if (commandLine == null || commandLine.isEmpty()) {
+			throw new PrideException("No command-line specified");
+		}
 		Collection<File> moduleDirs = Collections2.transform(modules, new Function<Module, File>() {
 			@Override
 			public File apply(Module module) {
