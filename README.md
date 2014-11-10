@@ -64,11 +64,20 @@ You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org
 
 ### Installing Pride
 
-If you want to install the newest version of Pride, or upgrade your existing installation, run this:
+You can easily install Pride with [Homebrew](http://brew.sh):
+
+```text
+$ brew tap prezi/oss
+$ brew install pride
+```
+
+Without Homebrew, you can install or upgrade Pride via:
 
     $ \curl -sSL http://href.prezi.com/install-pride | bash
 
 This will install a symlink in `/usr/local/bin`.
+
+### First time setup
 
 If you are installing Pride for the first time, it's recommended to set the base URL for all your Git repositories, for example:
 
