@@ -86,7 +86,7 @@ public class AddCommand extends AbstractPrideCommand {
 					moduleName = module;
 					repoUrl = getRepoUrl(repoBaseUrl, moduleName);
 				}
-				return new ExportedModule(module, repoUrl, branch, vcs);
+				return new ExportedModule(moduleName, repoUrl, branch, vcs);
 			}
 		});
 	}
