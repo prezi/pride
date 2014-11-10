@@ -3,20 +3,8 @@ package com.prezi.gradle.pride.cli;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.prezi.gradle.pride.PrideException;
-import com.prezi.gradle.pride.cli.commands.AbstractCommand;
-import com.prezi.gradle.pride.cli.commands.AddCommand;
-import com.prezi.gradle.pride.cli.commands.CheckVersionsCommand;
-import com.prezi.gradle.pride.cli.commands.ConfigCommand;
-import com.prezi.gradle.pride.cli.commands.DoCommand;
-import com.prezi.gradle.pride.cli.commands.ExportCommand;
-import com.prezi.gradle.pride.cli.commands.GradleCommand;
-import com.prezi.gradle.pride.cli.commands.InitCommand;
-import com.prezi.gradle.pride.cli.commands.ListCommand;
-import com.prezi.gradle.pride.cli.commands.ReinitCommand;
-import com.prezi.gradle.pride.cli.commands.RemoveCommand;
-import com.prezi.gradle.pride.cli.commands.RmCommandAlias;
-import com.prezi.gradle.pride.cli.commands.UpdateCommand;
-import com.prezi.gradle.pride.cli.commands.VersionCommand;
+import com.prezi.gradle.pride.cli.commands.Group;
+import com.prezi.gradle.pride.cli.commands.PrideCommand;
 import io.airlift.command.Cli;
 import io.airlift.command.Help;
 import io.airlift.command.ParseException;
@@ -28,6 +16,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 
 public class PrideCli {
@@ -41,22 +30,20 @@ public class PrideCli {
 				.withDescription("manages a pride of modules")
 				.withDefaultCommand(Help.class)
 				.withCommands(
-						AddCommand.class,
-						CheckVersionsCommand.class,
-						ConfigCommand.class,
-						DoCommand.class,
-						ExportCommand.class,
-						GradleCommand.class,
-						InitCommand.class,
-						ListCommand.class,
-						ReinitCommand.class,
-						RemoveCommand.class,
-						RmCommandAlias.class,
-						UpdateCommand.class,
-						VersionCommand.class,
 						Help.class,
 						SuggestCommand.class
 				);
+
+		for (PridePlugin plugin : ServiceLoader.load(PridePlugin.class)) {
+			for (Class<? extends PrideCommand> command : plugin.getCommands()) {
+				Group group = command.getAnnotation(Group.class);
+				if (group != null) {
+					builder.withGroup(group.value()).withCommand(command);
+				} else {
+					builder.withCommand(command);
+				}
+			}
+		}
 
 		Cli<Callable<?>> parser = builder.build();
 		int exitValue;
@@ -75,8 +62,8 @@ public class PrideCli {
 
 			boolean verbose = false;
 			try {
-				if (callable instanceof AbstractCommand) {
-					AbstractCommand command = (AbstractCommand) callable;
+				if (callable instanceof PrideCommand) {
+					PrideCommand command = (PrideCommand) callable;
 					if (command.isHelp()) {
 						CommandMetadata commandMetadata = findCommandMetadata(parser.getMetadata(), command.getClass());
 						Help.help(commandMetadata);
@@ -111,7 +98,7 @@ public class PrideCli {
 		System.exit(exitValue);
 	}
 
-	private static CommandMetadata findCommandMetadata(GlobalMetadata global, Class<? extends AbstractCommand> type) {
+	private static CommandMetadata findCommandMetadata(GlobalMetadata global, Class<? extends PrideCommand> type) {
 		CommandMetadata result = findCommandMetadata(null, global.getDefaultGroupCommands(), type);
 		result = findCommandMetadata(result, global.getDefaultCommand(), type);
 		for (CommandGroupMetadata group : global.getCommandGroups()) {
@@ -121,14 +108,14 @@ public class PrideCli {
 		return result;
 	}
 
-	private static CommandMetadata findCommandMetadata(CommandMetadata result, List<CommandMetadata> commands, Class<? extends AbstractCommand> type) {
+	private static CommandMetadata findCommandMetadata(CommandMetadata result, List<CommandMetadata> commands, Class<? extends PrideCommand> type) {
 		for (CommandMetadata command : commands) {
 			result = findCommandMetadata(result, command, type);
 		}
 		return result;
 	}
 
-	private static CommandMetadata findCommandMetadata(CommandMetadata result, CommandMetadata command, Class<? extends AbstractCommand> type) {
+	private static CommandMetadata findCommandMetadata(CommandMetadata result, CommandMetadata command, Class<? extends PrideCommand> type) {
 		if (result != null) {
 			return result;
 		}

@@ -9,9 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.concurrent.Callable;
 
-public abstract class AbstractCommand implements Callable<Integer> {
+public abstract class AbstractCommand implements PrideCommand {
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
 	@Option(name = {"-v", "--verbose"},
@@ -60,14 +59,17 @@ public abstract class AbstractCommand implements Callable<Integer> {
 		return vcsManager;
 	}
 
+	@Override
 	public boolean isVerbose() {
 		return verbose;
 	}
 
+	@Override
 	public boolean isQuiet() {
 		return quiet;
 	}
 
+	@Override
 	public boolean isHelp() {
 		return help;
 	}
