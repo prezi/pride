@@ -54,6 +54,9 @@ public abstract class AbstractConfigurationHandler<M> {
 	}
 
 	public void saveConfiguration(Configuration configuration, Collection<M> modules) {
+		for (String moduleKey : Iterators.toArray(configuration.getKeys(MODULES_KEY), String.class)) {
+			configuration.clearProperty(moduleKey);
+		}
 		int id = 0;
 		for (M module : modules) {
 			String moduleId = MODULES_KEY + "." + id;
