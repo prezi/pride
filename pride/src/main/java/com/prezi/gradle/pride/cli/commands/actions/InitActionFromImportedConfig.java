@@ -38,12 +38,16 @@ public class InitActionFromImportedConfig extends InitActionBase {
 					+ prideDirectory);
 		}
 
-		PropertiesConfiguration importedConfig;
-		URI configUri = URI.create(configLocation);
-		if (configUri.isAbsolute()) {
-			importedConfig = new PropertiesConfiguration(configUri.toURL());
+		PropertiesConfiguration importedConfig = new PropertiesConfiguration();
+		if ("-".equals(configLocation)) {
+			importedConfig.load(System.in);
 		} else {
-			importedConfig = new PropertiesConfiguration(configUri.getRawPath());
+			URI configUri = URI.create(configLocation);
+			if (configUri.isAbsolute()) {
+				importedConfig.load(configUri.toURL());
+			} else {
+				importedConfig.load(configUri.getRawPath());
+			}
 		}
 
 		ConfigurationData<ExportedModule> configurationData = new ExportedConfigurationHandler(vcsManager).loadConfiguration(importedConfig);

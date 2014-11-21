@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
-import com.google.common.io.Files;
 import com.prezi.gradle.pride.Module;
 import com.prezi.gradle.pride.Pride;
 import com.prezi.gradle.pride.PrideException;
@@ -41,41 +40,35 @@ public class ExportCommand extends AbstractPrideCommand {
 		if (!overwrite && output != null && output.exists()) {
 			throw new PrideException("Output file already exists: " + output);
 		}
-		File outputFile = File.createTempFile("export-", ".pride");
-		try {
-			PropertiesConfiguration config = new PropertiesConfiguration(outputFile);
-			config.copy(pride.getLocalConfiguration());
-			Collection<ExportedModule> exportedModules = Collections2.transform(pride.getModules(), new Function<Module, ExportedModule>() {
-				@Override
-				public ExportedModule apply(Module module) {
-					try {
-						VcsSupport vcsSupport = module.getVcs().getSupport();
-						File moduleDirectory = pride.getModuleDirectory(module.getName());
-						VcsStatus vcsStatus = vcsSupport.getStatus(moduleDirectory);
-						String revision;
-						if (explicit || Strings.isNullOrEmpty(vcsStatus.getBranch())) {
-							revision = vcsStatus.getRevision();
-						} else {
-							revision = vcsStatus.getBranch();
-						}
-						return new ExportedModule(module.getName(), vcsSupport.getRepositoryUrl(moduleDirectory), revision, module.getVcs());
-					} catch (IOException e) {
-						throw Throwables.propagate(e);
+		PropertiesConfiguration config = new PropertiesConfiguration();
+		config.copy(pride.getLocalConfiguration());
+		Collection<ExportedModule> exportedModules = Collections2.transform(pride.getModules(), new Function<Module, ExportedModule>() {
+			@Override
+			public ExportedModule apply(Module module) {
+				try {
+					VcsSupport vcsSupport = module.getVcs().getSupport();
+					File moduleDirectory = pride.getModuleDirectory(module.getName());
+					VcsStatus vcsStatus = vcsSupport.getStatus(moduleDirectory);
+					String revision;
+					if (explicit || Strings.isNullOrEmpty(vcsStatus.getBranch())) {
+						revision = vcsStatus.getRevision();
+					} else {
+						revision = vcsStatus.getBranch();
 					}
+					return new ExportedModule(module.getName(), vcsSupport.getRepositoryUrl(moduleDirectory), revision, module.getVcs());
+				} catch (IOException e) {
+					throw Throwables.propagate(e);
 				}
-			});
-			ExportedConfigurationHandler configHandler = new ExportedConfigurationHandler(getVcsManager());
-			configHandler.saveConfiguration(config, exportedModules);
-			config.save();
-
-			if (output == null) {
-				Files.asByteSource(outputFile).copyTo(System.out);
-			} else {
-				FileUtils.deleteQuietly(output);
-				Files.copy(outputFile, output);
 			}
-		} finally {
-			FileUtils.deleteQuietly(outputFile);
+		});
+		ExportedConfigurationHandler configHandler = new ExportedConfigurationHandler(getVcsManager());
+		configHandler.saveConfiguration(config, exportedModules);
+
+		if (output == null) {
+			config.save(System.out);
+		} else {
+			FileUtils.deleteQuietly(output);
+			config.save(output);
 		}
 	}
 }
