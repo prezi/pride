@@ -38,7 +38,7 @@ public class InitCommand extends AbstractConfiguredCommand {
 
 	@Option(name = "--from-config",
 			title = "file or URL",
-			description = "Load configuration and modules from existing configuration")
+			description = "Load configuration and modules from existing configuration, or '-' to read from standard input")
 	private String explicitFromConfig;
 
 	@Option(name = {"-c", "--use-repo-cache"},
