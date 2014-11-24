@@ -20,6 +20,9 @@ allprojects {
 	apply plugin: "idea"
 }
 
+// Use this Gradle version by default
+def defaultGradleVersion = "2.2.1"
+
 subprojects { subproject ->
 	apply plugin: "maven"
 	apply plugin: "groovy"
@@ -179,7 +182,7 @@ project("pride") {
 
 	dependencies {
 		compile project(path: ":pride-core")
-		compile "org.gradle:gradle-tooling-api:2.0"
+		compile "org.gradle:gradle-tooling-api:${defaultGradleVersion}"
 		compile "io.airlift:airline:0.6"
 		compile "ch.qos.logback:logback-classic:1.1.2"
 
@@ -221,7 +224,7 @@ project("gradle-pride-projectmodel-plugin") {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '2.1'
+	gradleVersion = defaultGradleVersion
 }
 
 allprojects {
