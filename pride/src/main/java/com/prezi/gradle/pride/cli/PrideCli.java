@@ -95,7 +95,10 @@ public class PrideCli {
 			logger.error("Exception:", e);
 			exitValue = -1;
 		}
-		System.exit(exitValue);
+
+		if (exitValue != 0) {
+			System.exit(exitValue);
+		}
 	}
 
 	private static CommandMetadata findCommandMetadata(GlobalMetadata global, Class<? extends PrideCommand> type) {
