@@ -61,7 +61,7 @@ public class PrideCli {
 				}
 
 				logger.error("{}", e.getMessage());
-				System.exit(-1);
+				return -1;
 			}
 
 			boolean verbose = false;
@@ -71,7 +71,7 @@ public class PrideCli {
 					if (command.isHelp()) {
 						CommandMetadata commandMetadata = findCommandMetadata(parser.getMetadata(), command.getClass());
 						Help.help(commandMetadata);
-						System.exit(0);
+						return 0;
 					}
 					Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 					if (command.isVerbose()) {
