@@ -23,8 +23,12 @@ public class PrideCli {
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(PrideCli.class);
 
-	@SuppressWarnings("unchecked")
 	public static void main(String... args) {
+		System.exit(execute(args));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static int execute(String... args) {
 		Cli.CliBuilder<Callable<?>> builder = Cli.builder("pride");
 		builder
 				.withDescription("manages a pride of modules")
@@ -57,7 +61,7 @@ public class PrideCli {
 				}
 
 				logger.error("{}", e.getMessage());
-				System.exit(-1);
+				return -1;
 			}
 
 			boolean verbose = false;
@@ -67,7 +71,7 @@ public class PrideCli {
 					if (command.isHelp()) {
 						CommandMetadata commandMetadata = findCommandMetadata(parser.getMetadata(), command.getClass());
 						Help.help(commandMetadata);
-						System.exit(0);
+						return 0;
 					}
 					Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 					if (command.isVerbose()) {
@@ -95,7 +99,8 @@ public class PrideCli {
 			logger.error("Exception:", e);
 			exitValue = -1;
 		}
-		System.exit(exitValue);
+
+		return exitValue;
 	}
 
 	private static CommandMetadata findCommandMetadata(GlobalMetadata global, Class<? extends PrideCommand> type) {
