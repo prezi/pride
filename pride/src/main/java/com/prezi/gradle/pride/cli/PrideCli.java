@@ -23,8 +23,12 @@ public class PrideCli {
 
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(PrideCli.class);
 
-	@SuppressWarnings("unchecked")
 	public static void main(String... args) {
+		System.exit(execute(args));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static int execute(String... args) {
 		Cli.CliBuilder<Callable<?>> builder = Cli.builder("pride");
 		builder
 				.withDescription("manages a pride of modules")
@@ -96,9 +100,7 @@ public class PrideCli {
 			exitValue = -1;
 		}
 
-		if (exitValue != 0) {
-			System.exit(exitValue);
-		}
+		return exitValue;
 	}
 
 	private static CommandMetadata findCommandMetadata(GlobalMetadata global, Class<? extends PrideCommand> type) {
