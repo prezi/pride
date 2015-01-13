@@ -17,7 +17,6 @@ import org.gradle.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 	private final SetMultimap<String, Dependency> dynamicDependencies = LinkedHashMultimap.create();
 	private final SetMultimap<String, Dependency> requestedDynamicDependencies = LinkedHashMultimap.create();
 
-	public DynamicDependenciesExtension(Project project, Map<String, Project> projectsByGroupAndName) throws IOException {
+	public DynamicDependenciesExtension(Project project, Map<String, Project> projectsByGroupAndName) {
 		this.project = project;
 		this.projectsByGroupAndName = projectsByGroupAndName;
 	}
