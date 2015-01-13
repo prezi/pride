@@ -19,6 +19,7 @@ public final class VcsManager {
 		for (VcsSupportFactory factory : ServiceLoader.load(VcsSupportFactory.class)) {
 			vcss.put(factory.getType(), factory);
 		}
+		// Make sure file support is always the last VCS tried
 		VcsSupportFactory fileSupport = new FileVcsSupportFactory();
 		vcss.put(fileSupport.getType(), fileSupport);
 	}
