@@ -36,9 +36,14 @@ public class InitCommand extends AbstractConfiguredCommand {
 			description = "Ignore existing pride's configuration (to be used with --force)")
 	private boolean explicitIgnoreConfig;
 
-	@Option(name = "--from-config",
+	@Option(name = "--import",
 			title = "file or URL",
-			description = "Load configuration and modules from existing configuration, or '-' to read from standard input")
+			description = "Import configuration and modules from configuration file exported by 'pride export' (use '-' to read from standard input)")
+	private String explicitImport;
+
+	@Deprecated
+	@Option(name = "--from-config",
+			hidden = true)
 	private String explicitFromConfig;
 
 	@Option(name = {"-c", "--use-repo-cache"},
@@ -64,10 +69,19 @@ public class InitCommand extends AbstractConfiguredCommand {
 		boolean addWrapper = globalConfig.override(GRADLE_WRAPPER, explicitWithWrapper, explicitNoWrapper);
 
 		InitActionBase initAction;
-		if (explicitFromConfig == null) {
+		String configToImport;
+		//noinspection deprecation
+		if (explicitFromConfig != null) {
+			logger.warn("The --from-config option is deprecated, and will be removed in a future release. Please use --import instead.");
+			//noinspection deprecation
+			configToImport = explicitFromConfig;
+		} else {
+			configToImport = explicitImport;
+		}
+		if (configToImport == null) {
 			initAction = InitAction.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitForce, !explicitNoAddExisting, explicitIgnoreConfig);
 		} else {
-			initAction = InitActionFromImportedConfig.create(getPrideDirectory(), globalConfig, getVcsManager(), explicitFromConfig, explicitUseRepoCache, explicitNoRepoCache, explicitRecursive);
+			initAction = InitActionFromImportedConfig.create(getPrideDirectory(), globalConfig, getVcsManager(), configToImport, explicitUseRepoCache, explicitNoRepoCache, explicitRecursive);
 		}
 		initAction.createPride(addWrapper, isVerbose());
 	}
