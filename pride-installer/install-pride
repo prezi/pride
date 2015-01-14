@@ -12,7 +12,7 @@ installer=${dir}/install-gradle
 
 cat > ${installer} << 'EOF'
 defaultTasks "install"
-group = "com.prezi.gradle.pride"
+group = "com.prezi.pride"
 
 repositories {
 	mavenCentral()
@@ -30,7 +30,7 @@ configurations {
 }
 
 dependencies {
-	pride group: "com.prezi.gradle.pride", name: "pride", version: "+", classifier: "dist", ext: "zip"
+	pride group: "com.prezi.pride", name: "pride", version: "+", classifier: "dist", ext: "zip"
 }
 
 def userHome = System.properties['user.home']

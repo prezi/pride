@@ -6,7 +6,7 @@ initscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath "com.prezi.gradle.pride:gradle-pride-projectmodel-plugin:@version@"
+		classpath "com.prezi.pride:gradle-pride-projectmodel-plugin:@version@"
 	}
 }
 
