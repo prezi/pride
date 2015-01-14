@@ -5,3 +5,4 @@ jdk:
 env:
   global:
     - TERM=dumb
+sudo: false
