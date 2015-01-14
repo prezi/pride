@@ -15,7 +15,7 @@ def sonatype = hasProperty("sonatype")
 def signArtifacts = sonatype || hasProperty("sign")
 
 allprojects {
-	group = "com.prezi.gradle.pride"
+	group = "com.prezi.pride"
 	version = gitVersion
 	apply plugin: "idea"
 }
