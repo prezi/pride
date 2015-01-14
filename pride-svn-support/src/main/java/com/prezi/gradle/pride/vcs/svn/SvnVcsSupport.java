@@ -44,7 +44,7 @@ public class SvnVcsSupport implements VcsSupport {
 		log.debug("Checking out {} into {}", branchUrl, targetDirectory);
 		ImmutableList.Builder<String> checkoutCommand = ImmutableList.<String> builder().add("svn").add("checkout");
 		if (!recursive) {
-			checkoutCommand.add("--depth=files");
+			checkoutCommand.add("--ignore-externals");
 		}
 		checkoutCommand.add(branchUrl).add(targetDirectory.getPath());
 		ProcessUtils.executeIn(null, checkoutCommand.build());
@@ -59,7 +59,7 @@ public class SvnVcsSupport implements VcsSupport {
 			updateCommand.add("svn", "update");
 		}
 		if (!recursive) {
-			updateCommand.add("--depth=files");
+			updateCommand.add("--ignore-externals");
 		}
 		ProcessUtils.executeIn(targetDirectory, updateCommand.build());
 	}
