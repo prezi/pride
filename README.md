@@ -60,7 +60,8 @@ pride do -- git status --short
 
 ### Prerequisites
 
-You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed.
+You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed. Pride is a Java application,
+so you will need to have that installed as well.
 
 ### Installing Pride
 
