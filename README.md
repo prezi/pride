@@ -131,7 +131,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.9.3"
+        classpath "com.prezi.pride:gradle-pride-plugin:0.10"
     }
 }
 

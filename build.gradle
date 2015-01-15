@@ -15,7 +15,7 @@ def sonatype = hasProperty("sonatype")
 def signArtifacts = sonatype || hasProperty("sign")
 
 allprojects {
-	group = "com.prezi.gradle.pride"
+	group = "com.prezi.pride"
 	version = gitVersion
 	apply plugin: "idea"
 }
@@ -178,7 +178,7 @@ project("pride-svn-support") {
 
 project("pride") {
 	apply plugin: "application"
-	mainClassName = "com.prezi.gradle.pride.cli.PrideCli"
+	mainClassName = "com.prezi.pride.cli.PrideCli"
 
 	dependencies {
 		compile project(path: ":pride-core")

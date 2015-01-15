@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="com.prezi.gradle.pride.cli.LogbackHighThresholdFilter">
+		<filter class="com.prezi.pride.cli.LogbackHighThresholdFilter">
 			<level>INFO</level>
 		</filter>
 		<encoder>
