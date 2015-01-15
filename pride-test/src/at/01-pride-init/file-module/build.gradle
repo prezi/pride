@@ -9,6 +9,7 @@ buildscript {
 	}
 }
 
+// Use "pride" here to check backwards compatibility
 apply plugin: "pride"
 
 group "com.example.test.file"
