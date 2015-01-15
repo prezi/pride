@@ -60,22 +60,18 @@ pride do -- git status --short
 
 ### Prerequisites
 
-You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed.
+You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed. Pride is a Java application,
+so you will need to have that installed as well.
 
 ### Installing Pride
 
 You can easily install Pride with [Homebrew](http://brew.sh):
 
 ```text
-$ brew tap prezi/oss
-$ brew install pride
+$ brew install prezi/oss/pride
 ```
 
-Without Homebrew, you can install or upgrade Pride via:
-
-    $ \curl -sSL http://href.prezi.com/install-pride | bash
-
-This will install a symlink in `/usr/local/bin`.
+You can also download the latest version of Pride from the [releases](https://github.com/prezi/pride/releases) section.
 
 ### First time setup
 
@@ -131,7 +127,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:0.9.3"
+        classpath "com.prezi.pride:gradle-pride-plugin:0.10"
     }
 }
 

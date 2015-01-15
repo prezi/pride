@@ -8,11 +8,11 @@ buildscript {
 	}
 
 	dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:@version@"
+        classpath "com.prezi.pride:gradle-pride-plugin:@version@"
 	}
 }
 
-apply plugin: "pride"
+apply plugin: "com.prezi.pride"
 apply plugin: "java"
 apply plugin: "maven"
 

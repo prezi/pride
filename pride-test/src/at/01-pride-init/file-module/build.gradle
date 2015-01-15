@@ -5,10 +5,11 @@ buildscript {
 	}
 
 	dependencies {
-        classpath "com.prezi.gradle.pride:gradle-pride-plugin:@version@"
+        classpath "com.prezi.pride:gradle-pride-plugin:@version@"
 	}
 }
 
+// Use "pride" here to check backwards compatibility
 apply plugin: "pride"
 
 group "com.example.test.file"

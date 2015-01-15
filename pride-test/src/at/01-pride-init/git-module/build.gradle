@@ -5,13 +5,13 @@ buildscript {
 	}
 
 	dependencies {
-		classpath "com.prezi.gradle.pride:gradle-pride-plugin:@version@"
+		classpath "com.prezi.pride:gradle-pride-plugin:@version@"
 	}
 }
 
 group "com.example.test.git"
 
-apply plugin: "pride"
+apply plugin: "com.prezi.pride"
 
 configurations {
 	compile
