@@ -1,3 +1,12 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0"
+	}
+}
+
 String gitVersion
 if (hasProperty("release")) {
 	gitVersion = ["git", "describe", "--match", "[0-9]*", "--dirty"].execute().text.trim()
@@ -11,8 +20,8 @@ task version {
 	}
 }
 
-def sonatype = hasProperty("sonatype")
-def signArtifacts = sonatype || hasProperty("sign")
+def ossRelease = hasProperty("oss") || hasProperty("sonatype")
+def signArtifacts = ossRelease || hasProperty("sign")
 
 allprojects {
 	group = "com.prezi.pride"
@@ -81,7 +90,7 @@ subprojects { subproject ->
 					}
 				}
 
-				if (sonatype) {
+				if (ossRelease) {
 					repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
 						def user = project.getProperty("sonatypeUsername")
 						def password = project.getProperty("sonatypePassword")
@@ -213,6 +222,53 @@ project("gradle-pride-plugin") {
 		compile gradleApi()
 		compile project(":pride-core")
 		compile "com.google.guava:guava:17.0"
+	}
+
+	if (ossRelease) {
+		apply plugin: 'maven-publish'
+		apply plugin: 'com.jfrog.bintray'
+
+		publishing {
+			publications {
+				plugin(MavenPublication) {
+					from components.java
+
+					artifact javadocJar {
+						classifier "javadoc"
+					}
+
+					artifact sourcesJar {
+						classifier "sources"
+					}
+				}
+			}
+		}
+
+		bintray {
+			user = rootProject.property("bintrayUsername")
+			key = rootProject.property("bintrayApiKey")
+			publications = ['plugin']
+			pkg {
+				repo = "gradle-plugins"
+				name = "gradle-pride-plugin"
+				userOrg = "prezi"
+				desc = description
+				licenses = ["Apache-2.0"]
+				publicDownloadNumbers = true
+				websiteUrl = "https://github.com/prezi/pride"
+				issueTrackerUrl = "https://github.com/prezi/pride/issues"
+				vcsUrl = "https://github.com/prezi/pride.git"
+				labels = ["gradle", "pride", "git", "svn", "dynanic dependencies"]
+				version {
+					attributes = [ 'gradle-plugin': 'com.prezi.pride:com.prezi.pride:gradle-pride-plugin' ]
+				}
+			}
+			publish = false
+		}
+
+		uploadArchives {
+			dependsOn bintrayUpload
+		}
 	}
 }
 
