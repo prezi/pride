@@ -20,6 +20,6 @@ repositories {
 	maven { url "@repo@" }
 }
 
-dynamicDependencies {
+dependencies {
 	compile group: "com.prezi.example.transitive", name: "module-b", version: "1.0"
 }

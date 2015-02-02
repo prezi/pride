@@ -93,13 +93,14 @@ task testTransitiveResolution { task ->
 		mkdir repoDir
 		gradlew moduleADir, "uploadArchives"
 		gradlew moduleBDir, "uploadArchives"
-		pride prideDir, "init", "-v"
+		pride prideDir, "init", "-v", "--gradle-version", "${System.getProperty("user.home")}/Tools/gradle-local"
 		checkGradleOutput(prideDir, ["module-c:dependencies", "--configuration", "compile"]) { output ->
 			assert output.contains("""
 compile - Compile classpath for source set 'main'.
-+--- com.prezi.example.transitive:module-b:1.0
-|    \\--- com.prezi.example.transitive:module-a:1.0 -> project :module-a
-\\--- project :module-a
+\\--- com.prezi.example.transitive:module-b:1.0
+     \\--- com.prezi.example.transitive:module-a:1.0 -> project :module-a
+
+BUILD SUCCESSFUL
 """)
 		}
 	}
@@ -127,10 +128,11 @@ def checkGradleOutput(File dir, List<?> args1, Closure check) {
 	def output = new ByteArrayOutputStream()
 	def arguments = new ArrayList<Object>(args1)
 	arguments.add "--stacktrace"
+	arguments.add "--no-daemon"
 	println "Running Gradle with ${arguments.join(" ")}"
 	exec {
 		workingDir dir
-		executable file("$rootDir/gradlew")
+		executable file("${System.getProperty("user.home")}/Tools/gradle-local/bin/gradle")
 		args arguments.toArray()
 		standardOutput = output
 	}
@@ -140,10 +142,11 @@ def checkGradleOutput(File dir, List<?> args1, Closure check) {
 def gradlew(File dir, Object... args1) {
 	def arguments = new ArrayList<Object>(Arrays.asList(args1))
 	arguments.add "--stacktrace"
+	arguments.add "--no-daemon"
 	println "Running Gradle with ${arguments.join(" ")}"
 	exec {
 		workingDir dir
-		executable file("$rootDir/gradlew")
+		executable file("${System.getProperty("user.home")}/Tools/gradle-local/bin/gradle")
 		args arguments.toArray()
 	}
 }

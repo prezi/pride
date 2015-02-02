@@ -280,7 +280,8 @@ project("gradle-pride-projectmodel-plugin") {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = defaultGradleVersion
+//	gradleVersion = defaultGradleVersion
+	distributionPath = "${System.getProperty("user.home")}/Tools/gradle-local"
 }
 
 allprojects {

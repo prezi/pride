@@ -2,11 +2,12 @@ package com.prezi.pride;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.invocation.Gradle;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.DependencyResolveDetails2;
+import org.gradle.api.artifacts.component.ModuleComponentSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,26 +48,33 @@ public class PridePlugin implements Plugin<Project> {
 				projectsByGroupAndName.put(p.getGroup() + ":" + p.getName(), project.getRootProject().project(p.getPath()));
 			}
 		}
-		project.getExtensions().create("dynamicDependencies", DynamicDependenciesExtension.class, project, projectsByGroupAndName);
 
 		// Apply Pride convention
 		project.getConvention().getPlugins().put("pride", new PrideConvention(project));
 
-		// Go through transitive dependencies and replace them with projects when applicable.
-		// See https://github.com/prezi/pride/issues/40
-		// See https://github.com/prezi/pride/issues/87
-		// Do this in the root project
-		if (!prideDisabled) {
-			if (!project.getRootProject().hasProperty("pride.init")) {
-				project.getRootProject().getConvention().getExtraProperties().set("pride.init", true);
-				final Gradle gradle = project.getGradle();
-				gradle.projectsEvaluated(new Closure(gradle) {
-					@SuppressWarnings("UnusedDeclaration")
-					public void doCall(Object args) {
-						gradle.allprojects(new TransitiveOverrideAction(projectsByGroupAndName));
-					}
-				});
-			}
+		// Use replacement rule
+		if (!isDisabled(project)) {
+			project.getConfigurations().all(new Action<Configuration>() {
+				@Override
+				public void execute(Configuration configuration) {
+					configuration.getResolutionStrategy().eachDependency2(new Action<DependencyResolveDetails2>() {
+						@Override
+						public void execute(DependencyResolveDetails2 details) {
+							if (!(details.getRequested() instanceof ModuleComponentSelector)) {
+								logger.warn("We have been called with a project! {}", details.getRequested());
+								return;
+							}
+							ModuleComponentSelector requested = (ModuleComponentSelector) details.getRequested();
+							String id = requested.getGroup() + ":" + requested.getModule();
+							Project dependentProject = projectsByGroupAndName.get(id);
+							if (dependentProject != null) {
+								logger.info("Replaced external dependency {} with {}", requested, dependentProject);
+								details.useTarget(dependentProject);
+							}
+						}
+					});
+				}
+			});
 		}
 
 		// See https://github.com/prezi/pride/issues/100
