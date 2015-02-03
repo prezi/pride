@@ -6,7 +6,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.DependencyResolveDetails2;
+import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.component.ModuleComponentSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +18,6 @@ import java.util.SortedSet;
 
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
-
-	// All local projects have their version set to a high value in the generated build.gradle
-	// in order to override external dependencies
-	public static final String LOCAL_PROJECT_VERSION = String.valueOf(Short.MAX_VALUE);
 
 	@Override
 	public void apply(Project project) {
@@ -57,18 +53,18 @@ public class PridePlugin implements Plugin<Project> {
 			project.getConfigurations().all(new Action<Configuration>() {
 				@Override
 				public void execute(Configuration configuration) {
-					configuration.getResolutionStrategy().eachDependency2(new Action<DependencyResolveDetails2>() {
+					configuration.getResolutionStrategy().eachDependency(new Action<DependencyResolveDetails>() {
 						@Override
-						public void execute(DependencyResolveDetails2 details) {
-							if (!(details.getRequested() instanceof ModuleComponentSelector)) {
-								logger.warn("We have been called with a project! {}", details.getRequested());
+						public void execute(DependencyResolveDetails details) {
+							// Skip components that are not external components
+							if (!(details.getSelector() instanceof ModuleComponentSelector)) {
 								return;
 							}
-							ModuleComponentSelector requested = (ModuleComponentSelector) details.getRequested();
-							String id = requested.getGroup() + ":" + requested.getModule();
+							ModuleComponentSelector selector = (ModuleComponentSelector) details.getSelector();
+							String id = selector.getGroup() + ":" + selector.getModule();
 							Project dependentProject = projectsByGroupAndName.get(id);
 							if (dependentProject != null) {
-								logger.info("Replaced external dependency {} with {}", requested, dependentProject);
+								logger.info("Replaced external dependency {} with {}", selector, dependentProject);
 								details.useTarget(dependentProject);
 							}
 						}
