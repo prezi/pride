@@ -25,7 +25,7 @@ task testPrideInit { task ->
 			workingDir file("$dir/git-module")
 			commandLine "git", "remote", "add", "origin", "git@github.com:prezi/test"
 		}
-		pride(dir, "init", "--gradle-version", "2.2.1")
+		pride(dir, "init", "--gradle-version", defaultGradleVersion)
 
 		assert file("$dir/build.gradle").exists()
 		assert file("$dir/gradlew").exists()
@@ -42,7 +42,7 @@ project(':git-module').projectDir = file('git-module')
 0
 """
 		assert asProps(file("$dir/.pride/config")) == asProps("""
-gradle.version = 2.2.1
+gradle.version = ${defaultGradleVersion}
 modules.0.name = file-module
 modules.0.vcs = file
 modules.1.name = git-module
@@ -57,7 +57,7 @@ com.example.test.git:git-module::git-module
 		pride(dir, "export", "--output", exportFile, "-O")
 
 		assert asProps(exportFile) == asProps("""
-gradle.version = 2.2.1
+gradle.version = ${defaultGradleVersion}
 modules.0.name = file-module
 modules.0.vcs = file
 modules.1.name = git-module
@@ -74,7 +74,7 @@ include 'git-module'
 project(':git-module').projectDir = file('git-module')
 """
 		assert asProps(file("$dir/.pride/config")) == asProps("""
-gradle.version = 2.2.1
+gradle.version = ${defaultGradleVersion}
 modules.0.name = git-module
 modules.0.vcs = git
 """)
@@ -93,7 +93,7 @@ task testTransitiveResolution { task ->
 		mkdir repoDir
 		gradlew moduleADir, "uploadArchives"
 		gradlew moduleBDir, "uploadArchives"
-		pride prideDir, "init", "-v", "--gradle-version", "${System.getProperty("user.home")}/Tools/gradle-local"
+		pride prideDir, "init", "-v", "--gradle-version", defaultGradleVersion
 		checkGradleOutput(prideDir, ["module-c:dependencies", "--configuration", "compile"]) { output ->
 			assert output.contains("""
 compile - Compile classpath for source set 'main'.
@@ -129,10 +129,10 @@ def checkGradleOutput(File dir, List<?> args1, Closure check) {
 	def arguments = new ArrayList<Object>(args1)
 	arguments.add "--stacktrace"
 	arguments.add "--no-daemon"
-	println "Running Gradle with ${arguments.join(" ")}"
+	println "Running Gradle with ${arguments.join(" ")} in ${dir}"
 	exec {
 		workingDir dir
-		executable file("${System.getProperty("user.home")}/Tools/gradle-local/bin/gradle")
+		executable "$rootDir/gradlew"
 		args arguments.toArray()
 		standardOutput = output
 	}
@@ -143,10 +143,10 @@ def gradlew(File dir, Object... args1) {
 	def arguments = new ArrayList<Object>(Arrays.asList(args1))
 	arguments.add "--stacktrace"
 	arguments.add "--no-daemon"
-	println "Running Gradle with ${arguments.join(" ")}"
+	println "Running Gradle with ${arguments.join(" ")} in ${dir}"
 	exec {
 		workingDir dir
-		executable file("${System.getProperty("user.home")}/Tools/gradle-local/bin/gradle")
+		executable "$rootDir/gradlew"
 		args arguments.toArray()
 	}
 }

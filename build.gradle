@@ -30,7 +30,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-def defaultGradleVersion = "2.2.1"
+ext.defaultGradleVersion = "2.4-20150205230024+0000"
 
 subprojects { subproject ->
 	apply plugin: "maven"
@@ -49,14 +49,16 @@ subprojects { subproject ->
 		mavenLocal()
 		mavenCentral()
 		maven {
-			url "http://gradle.artifactoryonline.com/gradle/libs"
+			url "http://gradle.artifactoryonline.com/gradle/libs-snapshots"
 		}
 	}
 
 	dependencies {
 		testCompile "junit:junit:4.11"
-		testCompile("org.spockframework:spock-core:0.7-groovy-2.0")
-		testCompile("org.codehaus.groovy:groovy-all:2.3.6")
+		testCompile("org.spockframework:spock-core:0.7-groovy-2.0") {
+			exclude group: "org.codehaus.groovy"
+		}
+		testCompile localGroovy()
 		testRuntime "org.slf4j:slf4j-simple:1.7.7"
 	}
 
@@ -280,8 +282,7 @@ project("gradle-pride-projectmodel-plugin") {
 }
 
 task wrapper(type: Wrapper) {
-//	gradleVersion = defaultGradleVersion
-	distributionPath = "${System.getProperty("user.home")}/Tools/gradle-local"
+	gradleVersion = defaultGradleVersion
 }
 
 allprojects {
