@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.Set;
 
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
@@ -31,44 +31,16 @@ public class PridePlugin implements Plugin<Project> {
 			}
 		}
 
-		// Add our custom dependency declaration
-		final Map<String, Project> projectsByGroupAndName = Maps.newTreeMap();
-		if (!prideDisabled && Pride.containsPride(project.getRootDir())) {
-			SortedSet<PrideProjectData> allProjectData;
-			try {
-				allProjectData = Pride.loadProjects(Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(project.getRootDir())));
-			} catch (IOException e) {
-				throw Throwables.propagate(e);
-			}
-			for (PrideProjectData p : allProjectData) {
-				projectsByGroupAndName.put(p.getGroup() + ":" + p.getName(), project.getRootProject().project(p.getPath()));
-			}
-		}
-
 		// Apply Pride convention
 		project.getConvention().getPlugins().put("pride", new PrideConvention(project));
 
 		// Use replacement rule
 		if (!isDisabled(project)) {
+			final Set<Project> projects = project.getRootProject().getAllprojects();
 			project.getConfigurations().all(new Action<Configuration>() {
 				@Override
 				public void execute(Configuration configuration) {
-					configuration.getResolutionStrategy().eachDependency(new Action<DependencyResolveDetails>() {
-						@Override
-						public void execute(DependencyResolveDetails details) {
-							// Skip components that are not external components
-							if (!(details.getSelector() instanceof ModuleComponentSelector)) {
-								return;
-							}
-							ModuleComponentSelector selector = (ModuleComponentSelector) details.getSelector();
-							String id = selector.getGroup() + ":" + selector.getModule();
-							Project dependentProject = projectsByGroupAndName.get(id);
-							if (dependentProject != null) {
-								logger.info("Replaced external dependency {} with {}", selector, dependentProject);
-								details.useTarget(dependentProject);
-							}
-						}
-					});
+					configuration.getResolutionStrategy().eachDependency(new ReplaceDependenciesAction(projects));
 				}
 			});
 		}
@@ -111,5 +83,36 @@ public class PridePlugin implements Plugin<Project> {
 
 	public static boolean isDisabled(Project project) {
 		return project.hasProperty("pride.disable");
+	}
+
+	private static class ReplaceDependenciesAction implements Action<DependencyResolveDetails> {
+		private Map<String, Project> modulesToProjectsMapping;
+		private final Set<Project> projects;
+
+		public ReplaceDependenciesAction(Set<Project> projects) {
+			this.projects = projects;
+		}
+
+		@Override
+		public void execute(DependencyResolveDetails details) {
+			// Skip components that are not external components
+			if (!(details.getSelector() instanceof ModuleComponentSelector)) {
+				return;
+			}
+			ModuleComponentSelector selector = (ModuleComponentSelector) details.getSelector();
+			if (modulesToProjectsMapping == null) {
+				modulesToProjectsMapping = Maps.newTreeMap();
+				for (Project project : projects) {
+					modulesToProjectsMapping.put(project.getGroup() + ":" + project.getName(), project);
+				}
+				logger.info("Modules to projects mapping: {}", modulesToProjectsMapping);
+			}
+			String id = selector.getGroup() + ":" + selector.getModule();
+			Project dependentProject = modulesToProjectsMapping.get(id);
+			if (dependentProject != null) {
+				logger.info("Replaced external dependency {} with {}", selector, dependentProject);
+				details.useTarget(dependentProject);
+			}
+		}
 	}
 }

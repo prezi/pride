@@ -2,11 +2,9 @@ package com.prezi.pride.cli;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.prezi.pride.Module;
 import com.prezi.pride.Pride;
 import com.prezi.pride.PrideException;
-import com.prezi.pride.PrideProjectData;
 import com.prezi.pride.RuntimeConfiguration;
 import com.prezi.pride.cli.gradle.GradleConnectorManager;
 import com.prezi.pride.cli.model.ProjectModelAccessor;
@@ -26,7 +24,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,7 +110,6 @@ public class PrideInitializer {
 			});
 
 			createSettingsFile(pride, rootProjects);
-			createProjectsFile(pride, rootProjects);
 		} catch (Exception ex) {
 			throw new PrideException("There was a problem during the initialization of the pride. Fix the errors above, and try again with\n\n\tpride init --force", ex);
 		}
@@ -143,28 +139,6 @@ public class PrideInitializer {
 			String childProjectRelativePath = URI.create(prideRootDir.getCanonicalPath()).relativize(URI.create(child.getProjectDir())).toString();
 			FileUtils.write(settingsFile, "project(\':" + rootProjectName + child.getPath() + "\').projectDir = file(\'" + childProjectRelativePath + "\')\n", true);
 			writeSettingsForChildren(prideRootDir, settingsFile, rootProjectName, child.getChildren());
-		}
-	}
-
-	private void createProjectsFile(Pride pride, Map<File, PrideProjectModel> rootProjects) throws IOException {
-		File projectsFile = Pride.getPrideProjectsFile(Pride.getPrideConfigDirectory(pride.getRootDirectory()));
-		Set<PrideProjectData> projects = Sets.newTreeSet();
-		for (PrideProjectModel projectModel : rootProjects.values()) {
-			addProjectData("", projectModel, projects);
-		}
-		Pride.saveProjects(projectsFile, projects);
-	}
-
-	private void addProjectData(String parentPath, PrideProjectModel projectModel, Collection<PrideProjectData> projects) {
-		String group = projectModel.getGroup();
-		String path = parentPath + ":" + projectModel.getName();
-		if (group != null) {
-			PrideProjectData projectData = new PrideProjectData(group, projectModel.getName(), path);
-			logger.debug("Found project {}", projectData);
-			projects.add(projectData);
-		}
-		for (PrideProjectModel child : projectModel.getChildren()) {
-			addProjectData(path, child, projects);
 		}
 	}
 }

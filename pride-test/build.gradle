@@ -48,10 +48,6 @@ modules.0.vcs = file
 modules.1.name = git-module
 modules.1.vcs = git
 """)
-		assert rawContents("$dir/.pride/projects", "#") == """
-com.example.test.file:file-module::file-module
-com.example.test.git:git-module::git-module
-"""
 
 		def exportFile = file("$temporaryDir/export.pride")
 		pride(dir, "export", "--output", exportFile, "-O")
@@ -78,9 +74,6 @@ gradle.version = ${defaultGradleVersion}
 modules.0.name = git-module
 modules.0.vcs = git
 """)
-		assert rawContents("$dir/.pride/projects", "#") == """
-com.example.test.git:git-module::git-module
-"""
 	}
 }
 
