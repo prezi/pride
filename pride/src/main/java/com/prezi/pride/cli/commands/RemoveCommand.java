@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.prezi.pride.Module;
 import com.prezi.pride.Pride;
 import com.prezi.pride.PrideException;
@@ -52,16 +53,29 @@ public class RemoveCommand extends AbstractFilteredPrideCommand {
 		}
 
 		// Remove modules
+		final List<String> failedModules = Lists.newArrayList();
 		ProgressUtils.execute(pride, modules, new LoggedNamedProgressAction<Module>("Removing") {
 			@Override
 			protected void execute(Pride pride, Module module) throws IOException {
-				pride.removeModule(module.getName());
+				String moduleName = module.getName();
+				try {
+					pride.removeModule(moduleName);
+				} catch (Exception ex) {
+					logger.warn("Could not remove module {}: {}", moduleName, ex);
+					logger.debug("Exception while removing module {}", moduleName, ex);
+					failedModules.add(moduleName);
+				}
 			}
 		});
 		pride.save();
 
 		// Re-initialize pride
 		new PrideInitializer(new GradleConnectorManager(pride.getConfiguration()), isVerbose()).reinitialize(pride);
+
+		// Show error if not all modules could be removed
+		if (!failedModules.isEmpty()) {
+			throw new PrideException("Could not remove the following modules completely:\n\n\t* " + Joiner.on("\n\t* ").join(failedModules));
+		}
 	}
 
 	@Override
