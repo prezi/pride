@@ -201,7 +201,7 @@ project("pride") {
 		runtime project(path: ":pride-svn-support")
 	}
 
-	install { dependsOn installApp }
+	install { dependsOn installDist }
 
 	configure(applicationDistribution) {
 		from(rootProject.file("README.md")) {
