@@ -86,8 +86,8 @@ public class ListCommand extends AbstractFilteredPrideCommand {
 			String branch = status.getBranch();
 			StringBuilder line = new StringBuilder();
 
-			line.append(status.hasUnpublishedChanges() ? 'P' : ' ');
-			line.append(status.hasUncommittedChanges() ? 'c' : ' ');
+			line.append(status.hasUnpublishedChanges() ? 'M' : ' ');
+			line.append(status.hasUncommittedChanges() ? 'M' : ' ');
 			line.append(' ').append(module.getName());
 
 			line.append(new String(new char[moduleMaxLength + 2 - module.getName().length()]).replace("\0", " "));
