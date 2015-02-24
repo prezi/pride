@@ -42,11 +42,16 @@ public class InitActionFromImportedConfig extends InitActionBase {
 		if ("-".equals(configLocation)) {
 			importedConfig.load(System.in);
 		} else {
-			URI configUri = URI.create(configLocation);
-			if (configUri.isAbsolute()) {
-				importedConfig.load(configUri.toURL());
+			File configFile = new File(configLocation);
+			if (configFile.isFile()) {
+				importedConfig.load(configFile);
 			} else {
-				importedConfig.load(configUri.getRawPath());
+				URI configUri = URI.create(configLocation);
+				if (configUri.isAbsolute()) {
+					importedConfig.load(configUri.toURL());
+				} else {
+					importedConfig.load(configUri.getRawPath());
+				}
 			}
 		}
 
