@@ -13,7 +13,7 @@ Pride works with the concept of modules: Git or Subversion repositories that con
 
 If you only want to work on one module at a time, it's no problem, as Gradle will load the module's dependencies from whatever artifact repository you are deploying your built modules into. But things get more complicated when you want to change multiple interdependent modules at the same time. You will end up having to combine your modules into a single Gradle project, or relying on installing your modules in a local Ivy or Maven repository so that dependent modules can get to them.
 
-Pride tries a different route. We call the set of modules you want to work on a "pride." A pride is a directory with all these modules locally cloned next to each other. What Pride does is that it generates a Gradle project on top of them, so that Gradle can see all your modules in a single Gradle multi-project.
+Pride tries a different route. We call the set of modules you want to work on a "pride." A pride is a directory with all these modules locally cloned next to each other. Pride generates a Gradle project on top of them, so that Gradle can see all your modules in a single Gradle multi-project.
 
 ```
 +-- pride-root/
@@ -97,7 +97,7 @@ Note: On Windows you will need to add `pride/build/install/pride/bin` to the `PA
 Check if everything works via:
 
     $ pride version
-    Pride version 0.6.3
+    Pride version 0.11
 
 ## Usage
 
@@ -134,16 +134,14 @@ buildscript {
 apply plugin: "pride"
 ```
 
-#### Using `dynamicDependencies { ... }`
+#### Adding dynamic dependencies
 
 The Pride plugin adds the concept of dynamically resolvable dependencies to Gradle. What it means is that a dependency can be resolved to either a local project if it is present in the pride (`project(path: "...")`), or to an external dependency (`group: "...", name: "...", version: "..."`).
 
-Because Gradle does not have this functionality built-in, you cannot use `dependencies { ... }` to declare inter-module dependencies. Instead you will have to use a similar concept introduced by the Pride plugin: `dynamicDependencies { ... }`.
-
-You declare a dependency like this:
+You declare a dependency just like you would normally:
 
 ```groovy
-dynamicDependencies {
+dependencies {
 	compile group: "com.example", name: "example", version: "1.+"
 }
 ```
@@ -164,8 +162,6 @@ dependencies {
 }
 ```
 
-**Note:** You can still declare dependencies via the `dependencies { ... }` block, but they will not be resolved to project dependencies, even if the corresponding project is part of the pride.
-
 #### Relative project references
 
 If you want your project to work in a pride as well as in stand-alone mode, you cannot use `project(":some-other-subproject")` and `project(path: ":some-other-subproject")` in your builds to refer to other subprojects in the project, as Gradle does not support relative paths that point above the current project. Instead of these you can use `relativeProject(":some-other-subproject")` and `relativeProject(path: ":some-other-subproject")`. These methods are also provided by the `pride` plugin. These will be resolved properly both in stand-alone and pride-mode.
@@ -173,7 +169,7 @@ If you want your project to work in a pride as well as in stand-alone mode, you 
 
 ## Limitations and caveats
 
-Craft your modules so that they are buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*). It's not hard at all.
+Crafting your modules so that they are buildable on their own (*stand-alone mode*) as well as a part of a pride (*pride-mode*) isn't hard at all:
 
 * Only use `include(...)`, `rootProject.name` and `project(...).name` in `settings.gradle` -- Pride needs to merge all module's `settings.gradle`s, and it does not support arbitrary code.
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
