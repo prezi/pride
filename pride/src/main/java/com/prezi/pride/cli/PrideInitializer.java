@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -140,7 +139,7 @@ public class PrideInitializer {
 	private void writeSettingsForChildren(File prideRootDir, File settingsFile, String rootProjectName, Set<PrideProjectModel> children) throws IOException {
 		for (PrideProjectModel child : children) {
 			FileUtils.write(settingsFile, "include \'" + rootProjectName + child.getPath() + "\'\n", true);
-			String childProjectRelativePath = URI.create(prideRootDir.getCanonicalPath()).relativize(URI.create(child.getProjectDir())).toString();
+			String childProjectRelativePath = prideRootDir.getCanonicalFile().toURI().relativize(new File(child.getProjectDir()).getCanonicalFile().toURI()).toString();
 			FileUtils.write(settingsFile, "project(\':" + rootProjectName + child.getPath() + "\').projectDir = file(\'" + childProjectRelativePath + "\')\n", true);
 			writeSettingsForChildren(prideRootDir, settingsFile, rootProjectName, child.getChildren());
 		}

@@ -30,7 +30,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-def defaultGradleVersion = "2.2.1"
+def defaultGradleVersion = "2.3"
 
 subprojects { subproject ->
 	apply plugin: "maven"
@@ -55,8 +55,10 @@ subprojects { subproject ->
 
 	dependencies {
 		testCompile "junit:junit:4.11"
-		testCompile("org.spockframework:spock-core:0.7-groovy-2.0")
-		testCompile("org.codehaus.groovy:groovy-all:2.3.6")
+		testCompile("org.spockframework:spock-core:0.7-groovy-2.0") {
+			exclude group: "org.codehaus.groovy"
+		}
+		testCompile("org.codehaus.groovy:groovy-all:2.3.9")
 		testRuntime "org.slf4j:slf4j-simple:1.7.7"
 	}
 
