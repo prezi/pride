@@ -59,21 +59,17 @@ public class ListCommand extends AbstractFilteredPrideCommand {
 		private int moduleMaxLength = 0;
 		private int branchMaxLength = 0;
 
-		private StatusFormatter(Pride pride) {
+		private StatusFormatter(Pride pride) throws Exception {
 			this.pride = pride;
 
 			Collection<Module> modules = pride.getModules();
 			for (Module module : modules) {
 				String name = module.getName();
-				moduleMaxLength = Math.max(moduleMaxLength, name.length());
+				this.moduleMaxLength = Math.max(this.moduleMaxLength, name.length());
 
-				try {
-					String branch = module.getVcs().getSupport().getStatus(pride.getModuleDirectory(name)).getBranch();
-					if (!Strings.isNullOrEmpty(branch)) {
-						branchMaxLength = Math.max(branchMaxLength, branch.length());
-					}
-				} catch (Exception e) {
-					// No branch
+				String branch = module.getVcs().getSupport().getStatus(pride.getModuleDirectory(name)).getBranch();
+				if (!Strings.isNullOrEmpty(branch)) {
+					this.branchMaxLength = Math.max(this.branchMaxLength, branch.length());
 				}
 			}
 		}
@@ -90,11 +86,11 @@ public class ListCommand extends AbstractFilteredPrideCommand {
 			line.append(status.hasUncommittedChanges() ? 'M' : ' ');
 			line.append(' ').append(module.getName());
 
-			line.append(new String(new char[moduleMaxLength + 2 - module.getName().length()]).replace("\0", " "));
+			line.append(Strings.repeat(" ", this.moduleMaxLength + 2 - module.getName().length()));
 
 			if (!Strings.isNullOrEmpty(branch)) {
 				line.append(branch);
-				line.append(new String(new char[branchMaxLength + 2 - branch.length()]).replace("\0", " "));
+				line.append(Strings.repeat(" ", this.branchMaxLength + 2 - branch.length()));
 				line.append('@');
 			}
 			line.append(status.getRevision());
