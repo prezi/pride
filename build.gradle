@@ -30,7 +30,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-def defaultGradleVersion = "2.2.1"
+def defaultGradleVersion = "2.3"
 
 subprojects { subproject ->
 	apply plugin: "maven"
