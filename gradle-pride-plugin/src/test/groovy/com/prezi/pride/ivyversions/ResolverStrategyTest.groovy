@@ -1,13 +1,13 @@
-package com.prezi.pride.cli.commands
+package com.prezi.pride.ivyversions
 
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class CheckVersionsCommandTest extends Specification {
+class ResolverStrategyTest extends Specification {
 	@Unroll
-	def "MatchVersion #requested == #actual: #expected"() {
+	def "Match version #requested == #actual: #expected"() {
 		expect:
-		CheckVersionsCommand.matchVersion(requested, actual) == expected
+		new ResolverStrategy().accept(requested, actual) == expected
 
 		where:
 		requested   | actual  | expected

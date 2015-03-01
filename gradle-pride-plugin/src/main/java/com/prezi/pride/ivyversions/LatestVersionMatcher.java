@@ -1,4 +1,4 @@
-package com.prezi.pride.cli.ivyversions;
+package com.prezi.pride.ivyversions;
 
 public class LatestVersionMatcher implements VersionMatcher {
     public boolean canHandle(String selector) {

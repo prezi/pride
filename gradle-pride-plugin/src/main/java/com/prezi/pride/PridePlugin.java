@@ -49,6 +49,11 @@ public class PridePlugin implements Plugin<Project> {
 			});
 		}
 
+		// Check dependency versions
+		CheckDependencyVersionsTask checkVersions = project.getTasks().create("checkDependencyVersions", CheckDependencyVersionsTask.class);
+		checkVersions.setConfigurations(project.getConfigurations());
+		checkVersions.setDescription("Checks if substituted dependency projects conform to their requested versions");
+
 		// See https://github.com/prezi/pride/issues/100
 		project.afterEvaluate(new Action<Project>() {
 			@Override

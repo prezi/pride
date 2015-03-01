@@ -1,4 +1,4 @@
-package com.prezi.pride.cli.ivyversions;
+package com.prezi.pride.ivyversions;
 
 import java.util.Comparator;
 import java.util.regex.Matcher;
@@ -79,7 +79,6 @@ public class VersionRangeMatcher implements VersionMatcher {
     public VersionRangeMatcher(Comparator<String> staticVersionComparator) {
         this.staticVersionComparator = staticVersionComparator;
     }
-
     public boolean canHandle(String selector) {
         return ALL_RANGE.matcher(selector).matches();
     }

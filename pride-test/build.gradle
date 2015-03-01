@@ -96,6 +96,12 @@ compile - Compile classpath for source set 'main'.
 BUILD SUCCESSFUL
 """)
 		}
+
+		checkGradleOutput(prideDir, ["module-c:checkDependencyVersions", "--configuration", "compile"]) { output ->
+			assert output.contains("""
+Configuration "compile" in project ":module-c" requests version 1.0 of project ":module-a", but its current version (1.1) does not fulfill that request
+""")
+		}
 	}
 }
 
