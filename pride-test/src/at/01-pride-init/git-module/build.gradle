@@ -17,7 +17,7 @@ configurations {
 	compile
 }
 
-dependencies {
+dynamicDependencies {
 	// Test if we can init a module with a missing dependency
 	compile "some.missing:module:1.0"
 	compile "some.other.missing:module:1.0"

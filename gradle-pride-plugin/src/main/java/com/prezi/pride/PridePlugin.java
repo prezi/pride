@@ -34,6 +34,10 @@ public class PridePlugin implements Plugin<Project> {
 		// Apply Pride convention
 		project.getConvention().getPlugins().put("pride", new PrideConvention(project));
 
+		// Add dynamicDependencies extension for backwards compatibility
+		//noinspection deprecation
+		project.getExtensions().create("dynamicDependencies", DynamicDependenciesExtension.class, project);
+
 		// Use replacement rule
 		if (!isDisabled(project)) {
 			final Set<Project> projects = project.getRootProject().getAllprojects();
