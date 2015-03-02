@@ -8,6 +8,7 @@ import io.airlift.command.Command;
 import io.airlift.command.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -56,9 +57,22 @@ public class ListCommand extends AbstractFilteredPrideCommand {
 	private static class StatusFormatter implements LineFormatter {
 
 		private final Pride pride;
+		private int moduleMaxLength;
+		private int branchMaxLength;
 
-		private StatusFormatter(Pride pride) {
+		private StatusFormatter(Pride pride) throws IOException {
 			this.pride = pride;
+
+			Collection<Module> modules = pride.getModules();
+			for (Module module : modules) {
+				String name = module.getName();
+				this.moduleMaxLength = Math.max(this.moduleMaxLength, name.length());
+
+				String branch = module.getVcs().getSupport().getStatus(pride.getModuleDirectory(name)).getBranch();
+				if (!Strings.isNullOrEmpty(branch)) {
+					this.branchMaxLength = Math.max(this.branchMaxLength, branch.length());
+				}
+			}
 		}
 
 		@Override
@@ -68,12 +82,17 @@ public class ListCommand extends AbstractFilteredPrideCommand {
 			VcsStatus status = module.getVcs().getSupport().getStatus(moduleDirectory);
 			String branch = status.getBranch();
 			StringBuilder line = new StringBuilder();
+
 			line.append(status.hasUnpublishedChanges() ? 'M' : ' ');
 			line.append(status.hasUncommittedChanges() ? 'M' : ' ');
 			line.append(' ').append(module.getName());
-			line.append(' ');
+
+			line.append(Strings.repeat(" ", this.moduleMaxLength + 2 - module.getName().length()));
+
 			if (!Strings.isNullOrEmpty(branch)) {
-				line.append(branch).append('@');
+				line.append(branch);
+				line.append(Strings.repeat(" ", this.branchMaxLength + 2 - branch.length()));
+				line.append('@');
 			}
 			line.append(status.getRevision());
 			line.append(" (").append(module.getVcs().getType()).append(")");
