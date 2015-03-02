@@ -56,10 +56,10 @@ public class ListCommand extends AbstractFilteredPrideCommand {
 	private static class StatusFormatter implements LineFormatter {
 
 		private final Pride pride;
-		private int moduleMaxLength = 0;
-		private int branchMaxLength = 0;
+		private int moduleMaxLength;
+		private int branchMaxLength;
 
-		private StatusFormatter(Pride pride) throws Exception {
+		private StatusFormatter(Pride pride) throws IOException {
 			this.pride = pride;
 
 			Collection<Module> modules = pride.getModules();
