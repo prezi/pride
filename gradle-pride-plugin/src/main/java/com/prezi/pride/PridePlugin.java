@@ -6,7 +6,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.DependencyResolveDetails;
+import org.gradle.api.artifacts.DependencySubstitution;
 import org.gradle.api.artifacts.component.ModuleComponentSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class PridePlugin implements Plugin<Project> {
 			project.getConfigurations().all(new Action<Configuration>() {
 				@Override
 				public void execute(Configuration configuration) {
-					configuration.getResolutionStrategy().eachDependency(new ReplaceDependenciesAction(projects));
+					configuration.getResolutionStrategy().getDependencySubstitution().all(new ReplaceDependenciesAction(projects));
 				}
 			});
 		}
@@ -94,7 +94,7 @@ public class PridePlugin implements Plugin<Project> {
 		return project.hasProperty("pride.disable");
 	}
 
-	private static class ReplaceDependenciesAction implements Action<DependencyResolveDetails> {
+	private static class ReplaceDependenciesAction implements Action<DependencySubstitution> {
 		private Map<String, Project> modulesToProjectsMapping;
 		private final Set<Project> projects;
 
@@ -103,12 +103,12 @@ public class PridePlugin implements Plugin<Project> {
 		}
 
 		@Override
-		public void execute(DependencyResolveDetails details) {
+		public void execute(DependencySubstitution details) {
 			// Skip components that are not external components
-			if (!(details.getSelector() instanceof ModuleComponentSelector)) {
+			if (!(details.getRequested() instanceof ModuleComponentSelector)) {
 				return;
 			}
-			ModuleComponentSelector selector = (ModuleComponentSelector) details.getSelector();
+			ModuleComponentSelector selector = (ModuleComponentSelector) details.getRequested();
 			if (modulesToProjectsMapping == null) {
 				modulesToProjectsMapping = Maps.newTreeMap();
 				for (Project project : projects) {
