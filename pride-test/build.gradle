@@ -94,7 +94,7 @@ task testTransitiveResolution { task ->
 		gradlew moduleADir, "uploadArchives"
 		gradlew moduleBDir, "uploadArchives"
 		pride prideDir, "init", "-v"
-		checkGradleOutput(prideDir, ["module-c:dependencies", "--configuration", "compile"]) { output ->
+		checkGradleOutput(prideDir, ["module-c:dependencies", "--configuration", "compile"]) { exitValue, output, error ->
 			assert output.contains("""
 compile - Compile classpath for source set 'main'.
 +--- com.prezi.example.transitive:module-b:1.0
@@ -102,6 +102,20 @@ compile - Compile classpath for source set 'main'.
 \\--- project :module-a
 """)
 		}
+	}
+}
+
+task testFailingModuleBuild { task ->
+	def dir = copyTest(task, "03-failing-module-build")
+	doLast {
+        checkPrideOutput(dir, ["init"]) { exitValue, output, error ->
+            assert exitValue != 0
+            assert error.contains("""You can get more detailed information about the error by rerunning Pride with --verbose.""")
+        }
+        checkPrideOutput(dir, ["init", "--force", "--verbose"]) { exitValue, output, error ->
+            assert exitValue != 0
+            assert error.contains("""Caused by: java.lang.RuntimeException: Error during configuration time""")
+        }
 	}
 }
 
@@ -115,26 +129,37 @@ tasks.findAll { it.name.startsWith("test") }.each {
 }
 
 def pride(File dir, Object... arguments) {
-	println "Running Pride with ${arguments.join(" ")}"
-	exec {
-		workingDir dir
-		executable file("${project(':pride').projectDir}/build/install/pride/bin/pride")
-		args arguments
-	}
+    println "Running Pride with ${arguments.join(" ")}"
+    exec {
+        workingDir dir
+        executable file("${project(':pride').projectDir}/build/install/pride/bin/pride")
+        args arguments
+    }
+}
+
+def checkPrideOutput(File dir, List<?> arguments, Closure check) {
+    checkOutput(dir, file("${project(':pride').projectDir}/build/install/pride/bin/pride"), arguments, check)
 }
 
 def checkGradleOutput(File dir, List<?> args1, Closure check) {
-	def output = new ByteArrayOutputStream()
 	def arguments = new ArrayList<Object>(args1)
 	arguments.add "--stacktrace"
-	println "Running Gradle with ${arguments.join(" ")}"
-	exec {
-		workingDir dir
-		executable file("$rootDir/gradlew")
-		args arguments.toArray()
-		standardOutput = output
-	}
-	check(new String(output.toByteArray()))
+    checkOutput(dir, file("$rootDir/gradlew"), args1, check)
+}
+
+def checkOutput(File dir, File command, List<?> arguments, Closure check) {
+    def output = new ByteArrayOutputStream()
+    def error = new ByteArrayOutputStream()
+    println "Running ${command} with ${arguments.join(" ")}"
+    def result = exec {
+        workingDir = dir
+        executable = command
+        args = new ArrayList(arguments)
+        standardOutput = output
+        errorOutput = error
+        ignoreExitValue = true
+    }
+    check(result.exitValue, new String(output.toByteArray()), new String(error.toByteArray()))
 }
 
 def gradlew(File dir, Object... args1) {
