@@ -114,6 +114,7 @@ task testFailingModuleBuild { task ->
         }
         checkPrideOutput(dir, ["init", "--force", "--verbose"]) { exitValue, output, error ->
             assert exitValue != 0
+            assert !error.contains("""You can get more detailed information about the error by rerunning Pride with --verbose.""")
             assert error.contains("""Caused by: java.lang.RuntimeException: Error during configuration time""")
         }
 	}
