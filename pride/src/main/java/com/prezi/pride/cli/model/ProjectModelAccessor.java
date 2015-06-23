@@ -59,7 +59,11 @@ public class ProjectModelAccessor {
 
 					return builder.get();
 				} catch (Exception ex) {
-					throw new PrideException("Could not parse module in " + moduleDirectory + ": " + ex, ex);
+					String message = "Could not evaluate Gradle module in " + moduleDirectory + ": " + ex + ".";
+					if (!verbose) {
+						message += " You can get more detailed information about the error by rerunning Pride with --verbose.";
+					}
+					throw new PrideException(message, ex);
 				}
 			}
 		});
