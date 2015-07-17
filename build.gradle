@@ -5,7 +5,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath "com.gradle.publish:plugin-publish-plugin:0.9.0"
+		classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
 	}
 }
 
@@ -33,7 +33,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-ext.defaultGradleVersion = "2.5-20150605053008+0000"
+ext.defaultGradleVersion = "2.5"
 
 subprojects { subproject ->
 	apply plugin: "maven"
