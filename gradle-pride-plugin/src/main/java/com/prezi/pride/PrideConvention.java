@@ -98,7 +98,7 @@ public class PrideConvention {
 	 * @return The project with the given path. Never returns null.
 	 * @throws org.gradle.api.UnknownProjectException If no project with the given path exists.
 	 */
-	public Project relativeProject(String path, Closure configureClosure) throws UnknownProjectException {
+	public Project relativeProject(String path, Closure<?> configureClosure) throws UnknownProjectException {
 		return ConfigureUtil.configure(configureClosure, relativeProject(path));
 	}
 }

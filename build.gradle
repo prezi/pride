@@ -46,6 +46,7 @@ subprojects { subproject ->
 
 	tasks.withType(AbstractCompile) {
 		options.encoding = "UTF-8"
+		options.compilerArgs << "-Werror" << "-Xlint:all" << "-Xlint:-options" << "-Xlint:-serial"
 	}
 
 	repositories {

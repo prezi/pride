@@ -84,7 +84,7 @@ public class GitVcsSupport implements VcsSupport {
 			} else {
 				// Update working copy
 				String updateCommand = configuration.getString(GIT_UPDATE, "git rebase --autostash");
-				ProcessUtils.executeIn(targetDirectory, Arrays.asList((String[]) updateCommand.split(" ")));
+				ProcessUtils.executeIn(targetDirectory, Arrays.asList(updateCommand.split(" ")));
 			}
 
 			// Update submodules if necessary

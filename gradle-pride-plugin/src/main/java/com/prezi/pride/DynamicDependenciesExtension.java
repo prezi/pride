@@ -30,7 +30,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 		return dependencyHandler.add(s, o);
 	}
 
-	public Dependency add(String s, Object o, Closure closure) {
+	public Dependency add(String s, Object o, Closure<?> closure) {
 		nagUser();
 		return dependencyHandler.add(s, o, closure);
 	}

@@ -41,7 +41,7 @@ public class PridePlugin implements Plugin<Project> {
 		project.getConvention().getPlugins().put("pride", new PrideConvention(project));
 
 		// Add dynamicDependencies extension for backwards compatibility
-		project.getExtensions().create("dynamicDependencies", DynamicDependenciesExtension.class, project);
+		addLegacyDynamicDependenciesExtension(project);
 
 		// Use replacement rule
 		if (!isDisabled(project)) {
@@ -68,6 +68,11 @@ public class PridePlugin implements Plugin<Project> {
 				}
 			}
 		});
+	}
+
+	@SuppressWarnings("deprecation")
+	private void addLegacyDynamicDependenciesExtension(Project project) {
+		project.getExtensions().create("dynamicDependencies", DynamicDependenciesExtension.class, project);
 	}
 
 	private static void checkGradleVersion(Project project) {
