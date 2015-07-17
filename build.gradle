@@ -49,6 +49,12 @@ subprojects { subproject ->
 		options.compilerArgs << "-Werror" << "-Xlint:all" << "-Xlint:-options" << "-Xlint:-serial"
 	}
 
+	tasks.withType(Javadoc) {
+		if (JavaVersion.current().isJava8Compatible()) {
+			options.addStringOption 'Xdoclint:none', '-quiet'
+		}
+	}
+
 	repositories {
 		mavenLocal()
 		mavenCentral()
