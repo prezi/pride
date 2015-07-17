@@ -1,0 +1,17 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
+	dependencies {
+        classpath "com.prezi.pride:gradle-pride-plugin:@version@"
+	}
+}
+
+// Use "pride" here to check backwards compatibility
+apply plugin: "pride"
+
+group "com.example.test.file"
+
+throw new RuntimeException("Error during configuration time")

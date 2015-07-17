@@ -153,7 +153,7 @@ If your pride contains the `com.example:example` project, the Pride plugin will 
 
 ```groovy
 dependencies {
-	compile project(path: ":com.example:exampe")
+	compile project(path: ":com.example:example")
 }
 ```
 

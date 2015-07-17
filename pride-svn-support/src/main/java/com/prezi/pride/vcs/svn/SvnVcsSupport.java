@@ -30,7 +30,7 @@ public class SvnVcsSupport implements VcsSupport {
 				+ "/?"										// optional trailing slash
 				+ "$", Pattern.COMMENTS);
 	private static final Pattern REVISION = Pattern.compile("Revision: (.*)");
-	private static final Pattern ROOT_URL = Pattern.compile("Repository Root: (.*)");
+	private static final Pattern URL = Pattern.compile("URL: (.*)");
 
 	private static final Logger log = LoggerFactory.getLogger(SvnVcsSupport.class);
 
@@ -109,7 +109,7 @@ public class SvnVcsSupport implements VcsSupport {
 	}
 
 	private RepositoryUrl getRepositoryUrlInternal(File targetDirectory) throws IOException {
-		String fullUrl = getInfoValue(targetDirectory, ROOT_URL);
+		String fullUrl = getInfoValue(targetDirectory, URL);
 		return RepositoryUrl.fromString(fullUrl);
 	}
 
