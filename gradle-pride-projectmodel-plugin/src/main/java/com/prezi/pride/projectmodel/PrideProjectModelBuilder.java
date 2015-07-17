@@ -6,9 +6,6 @@ import org.gradle.tooling.provider.model.ToolingModelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Set;
-
 public class PrideProjectModelBuilder implements ToolingModelBuilder {
 	private static final Logger logger = LoggerFactory.getLogger(PrideProjectModelBuilder.class);
 
@@ -31,15 +28,11 @@ public class PrideProjectModelBuilder implements ToolingModelBuilder {
 			throw new IllegalStateException("Group is not specified for project in " + project.getProjectDir());
 		}
 
-		Map<String, Set<DynamicDependency>> dynamicDependencies = DynamicDependenciesExtractor.getDynamicDependencies(project);
-		logger.debug("Dynamic dependencies for {}: {}", project, dynamicDependencies);
-
 		return new DefaultPrideProjectModel(
 				project.getPath(),
 				String.valueOf(project.getGroup()),
 				project.getName(),
 				String.valueOf(project.getVersion()),
-				dynamicDependencies,
 				childModels.build(),
 				project.getProjectDir().getAbsolutePath()
 		);

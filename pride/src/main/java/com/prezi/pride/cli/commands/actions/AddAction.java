@@ -110,7 +110,7 @@ public class AddAction {
 					}
 					pride.addModule(moduleName, vcs);
 				} catch (Exception ex) {
-					logger.warn("Could not add module {}", moduleName);
+					logger.warn("Could not add module {}: {}", moduleName, ex);
 					logger.debug("Exception while adding module {}", moduleName, ex);
 					failedModules.add(moduleName);
 				}

@@ -1,4 +1,4 @@
-package com.prezi.pride.cli.ivyversions;
+package com.prezi.pride.ivyversions;
 
 import java.util.Comparator;
 

@@ -1,4 +1,4 @@
-package com.prezi.pride.cli.ivyversions;
+package com.prezi.pride.ivyversions;
 
 import java.util.Comparator;
 
@@ -7,7 +7,6 @@ import java.util.Comparator;
  */
 public class SubVersionMatcher implements VersionMatcher {
 	private final Comparator<String> staticVersionComparator;
-
 	public SubVersionMatcher(VersionMatcher staticVersionComparator) {
 		this.staticVersionComparator = staticVersionComparator;
 	}

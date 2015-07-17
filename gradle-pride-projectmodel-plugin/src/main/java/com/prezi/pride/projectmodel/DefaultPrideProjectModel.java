@@ -1,7 +1,6 @@
 package com.prezi.pride.projectmodel;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 
 public class DefaultPrideProjectModel implements Serializable, PrideProjectModel {
@@ -9,16 +8,14 @@ public class DefaultPrideProjectModel implements Serializable, PrideProjectModel
 	private final String group;
 	private final String name;
 	private final String version;
-	private final Map<String, Set<DynamicDependency>> dynamicDependencies;
 	private final Set<PrideProjectModel> children;
 	private final String projectDir;
 
-	public DefaultPrideProjectModel(String path, String group, String name, String version, Map<String, Set<DynamicDependency>> dynamicDependencies, Set<PrideProjectModel> children, String projectDir) {
+	public DefaultPrideProjectModel(String path, String group, String name, String version, Set<PrideProjectModel> children, String projectDir) {
 		this.path = path;
 		this.group = group;
 		this.name = name;
 		this.version = version;
-		this.dynamicDependencies = dynamicDependencies;
 		this.children = children;
 		this.projectDir = projectDir;
 	}
@@ -46,11 +43,6 @@ public class DefaultPrideProjectModel implements Serializable, PrideProjectModel
 	@Override
 	public String getVersion() {
 		return version;
-	}
-
-	@Override
-	public Map<String, Set<DynamicDependency>> getDynamicDependencies() {
-		return dynamicDependencies;
 	}
 
 	@Override
