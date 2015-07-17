@@ -9,7 +9,7 @@ You can read about Pride on [Prezi's engineering blog](http://engineering.prezi.
 
 ## How does it work?
 
-Pride works with the concept of modules: Git or Subversion repositories that contain individual Gradle projects that depend on each other. You can build large applications of such modules, but while working on the application in your local development environment, you rarely need to work on all of the modules at the same time.
+Pride works with the concept of modules: Git or Subversion repositories containing individual Gradle projects that depend on each other. You can build large applications of such modules, but while working on the application in your local development environment, you rarely need to work on all of the modules at the same time.
 
 If you only want to work on one module at a time, it's no problem, as Gradle will load the module's dependencies from whatever artifact repository you are deploying your built modules into. But things get more complicated when you want to change multiple interdependent modules at the same time. You will end up having to combine your modules into a single Gradle project, or relying on installing your modules in a local Ivy or Maven repository so that dependent modules can get to them.
 
@@ -60,8 +60,11 @@ pride do -- git status --short
 
 ### Prerequisites
 
-You need [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed. Pride is a Java application,
-so you will need to have that installed as well.
+To work with Git or Subversion modules, you'll need to have [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed.
+
+Pride is a Java application, so it requires Java 6+ as well.
+
+**Note:** Since version 0.11, Pride requires Gradle 2.5 or later. If you projects require an earlier Gradle version, try Pride version 0.10.
 
 ### Installing Pride
 
