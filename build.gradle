@@ -268,10 +268,9 @@ project("pride") {
 		}
 	}
 
-	artifacts {
-		archives(distZip) {
-			classifier "dist"
-		}
+	distTar {
+		compression Compression.GZIP
+		extension "tar.gz"
 	}
 }
 
