@@ -10,6 +10,11 @@ task prepareIntegTest(type: Sync) {
 }
 
 integTest {
+	configurations.integTestRuntime.allDependencies.withType(ProjectDependency) { projectDep ->
+		dependsOn projectDep.dependencyProject.install
+	}
+	dependsOn project(":gradle-pride-plugin").install
+	dependsOn project(":gradle-pride-projectmodel-plugin").install
 	dependsOn installDist
 	dependsOn prepareIntegTest
 }

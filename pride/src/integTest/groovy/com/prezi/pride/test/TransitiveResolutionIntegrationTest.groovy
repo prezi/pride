@@ -22,6 +22,7 @@ compile - Compile classpath for source set 'main'.
 \\--- com.prezi.example.transitive:module-b:1.0
      \\--- com.prezi.example.transitive:module-a:1.0 -> project :module-a
 """)
+			process.waitForProcessOutput()
 			assert process.exitValue() == 0
 		}
 
@@ -29,6 +30,7 @@ compile - Compile classpath for source set 'main'.
 			assert process.text.contains("""
 Configuration "compile" in project ":module-c" requests version 1.0 of project ":module-a", but its current version (1.1) does not fulfill that request
 """)
+			process.waitForProcessOutput()
 			assert process.exitValue() == 0
 		}
 	}

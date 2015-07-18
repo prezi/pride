@@ -55,6 +55,8 @@ subprojects { subproject ->
 		}
 	}
 
+	tasks.withType(Upload).all { task -> task.dependsOn "check" }
+
 	def generatedIntegTestResourcesDir = file("$buildDir/generated-resources/integTest")
 	def projectLocationsProperties = file("$generatedIntegTestResourcesDir/project-locations.properties")
 	task createProjectLocationFile {
@@ -313,7 +315,6 @@ task wrapper(type: Wrapper) {
 }
 
 allprojects {
-	tasks.withType(Upload).all { task -> task.dependsOn "check" }
 	tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
 		options.compilerArgs << "-Xlint:unchecked"
 	}
