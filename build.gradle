@@ -55,6 +55,47 @@ subprojects { subproject ->
 		}
 	}
 
+	def generatedIntegTestResourcesDir = file("$buildDir/generated-resources/integTest")
+	def projectLocationsProperties = file("$generatedIntegTestResourcesDir/project-locations.properties")
+	task createProjectLocationFile {
+		inputs.property "projectDir", projectDir
+		outputs.file projectLocationsProperties
+		doLast {
+			mkdir(projectLocationsProperties.parentFile)
+			delete(projectLocationsProperties)
+			projectLocationsProperties << "rootDir=${rootDir.path}\n"
+			projectLocationsProperties << "projectDir=${projectDir.path}\n"
+			projectLocationsProperties << "buildDir=${buildDir.path}\n"
+			projectLocationsProperties << "prideInstallationDir=${project(":pride").buildDir.path}/install/pride\n"
+		}
+	}
+
+	sourceSets {
+		test {
+			output.dir generatedIntegTestResourcesDir, builtBy: createProjectLocationFile
+		}
+		integTest {
+			java.srcDir file('src/integTest/java')
+			groovy.srcDir file('src/integTest/groovy')
+			resources.srcDir file('src/integTest/resources')
+		}
+	}
+
+	dependencies {
+		integTestCompile sourceSets.main.output
+		integTestCompile configurations.testCompile
+		integTestCompile sourceSets.test.output
+		integTestRuntime configurations.runtime
+	}
+
+	task integTest(type: Test) {
+		shouldRunAfter test
+		testClassesDir = sourceSets.integTest.output.classesDir
+		classpath = sourceSets.integTest.runtimeClasspath
+	}
+
+	check.dependsOn integTest
+
 	repositories {
 		mavenLocal()
 		mavenCentral()

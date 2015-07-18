@@ -1,0 +1,15 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task prepareIntegTest(type: Sync) {
+	from "src/integTest/data"
+	into "$buildDir/integration-tests"
+	filter ReplaceTokens, tokens: [
+			version: version,
+			repo   : "file:///" + buildDir + "/repo"
+	]
+}
+
+integTest {
+	dependsOn installDist
+	dependsOn prepareIntegTest
+}
