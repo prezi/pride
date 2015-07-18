@@ -11,8 +11,8 @@ class TransitiveResolutionIntegrationTest extends AbstractIntegrationSpec {
 		def moduleBDir = file("module-b")
 
 		FileUtils.forceMkdir repoDir
-		gradle workingDir: moduleADir, "uploadArchives"
-		gradle workingDir: moduleBDir, "uploadArchives"
+		gradle gradlewDir: rootDir, workingDir: moduleADir, "uploadArchives"
+		gradle gradlewDir: rootDir, workingDir: moduleBDir, "uploadArchives"
 		pride workingDir: prideDir, "init", "-v", "--gradle-version", defaultGradleVersion
 
 		expect:

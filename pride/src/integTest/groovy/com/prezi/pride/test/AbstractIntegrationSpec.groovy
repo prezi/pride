@@ -123,7 +123,8 @@ class AbstractIntegrationSpec extends Specification {
 	}
 
 	Process gradle(Map<String, ?> options, List<?> arguments, Closure check = null) {
-		def commandLine = ["$rootDir/gradlew", *arguments]
+		def gradlewDir = options.gradlewDir ?: options.workingDir ?: dir
+		def commandLine = ["$gradlewDir/gradlew", *arguments]
 		exec options, commandLine, check
 	}
 
