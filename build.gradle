@@ -313,9 +313,3 @@ project("gradle-pride-projectmodel-plugin") {
 task wrapper(type: Wrapper) {
 	gradleVersion = defaultGradleVersion
 }
-
-allprojects {
-	tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
-		options.compilerArgs << "-Xlint:unchecked"
-	}
-}
