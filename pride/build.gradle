@@ -1,0 +1,20 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task prepareIntegTest(type: Sync) {
+	from "src/integTest/data"
+	into "$buildDir/generated-resources/integration-tests"
+	filter ReplaceTokens, tokens: [
+			version: version,
+			repo   : "file:///" + buildDir + "/repo"
+	]
+}
+
+integTest {
+	configurations.integTestRuntime.allDependencies.withType(ProjectDependency) { projectDep ->
+		dependsOn projectDep.dependencyProject.install
+	}
+	dependsOn project(":gradle-pride-plugin").install
+	dependsOn project(":gradle-pride-projectmodel-plugin").install
+	dependsOn installDist
+	dependsOn prepareIntegTest
+}

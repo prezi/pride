@@ -55,6 +55,52 @@ subprojects { subproject ->
 		}
 	}
 
+	tasks.withType(Upload).all { task -> task.dependsOn "check" }
+
+	def generatedIntegTestResourcesDir = file("$buildDir/generated-resources/integTest")
+	def projectLocationsProperties = file("$generatedIntegTestResourcesDir/project-locations.properties")
+	task createProjectLocationFile {
+		inputs.property "projectDir", projectDir
+		outputs.file projectLocationsProperties
+		doLast {
+			mkdir(projectLocationsProperties.parentFile)
+			def props = [
+			        rootDir: rootDir.path,
+					projectDir: projectDir.path,
+					buildDir: buildDir.path,
+					prideInstallationDir: project(":pride").buildDir.path + "/install/pride",
+					defaultGradleVersion: defaultGradleVersion
+			] as Properties
+			projectLocationsProperties.withOutputStream { props.store(it, "") }
+		}
+	}
+
+	sourceSets {
+		test {
+			output.dir generatedIntegTestResourcesDir, builtBy: createProjectLocationFile
+		}
+		integTest {
+			java.srcDir file('src/integTest/java')
+			groovy.srcDir file('src/integTest/groovy')
+			resources.srcDir file('src/integTest/resources')
+		}
+	}
+
+	dependencies {
+		integTestCompile sourceSets.main.output
+		integTestCompile configurations.testCompile
+		integTestCompile sourceSets.test.output
+		integTestRuntime configurations.runtime
+	}
+
+	task integTest(type: Test) {
+		shouldRunAfter test
+		testClassesDir = sourceSets.integTest.output.classesDir
+		classpath = sourceSets.integTest.runtimeClasspath
+	}
+
+	check.dependsOn integTest
+
 	repositories {
 		mavenLocal()
 		mavenCentral()
@@ -266,11 +312,4 @@ project("gradle-pride-projectmodel-plugin") {
 
 task wrapper(type: Wrapper) {
 	gradleVersion = defaultGradleVersion
-}
-
-allprojects {
-	tasks.withType(Upload).all { task -> task.dependsOn "check" }
-	tasks.withType(org.gradle.api.tasks.compile.JavaCompile) {
-		options.compilerArgs << "-Xlint:unchecked"
-	}
 }
