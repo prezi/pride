@@ -3,6 +3,10 @@ import com.google.common.base.Charsets
 import com.google.common.io.Files
 import com.google.common.io.Resources
 import org.apache.commons.io.FileUtils
+import org.junit.Rule
+import org.junit.rules.MethodRule
+import org.junit.runners.model.FrameworkMethod
+import org.junit.runners.model.Statement
 import spock.lang.Specification
 
 class AbstractIntegrationSpec extends Specification {
@@ -11,17 +15,41 @@ class AbstractIntegrationSpec extends Specification {
 	File buildDir
 	File prideInstallationDir
 	File dir
-	String defaultGradleVersion = "2.5"
+	String defaultGradleVersion
 
-	def setup() {
-		def testName = this.getClass().simpleName
+	@Rule
+	final MethodRule testData = new MethodRule() {
+		@Override
+		Statement apply(Statement base, FrameworkMethod method, Object target) {
+			String methodName = method.name
+			return new Statement() {
+				@Override
+				void evaluate() throws Throwable {
+					def testName = AbstractIntegrationSpec.this.getClass().simpleName
 
-		def projectLocations = asProps(Resources.toString(Resources.getResource("project-locations.properties"), Charsets.UTF_8))
-		rootDir = new File(projectLocations.rootDir as String)
-		projectDir = new File(projectLocations.projectDir as String)
-		buildDir = new File(projectLocations.buildDir as String)
-		prideInstallationDir = new File(projectLocations.prideInstallationDir as String)
-		dir = new File(buildDir, "integration-tests/${testName}")
+					def projectLocations = asProps(Resources.toString(Resources.getResource("project-locations.properties"), Charsets.UTF_8))
+					rootDir = new File(projectLocations.rootDir as String)
+					projectDir = new File(projectLocations.projectDir as String)
+					buildDir = new File(projectLocations.buildDir as String)
+					prideInstallationDir = new File(projectLocations.prideInstallationDir as String)
+					defaultGradleVersion = projectLocations.defaultGradleVersion as String
+
+					def source = new File(buildDir, "generated-resources/integration-tests/${testName}")
+					dir = new File(buildDir, "integration-tests/${testName}/${methodName}")
+					FileUtils.deleteQuietly(dir)
+					FileUtils.forceMkdir(dir)
+
+					if (source.isDirectory()) {
+						FileUtils.copyDirectory(source, dir)
+					}
+
+					try {
+						base.evaluate();
+					} finally {
+					}
+				}
+			}
+		}
 	}
 
 	File file(Object path) {
@@ -38,13 +66,13 @@ class AbstractIntegrationSpec extends Specification {
 		return dest
 	}
 
-	Properties asProps(String contents) {
+	static Properties asProps(String contents) {
 		def props = new Properties()
 		props.load(new StringReader(contents))
 		return props
 	}
 
-	def asProps(File f) {
+	static Properties asProps(File f) {
 		def props = new Properties()
 		f.withInputStream {
 			props.load(it)
@@ -93,8 +121,10 @@ class AbstractIntegrationSpec extends Specification {
 	Process gradle(List<?> arguments, Closure check = null) {
 		gradle [:], arguments, check
 	}
+
 	Process gradle(Map<String, ?> options, List<?> arguments, Closure check = null) {
 		def commandLine = ["$rootDir/gradlew", *arguments]
 		exec options, commandLine, check
 	}
+
 }

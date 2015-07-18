@@ -2,7 +2,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 task prepareIntegTest(type: Sync) {
 	from "src/integTest/data"
-	into "$buildDir/integration-tests"
+	into "$buildDir/generated-resources/integration-tests"
 	filter ReplaceTokens, tokens: [
 			version: version,
 			repo   : "file:///" + buildDir + "/repo"
