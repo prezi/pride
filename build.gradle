@@ -243,6 +243,12 @@ project("pride-svn-support") {
 	}
 }
 
+project("pride-hg-support") {
+	dependencies {
+		compile project(path: ":pride-core")
+	}
+}
+
 project("pride") {
 	apply plugin: "application"
 	mainClassName = "com.prezi.pride.cli.PrideCli"
@@ -255,6 +261,7 @@ project("pride") {
 
 		runtime project(path: ":pride-git-support")
 		runtime project(path: ":pride-svn-support")
+		runtime project(path: ":pride-hg-support")
 	}
 
 	install { dependsOn installDist }

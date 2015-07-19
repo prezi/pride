@@ -9,7 +9,7 @@ You can read about Pride on [Prezi's engineering blog](http://engineering.prezi.
 
 ## How does it work?
 
-Pride works with the concept of modules: Git or Subversion repositories containing individual Gradle projects that depend on each other. You can build large applications of such modules, but while working on the application in your local development environment, you rarely need to work on all of the modules at the same time.
+Pride works with the concept of modules: Git, Mercurial or Subversion repositories containing individual Gradle projects that depend on each other. You can build large applications of such modules, but while working on the application in your local development environment, you rarely need to work on all of the modules at the same time.
 
 If you only want to work on one module at a time, it's no problem, as Gradle will load the module's dependencies from whatever artifact repository you are deploying your built modules into. But things get more complicated when you want to change multiple interdependent modules at the same time. You will end up having to combine your modules into a single Gradle project, or relying on installing your modules in a local Ivy or Maven repository so that dependent modules can get to them.
 
@@ -47,6 +47,9 @@ pride add network-component backend-api
 # Now you do some work and realize you also need another module (with an absolute URL)
 pride add https://github.com/myself/myproject
 
+# To add a mercurial module, use --repo-type
+pride add --repo-type hg mercurial-project
+
 # Once you changed stuff, you probably want to run "check" on all your projects:
 ./gradlew check
 
@@ -60,7 +63,7 @@ pride do -- git status --short
 
 ### Prerequisites
 
-To work with Git or Subversion modules, you'll need to have [Git](http://git-scm.org/) or [Subversion](http://subversion.tigris.org) installed.
+To work with Git, Mercurial or Subversion modules, you'll need to have [Git](http://git-scm.org/), [Mercurial](http://mercurial.selenic.com/) or [Subversion](http://subversion.tigris.org) installed.
 
 Pride is a Java application, so it requires Java 6+ as well.
 
@@ -117,6 +120,10 @@ To create a new pride do this in an empty directory:
 To add modules by cloning them:
 
     $ pride add <repo>
+
+To clone mercurial module:
+
+    $ pride add --repo-type hg <repo>
 
 Where `<repo>` is either a full repository URL (like `git@github.com:prezi/pride.git`), or the name of the repository under the `repo.base.url` configuration setting.
 
@@ -178,13 +185,13 @@ Crafting your modules so that they are buildable on their own (*stand-alone mode
 * Do not use `buildSrc` to store your additional build logic. It's not a very good feature to start with, and Pride doesn't support it. Apply additional build logic from `something.gradle` instead.
 * Do not rely on `project.rootDir` or `rootProject` either. These properties change depending on whether your project is part of a pride or not. Instead always refer to the parent project with `relativeProject(":")` and take the `projectDir` from that.
 
-## Git repo caching
+## Repo caching
 
-To quickly create (and discard) prides, Git repos of modules are cached locally. Here's what Pride does when you `add` a module with cache enabled:
+To quickly create (and discard) prides, Git or Mercurial repos of modules are cached locally. Here's what Pride does when you `add` a module with cache enabled:
 
 * checks in its cache directory if it already has a clone of the module
-    * if it doesn't exist, it creates a mirror clone of it (see `--mirror` in [git-clone](http://git-scm.com/docs/git-clone))
-    * if it exists, it does a `git fetch --all` on it
+    * if it doesn't exist, it creates a mirror clone of it (see `--mirror` in [git-clone](http://git-scm.com/docs/git-clone) or `--noupdate` in [hg-clone](https://selenic.com/hg/help/clone))
+    * if it exists, it does a `git fetch --all` or `hg pull (--rebase|--update)` on it
 * clones the cached repo to your pride
 * sets `origin` to point to the original repo
 

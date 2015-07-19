@@ -1,6 +1,9 @@
 package com.prezi.pride.vcs;
 
+import com.prezi.pride.PrideException;
+
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +45,17 @@ public class RepoCache {
 			vcsSupport.checkout(repositoryUrl, moduleInCache, null, false, true);
 		} else {
 			log.info("Updating cached repository in " + moduleInCacheName);
-			vcsSupport.update(moduleInCache, null, false, true);
+			try {
+				vcsSupport.update(moduleInCache, null, false, true);
+			} catch (PrideException e) {
+				/*
+				 * Probably happended because mercurial repos (origin vs. repo in cache)
+				 * are unrelated. Remedy by reinitializing the cache.
+				 */
+				log.info("Cleaning up stale repo ({}) from the cache: {}", repositoryUrl, moduleInCacheName);
+				FileUtils.deleteDirectory(moduleInCache);
+				vcsSupport.checkout(repositoryUrl, moduleInCache, null, false, true);
+			}
 		}
 
 		vcsSupport.checkout(moduleInCache.getAbsolutePath(), targetDirectory, branch, recursive, false);

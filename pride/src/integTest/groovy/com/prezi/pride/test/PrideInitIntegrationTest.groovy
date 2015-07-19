@@ -1,6 +1,6 @@
 package com.prezi.pride.test
 
-class PrideInitIntegrationTest extends AbstractIntegrationSpec {
+class PrideInitIntegrationTest extends AbstractIntegrationSpec implements HgTestSupport {
 	def "pride init"() {
 		given:
 		setupModules()
@@ -19,6 +19,8 @@ include 'file-module'
 project(':file-module').projectDir = file('file-module')
 include 'git-module'
 project(':git-module').projectDir = file('git-module')
+include 'hg-module'
+project(':hg-module').projectDir = file('hg-module')
 """
 
 		rawContents(".pride/version", "#") == """
@@ -31,6 +33,8 @@ modules.0.name = file-module
 modules.0.vcs = file
 modules.1.name = git-module
 modules.1.vcs = git
+modules.2.name = hg-module
+modules.2.vcs = hg
 """)
 
 		when:
@@ -44,10 +48,14 @@ modules.0.name = file-module
 modules.0.vcs = file
 modules.1.name = git-module
 modules.1.vcs = git
+modules.2.name = hg-module
+modules.2.vcs = hg
 modules.0.remote = ${dir}/file-module
 modules.0.revision = none
 modules.1.remote = git@github.com:prezi/test
 modules.1.revision = master
+modules.2.remote = https://bitbucket.org/prezi/test
+modules.2.revision = default
 """)
 
 		when:
@@ -57,11 +65,15 @@ modules.1.revision = master
 		rawContents("settings.gradle", "//") == """
 include 'git-module'
 project(':git-module').projectDir = file('git-module')
+include 'hg-module'
+project(':hg-module').projectDir = file('hg-module')
 """
 		asProps(file(".pride/config")) == asProps("""
 gradle.version = ${defaultGradleVersion}
 modules.0.name = git-module
 modules.0.vcs = git
+modules.1.name = hg-module
+modules.1.vcs = hg
 """)
 
 	}
@@ -86,5 +98,7 @@ modules.0.vcs = git
 		exec workingDir: "git-module", "git", "add", "-A"
 		exec workingDir: "git-module", "git", "commit", "--message", "Initial"
 		exec workingDir: "git-module", "git", "remote", "add", "origin", "git@github.com:prezi/test"
+
+		initializeHgRepo('hg-module')
 	}
 }
