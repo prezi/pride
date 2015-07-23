@@ -71,7 +71,7 @@ Pride is a Java application, so it requires Java 6+ as well.
 You can easily install Pride with [Homebrew](http://brew.sh):
 
 ```text
-$ brew install prezi/oss/pride
+$ brew install lptr/oss/pride
 ```
 
 You can also download the latest version of Pride from the [releases](https://github.com/prezi/pride/releases) section.
