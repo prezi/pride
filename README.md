@@ -37,7 +37,7 @@ Here's a typical Pride session:
 
 ```bash
 # Create the pride
-mkdir quick-fix-for-securty-bug
+mkdir quick-fix-for-security-bug
 cd quick-fix-for-security-bug
 pride init
 
