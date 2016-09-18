@@ -10,13 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ProcessUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessUtils.class);
 
-	public static Process executeIn(File directory, List<?> commandLine, boolean processOutput, boolean redirectErrorStream) throws IOException {
+	public static Process executeIn(File directory, List<?> commandLine, boolean processOutput, boolean redirectErrorStream, List<Integer> acceptableExitCodes) throws IOException {
 		List<String> stringCommandLine = new ArrayList<String>();
 		for (Object item : commandLine) {
 			stringCommandLine.add(String.valueOf(item));
@@ -57,7 +58,7 @@ public class ProcessUtils {
 			throw new IOException("Interrupted", e);
 		}
 		int result = process.exitValue();
-		if (result != 0) {
+		if (!acceptableExitCodes.contains(result)) {
 			String output;
 			if (!processOutput) {
 				List<String> outputLines = new ArrayList<String>();
@@ -71,6 +72,11 @@ public class ProcessUtils {
 		}
 
 		return process;
+	}
+
+	public static Process executeIn(File directory, List<?> commandLine, boolean processOutput, boolean redirectErrorStream) throws IOException {
+		List<Integer> defaultAcceptableExitCodes = Arrays.asList(0);
+		return ProcessUtils.executeIn(directory, commandLine, processOutput, redirectErrorStream, defaultAcceptableExitCodes);
 	}
 
 	public static Process executeIn(File directory, List<?> commandLine, boolean processOutput) throws IOException {
