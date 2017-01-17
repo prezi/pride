@@ -131,7 +131,16 @@ public class Pride {
 		final File moduleDir = getModuleDirectory(name);
 		logger.info("Removing " + name + " from " + moduleDir);
 		modules.remove(name);
-		FileUtils.deleteDirectory(moduleDir);
+		try {
+			FileUtils.deleteDirectory(moduleDir);
+		}
+		catch (IOException ex) {
+			// Found on Windows only, sometimes files cannot be deleted
+			// This can be due to background processes monitoring the filesystem or
+			// the user left a command shell open in the folder
+			logger.error("Removing " + name + " failed with error: " + ex.getMessage());
+			logger.error("Please remove folder " + moduleDir + " manually");
+		}
 	}
 
 	public boolean hasModule(String name) {
