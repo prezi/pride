@@ -48,9 +48,6 @@ public class ProjectModelAccessor {
 					// See https://github.com/prezi/pride/issues/94
 					arguments.add("--init-script", modelInitFile.getAbsolutePath());
 
-					// See https://github.com/prezi/pride/issues/91
-					arguments.add("--no-search-upward");
-
 					// See https://github.com/prezi/pride/issues/57
 					arguments.add("-P", "pride.disable");
 

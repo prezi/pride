@@ -14,7 +14,7 @@ import org.gradle.api.artifacts.result.DependencyResult;
 import org.gradle.api.artifacts.result.ResolvedDependencyResult;
 import org.gradle.api.internal.artifacts.dsl.dependencies.ProjectFinder;
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.api.internal.tasks.options.Option;
+import org.gradle.api.tasks.options.Option;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 

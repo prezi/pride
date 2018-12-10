@@ -6,7 +6,7 @@ class PrideInitIntegrationTest extends AbstractIntegrationSpec {
 		setupModules()
 
 		when:
-		pride "init", "--gradle-version", defaultGradleVersion
+		pride "init", "--gradle-version", defaultGradleVersion, "--verbose"
 
 		then:
 		file("build.gradle").exists()
@@ -69,11 +69,10 @@ modules.0.vcs = git
 	def "using with earlier Gradle versions produces error"() {
 		given:
 		setupModules()
-		pride "init", "--gradle-version", "2.4"
 
 		expect:
-		gradle(["tasks"]) { Process process ->
-			assert process.err.text.contains("""Pride requires Gradle version 2.5 or later. If you want to use an earlier Gradle version, try Pride 0.10.""")
+		pride([ "init", "--gradle-version", "2.4"]) { Process process ->
+			assert process.err.text.contains("""org.gradle.tooling.UnsupportedVersionException: Support for builds using Gradle versions older than 2.6 was removed in tooling API version 5.0.""")
 			process.waitForProcessOutput()
 			assert process.exitValue() != 0
 		}

@@ -33,7 +33,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-ext.defaultGradleVersion = "2.5"
+ext.defaultGradleVersion = "5.0"
 
 subprojects { subproject ->
 	apply plugin: "maven"
@@ -95,7 +95,7 @@ subprojects { subproject ->
 
 	task integTest(type: Test) {
 		shouldRunAfter test
-		testClassesDir = sourceSets.integTest.output.classesDir
+		testClassesDirs = sourceSets.integTest.output.classesDirs
 		classpath = sourceSets.integTest.runtimeClasspath
 	}
 
@@ -104,6 +104,9 @@ subprojects { subproject ->
 	repositories {
 		mavenLocal()
 		mavenCentral()
+		maven {
+			url "http://gradle.artifactoryonline.com/gradle/libs-releases"
+		}
 		maven {
 			url "http://gradle.artifactoryonline.com/gradle/libs-snapshots"
 		}
@@ -307,8 +310,4 @@ project("gradle-pride-projectmodel-plugin") {
 		compile gradleApi()
 		compile project(":pride-core")
 	}
-}
-
-task wrapper(type: Wrapper) {
-	gradleVersion = defaultGradleVersion
 }
