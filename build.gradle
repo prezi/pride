@@ -37,6 +37,7 @@ ext.defaultGradleVersion = "5.0"
 
 subprojects { subproject ->
 	apply plugin: "maven"
+	apply plugin: "maven-publish"
 	apply plugin: "groovy"
 
 	description = "Pride manages multiple Gradle modules as a single Gradle project"
@@ -121,56 +122,56 @@ subprojects { subproject ->
 		testRuntime "org.slf4j:slf4j-simple:1.7.7"
 	}
 
-	uploadArchives {
-		repositories {
-			mavenDeployer {
-				pom.project {
-					url "http://github.com/prezi/pride"
-					name subproject.name
-					description subproject.description
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				pom {
+					url = "http://github.com/prezi/pride"
+					name = subproject.name
+					description = subproject.description
 
 					scm {
-						url "scm:git@github.com:prezi/pride.git"
-						connection "scm:git@github.com:prezi/pride.git"
-						developerConnection "scm:git@github.com:prezi/pride.git"
+						url = "scm:git@github.com:prezi/pride.git"
+						connection = "scm:git@github.com:prezi/pride.git"
+						developerConnection = "scm:git@github.com:prezi/pride.git"
 					}
 
 					licenses {
 						license {
-							name "The Apache Software License, Version 2.0"
-							url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-							distribution "repo"
+							name = "The Apache Software License, Version 2.0"
+							url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+							distribution = "repo"
 						}
 					}
 
 					developers {
 						developer {
-							id "lptr"
-							name "Lorant Pinter"
+							id = "lptr"
+							name = "Lorant Pinter"
+						}
+						developer {
+							id = "rosadam"
+							name = "Adam Rosenberger"
 						}
 					}
 				}
-
+			}
+		}
+		repositories {
+			maven {
+				def isSnapshot = version.endsWith('SNAPSHOT')
 				if (ossRelease) {
-					repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-						def user = project.getProperty("sonatypeUsername")
-						def password = project.getProperty("sonatypePassword")
-						authentication(userName: user, password: password)
+					credentials {
+						username = project.getProperty("sonatypeUsername")
+						password = project.getProperty("sonatypePassword")
 					}
-					snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-						def user = project.getProperty("sonatypeUsername")
-						def password = project.getProperty("sonatypePassword")
-						authentication(userName: user, password: password)
-					}
+					url = isSnapshot ? "https://oss.sonatype.org/content/repositories/snapshots/" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 				} else if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
-					def user = project.getProperty("nexusUser")
-					def password = project.getProperty("nexusPassword")
-					repository(url: "https://artifactory.prezi.com/plugins-release-local/") {
-						authentication(userName: user, password: password)
+					credentials {
+						username = project.getProperty("nexusUser")
+						password = project.getProperty("nexusPassword")
 					}
-					snapshotRepository(url: "https://artifactory.prezi.com/plugins-snapshot-local/") {
-						authentication(userName: user, password: password)
-					}
+					url = isSnapshot ? "https://artifactory.prezi.com/plugins-snapshot-local/" : "https://artifactory.prezi.com/plugins-release-local/"
 				}
 			}
 		}
@@ -180,15 +181,7 @@ subprojects { subproject ->
 		apply plugin: "signing"
 
 		signing {
-			sign configurations.archives
-		}
-
-		uploadArchives {
-			repositories {
-				mavenDeployer {
-					beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-				}
-			}
+			sign publishing.publications.mavenJava
 		}
 	}
 
