@@ -122,9 +122,27 @@ subprojects { subproject ->
 		testRuntime "org.slf4j:slf4j-simple:1.7.7"
 	}
 
+	task javadocJar(type: Jar) {
+		dependsOn javadoc
+		classifier = "javadoc"
+		from "build/docs/javadoc"
+	}
+
+	task sourcesJar(type: Jar) {
+		from sourceSets.main.allSource
+		classifier = "sources"
+	}
+
+	jar {
+		from rootProject.file("LICENSE.txt")
+	}
+
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
+				artifact jar
+				artifact javadocJar
+				artifact sourcesJar
 				pom {
 					url = "http://github.com/prezi/pride"
 					name = subproject.name
@@ -191,27 +209,6 @@ subprojects { subproject ->
 				version: version
 		]
 	}
-
-	task javadocJar(type: Jar) {
-		dependsOn javadoc
-		classifier = "javadoc"
-		from "build/docs/javadoc"
-	}
-
-	task sourcesJar(type: Jar) {
-		from sourceSets.main.allSource
-		classifier = "sources"
-	}
-
-	jar {
-		from rootProject.file("LICENSE.txt")
-	}
-
-	artifacts {
-		archives jar
-		archives javadocJar
-		archives sourcesJar
-	}
 }
 
 project("pride-core") {
@@ -267,6 +264,10 @@ project("pride") {
 	distTar {
 		compression Compression.GZIP
 		extension "tar.gz"
+	}
+	publishing.publications.mavenJava {
+		artifact distTar
+		artifact distZip
 	}
 }
 
