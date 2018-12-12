@@ -22,7 +22,7 @@ public class DynamicDependenciesExtension extends GroovyObjectSupport {
 	@SuppressWarnings("UnusedDeclaration")
 	public Object methodMissing(String name, Object args) {
 		nagUser();
-		return dependencyHandler.methodMissing(name, args);
+		return dependencyHandler.getAdditionalMethods().tryInvokeMethod(name, args);
 	}
 
 	public Dependency add(String s, Object o) {
