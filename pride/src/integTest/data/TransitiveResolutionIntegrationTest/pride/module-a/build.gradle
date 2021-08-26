@@ -14,12 +14,13 @@ buildscript {
 
 apply plugin: "pride"
 apply plugin: "java"
-apply plugin: "maven"
+apply plugin: "maven-publish"
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "@repo@")
-        }
-    }
+publishing {
+	repositories {
+		maven {
+			url = "@repo@"
+		}
+	}
 }
+

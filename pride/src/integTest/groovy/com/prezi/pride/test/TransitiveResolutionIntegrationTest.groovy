@@ -16,7 +16,7 @@ class TransitiveResolutionIntegrationTest extends AbstractIntegrationSpec {
 		pride workingDir: prideDir, "init", "-v", "--gradle-version", defaultGradleVersion
 
 		expect:
-		gradle workingDir: prideDir, ["module-c:dependencies", "--configuration", "compile"], { Process process ->
+		gradle workingDir: prideDir, ["module-c:dependencies", "--configuration", "compileClasspath"], { Process process ->
 			assert process.text.contains("""\\--- com.prezi.example.transitive:module-a:1.0 -> project :module-a""")
 			process.waitForProcessOutput()
 			assert process.exitValue() == 0

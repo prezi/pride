@@ -14,12 +14,12 @@ buildscript {
 
 apply plugin: "pride"
 apply plugin: "java"
-apply plugin: "maven"
+apply plugin: "maven-publish"
 
 repositories {
 	maven { url "@repo@" }
 }
 
 dependencies {
-	compile group: "com.prezi.example.transitive", name: "module-b", version: "1.0"
+	implementation group: "com.prezi.example.transitive", name: "module-b", version: "1.0"
 }

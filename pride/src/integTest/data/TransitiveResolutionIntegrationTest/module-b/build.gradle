@@ -14,20 +14,20 @@ buildscript {
 
 apply plugin: "com.prezi.pride"
 apply plugin: "java"
-apply plugin: "maven"
+apply plugin: "maven-publish"
 
 repositories {
 	maven { url "@repo@" }
 }
 
 dependencies {
-	compile group: "com.prezi.example.transitive", name: "module-a", version: "1.0"
+	implementation group: "com.prezi.example.transitive", name: "module-a", version: "1.0"
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "@repo@")
-        }
-    }
+publishing {
+	repositories {
+		maven {
+			url = "@repo@"
+		}
+	}
 }
