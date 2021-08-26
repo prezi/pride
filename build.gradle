@@ -33,7 +33,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-ext.defaultGradleVersion = "7.0"
+ext.defaultGradleVersion = "7.1"
 
 subprojects { subproject ->
 	apply plugin: "maven"
@@ -106,10 +106,10 @@ subprojects { subproject ->
 		mavenLocal()
 		mavenCentral()
 		maven {
-			url "http://repo.gradle.org/gradle/libs-releases"
+			url "https://repo.gradle.org/gradle/libs-releases"
 		}
 		maven {
-			url "http://repo.gradle.org/gradle/libs-snapshots"
+			url "https://repo.gradle.org/gradle/libs-snapshots"
 		}
 	}
 
