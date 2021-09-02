@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
-	private static final String MINIMUM_GRADLE_VERSION = "4.0";
+	private static final String MINIMUM_GRADLE_VERSION = "4.8";
 
 	@Override
 	public void apply(Project project) {
@@ -107,10 +107,6 @@ public class PridePlugin implements Plugin<Project> {
 	private static boolean alreadyCheckedIfRunningFromRootOfPride;
 
 	private static void checkIfNotRunningFromRootOfPride(final Project project) throws IOException {
-		// Don't check for a pride when not searching upward
-		if (!project.getGradle().getStartParameter().isSearchUpwards()) {
-			return;
-		}
 		if (!alreadyCheckedIfRunningFromRootOfPride) {
 			if (!Pride.containsPride(project.getRootDir())) {
 				logger.debug("No pride found in " + String.valueOf(project.getRootDir()));
