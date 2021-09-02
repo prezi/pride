@@ -11,12 +11,12 @@ class TransitiveResolutionIntegrationTest extends AbstractIntegrationSpec {
 		def moduleBDir = file("module-b")
 
 		FileUtils.forceMkdir repoDir
-		gradle gradlewDir: rootDir, workingDir: moduleADir, "uploadArchives"
-		gradle gradlewDir: rootDir, workingDir: moduleBDir, "uploadArchives"
+		gradle gradlewDir: rootDir, workingDir: moduleADir, "publish"
+		gradle gradlewDir: rootDir, workingDir: moduleBDir, "publish"
 		pride workingDir: prideDir, "init", "-v", "--gradle-version", defaultGradleVersion
 
 		expect:
-		gradle workingDir: prideDir, ["module-c:dependencies", "--configuration", "compileClasspath"], { Process process ->
+		gradle workingDir: prideDir, ["module-c:dependencies", "--configuration", "runtimeClasspath"], { Process process ->
 			assert process.text.contains("""\\--- com.prezi.example.transitive:module-a:1.0 -> project :module-a""")
 			process.waitForProcessOutput()
 			assert process.exitValue() == 0

@@ -33,7 +33,7 @@ allprojects {
 }
 
 // Use this Gradle version by default
-ext.defaultGradleVersion = "7.1"
+ext.defaultGradleVersion = "7.0"
 
 subprojects { subproject ->
 	apply plugin: "maven"

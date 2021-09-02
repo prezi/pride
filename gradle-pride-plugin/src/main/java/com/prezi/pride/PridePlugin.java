@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class PridePlugin implements Plugin<Project> {
 	private static final Logger logger = LoggerFactory.getLogger(PridePlugin.class);
-	private static final String MINIMUM_GRADLE_VERSION = "4.0";
+	private static final String MINIMUM_GRADLE_VERSION = "4.8";
 
 	@Override
 	public void apply(Project project) {
