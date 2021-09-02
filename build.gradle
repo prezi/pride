@@ -140,7 +140,7 @@ subprojects { subproject ->
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
-				artifact jar
+				from components.java
 				artifact javadocJar
 				artifact sourcesJar
 				pom {
