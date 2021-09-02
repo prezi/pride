@@ -189,7 +189,8 @@ subprojects { subproject ->
 						username = project.getProperty("nexusUser")
 						password = project.getProperty("nexusPassword")
 					}
-					url = isSnapshot ? "https://artifactory.prezi.com/plugins-snapshot-local/" : "https://artifactory.prezi.com/plugins-release-local/"
+					def baseRepoUrl = "https://artifactory.prezi.com/artifactory"
+					url = isSnapshot ? "${baseRepoUrl}/plugins-snapshot-local/" : "${baseRepoUrl}/plugins-release-local/"
 				}
 			}
 		}
