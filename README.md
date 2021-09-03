@@ -202,8 +202,6 @@ Pull requests are more than welcome. For discussions, please head over to the [m
 
 Working with a large modular application is like herding cats. Dangerous cats. Like a pride of lions.
 
-![](http://i62.tinypic.com/2hs3g4o.jpg)
-
 ## License
 
 Pride is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
