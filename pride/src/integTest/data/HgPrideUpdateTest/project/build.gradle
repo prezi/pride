@@ -1,0 +1,14 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath "com.prezi.pride:gradle-pride-plugin:@version@"
+	}
+}
+
+group "com.example.test.hg"
+
+apply plugin: "com.prezi.pride"

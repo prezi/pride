@@ -1,0 +1,24 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath "com.prezi.pride:gradle-pride-plugin:@version@"
+	}
+}
+
+group "com.example.test.hg"
+
+apply plugin: "com.prezi.pride"
+
+configurations {
+	compile
+}
+
+dependencies {
+	// Test if we can init a module with a missing dependency
+	compile "some.missing:module:1.0"
+	compile "some.other.missing:module:1.0"
+}
